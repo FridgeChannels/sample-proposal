@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="Uncle’s Coffee Bean Reward Challenge proposal">
+  <meta name="description" content="FridgeChannel Reward Challenge proposal">
   <title>Reward Challenge Proposal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,7 +15,7 @@
       --shadow:0 28px 80px rgba(68,44,26,.14);
     }
     *{box-sizing:border-box}
-    html{scroll-behavior:smooth;scroll-snap-type:y mandatory}
+    html{scroll-behavior:smooth;scroll-snap-type:y proximity}
     body{margin:0;background:var(--cream);color:var(--ink);font-family:"DM Sans",sans-serif;line-height:1.55}
     body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.15;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.18'/%3E%3C/svg%3E")}
     a{color:inherit}.wrap{width:min(1180px,calc(100% - 40px));margin:auto}
@@ -158,6 +158,8 @@
     .hero-visual{min-height:0;border-radius:24px;transform:none}
     .hero-visual:hover{transform:none}
     .hero-visual img{position:static;display:block;width:100%;height:auto;object-fit:contain}
+    .hero-visual video{position:static;display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;background:#0d1f18}
+    .hero-video-badge{position:absolute;left:18px;bottom:18px;display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;background:rgba(5,5,5,.72);color:#fff;font-family:"Roboto Mono",monospace;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;backdrop-filter:blur(6px)}
     .hero-note{background:rgba(5,5,5,.92);color:#fff;border:1px solid rgba(255,255,255,.12)}
     #touchpoint,#experience{background:var(--brand-dark);color:#fff}
     #touchpoint .section-head p,#experience .section-head p{color:#888}
@@ -324,12 +326,13 @@
     main>section.slide-group{min-height:0;padding:0!important}
     .demo-slide{min-height:100svh;padding:var(--slide-pad) 0;display:flex;flex-direction:column;justify-content:center;border-bottom:1px solid rgba(32,23,18,.14)}
     .hero,.agenda-section,.demo-slide,#pilot,#process{scroll-snap-align:start;scroll-snap-stop:always}
-    .chapter-label,.slide-label,.step-label{font-family:"Roboto Mono",monospace;font-weight:700;text-transform:uppercase}
+    .chapter-label,.step-label{font-family:"Roboto Mono",monospace;font-weight:700;text-transform:uppercase}
     .chapter-label{color:var(--rust);font-size:1rem;line-height:1.5;letter-spacing:.12em}
-    .slide-label{margin-top:14px;color:var(--rust);font-size:1rem;line-height:1.5;letter-spacing:.08em}
+    .section-head.no-label{grid-template-columns:1fr}
     .hero-copy>.eyebrow,.agenda-title>.eyebrow,#process>.wrap>.section-head>.eyebrow{font-size:1rem;line-height:1.5}
     .slide-title{margin-top:18px;font-size:var(--slide-title)!important;line-height:1.05!important;letter-spacing:-.04em}
-    .summary-line{max-width:820px;margin-top:18px;font-size:clamp(1.35rem,2.3vw,1.75rem)!important;font-weight:600!important;line-height:1.38!important;letter-spacing:-.015em!important;color:#6b625c}
+    .summary-line{max-width:820px;margin-top:18px;font-size:var(--slide-title)!important;font-weight:400!important;line-height:1.04!important;letter-spacing:-.04em!important;color:#201712}
+    h2{font-weight:400!important}
     .content-title{font-size:var(--content-title)!important;line-height:1.12!important}
     .step-label{color:var(--rust);font-size:.7rem;letter-spacing:.08em}
     .slide-head{margin-bottom:clamp(42px,6vh,68px)}
@@ -354,7 +357,8 @@
     .goal-block .goal-table th,.goal-block .goal-table td{padding:12px 14px}
     .goal-label{position:static}
     .touchpoint-part.demo-slide{display:flex}
-    .touchpoint-slide-grid{display:grid;grid-template-columns:minmax(280px,.65fr) minmax(0,1.35fr);align-items:center;gap:clamp(32px,5vw,64px)}
+    .touchpoint-slide-grid{display:grid;grid-template-columns:1fr;justify-items:center;align-items:center;gap:clamp(32px,5vw,64px)}
+    .touchpoint-slide-grid>img{max-width:min(680px,100%);max-height:60svh;object-fit:contain;border-radius:18px}
     .touchpoint-part.demo-slide>img{width:100%}
     .touchpoint-part.demo-slide .touchpoint-part-copy>span{margin-bottom:14px}
     .touchpoint-part.demo-slide .touchpoint-part-copy h2{max-width:900px}
@@ -384,6 +388,67 @@
       .goal-block,.touchpoint-slide-grid{grid-template-columns:1fr}
       .slide-head{margin-bottom:36px}
     }
+    #moat.demo-slide{padding:var(--slide-pad) 0}
+    .moat-head{max-width:960px;margin-bottom:56px}
+    .moat-head h2{font-size:var(--slide-title);line-height:1.04;letter-spacing:-.04em}
+    .moat-head p{margin-top:26px;max-width:760px;color:var(--muted);font-size:clamp(1.05rem,1.5vw,1.2rem);line-height:1.6}
+    .moat-head p em{font-style:italic;color:#201712}
+    .moat-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+    .moat-card{background:rgba(23,56,43,.9);color:#f6f0e6;border:1px solid rgba(246,240,230,.1);border-radius:0;padding:40px 34px;display:flex;flex-direction:column}
+    .moat-card-title{font-family:"Playfair Display",serif;font-size:clamp(1.5rem,2vw,1.95rem);line-height:1.12;color:#f6f0e6;letter-spacing:-.01em}
+    .moat-card-title span{font-size:.72em;color:rgba(246,240,230,.62)}
+    .moat-stat{display:flex;align-items:baseline;gap:16px;margin:30px 0 22px;flex-wrap:wrap}
+    .moat-num{font-family:"Playfair Display",serif;font-size:clamp(3.4rem,5vw,4.6rem);line-height:.9;color:var(--gold);letter-spacing:-.02em}
+    .moat-stat-label{font-weight:800;font-size:1rem;color:var(--gold);letter-spacing:-.01em}
+    .moat-card p{color:rgba(246,240,230,.78);font-size:1rem;line-height:1.62}
+    @media(max-width:900px){
+      .moat-grid{grid-template-columns:1fr}
+      .moat-card{padding:34px 28px}
+    }
+    #team.demo-slide{padding:var(--slide-pad) 0}
+    .role-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:10px;border-top:1px solid rgba(32,23,18,.2);border-bottom:1px solid rgba(32,23,18,.2)}
+    .role-card{display:flex;flex-direction:column;min-height:330px;padding:32px 32px 36px 0;background:transparent}
+    .role-card+.role-card{padding-left:32px;border-left:1px solid rgba(32,23,18,.2)}
+    .role-metric{font-family:"Playfair Display",serif;font-size:clamp(1.6rem,2.1vw,2.2rem);line-height:1.08;letter-spacing:-.03em;color:#201712}
+    .role-desc{max-width:32ch;margin-top:18px;color:var(--muted);font-size:1rem;line-height:1.62;flex:1}
+    .role-sub{display:grid;gap:0;margin-top:30px;border-top:1px solid rgba(32,23,18,.16)}
+    .role-sub span{padding:10px 0;border-bottom:1px solid rgba(32,23,18,.12);font-family:"Roboto Mono",monospace;font-size:.72rem;font-weight:500;letter-spacing:.01em;color:var(--forest)}
+    @media(max-width:760px){.role-grid{grid-template-columns:1fr}.role-card{min-height:0;padding:28px 0}.role-card+.role-card{padding-left:0;border-left:0;border-top:1px solid rgba(32,23,18,.2)}}
+    #fulfillment.demo-slide{padding:var(--slide-pad) 0}
+    .fulfillment-head{max-width:1180px;margin-bottom:48px}
+    .fulfillment-head h2{font-size:var(--slide-title);line-height:1.04;letter-spacing:-.04em}
+    .fulfillment-head p{margin-top:22px;max-width:1080px;color:var(--muted);font-size:clamp(1.05rem,1.5vw,1.28rem);line-height:1.55}
+    .launch-summary{margin-bottom:28px}
+    .launch-summary h3{font-size:clamp(1.65rem,2.5vw,2.35rem);color:#201712}
+    .launch-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:24px}
+    .launch-metric{padding:22px 20px;border:1px solid rgba(246,240,230,.1);border-radius:0;background:rgba(23,56,43,.9);color:#f6f0e6}
+    .launch-metric strong{display:block;color:var(--gold);font-family:"Playfair Display",serif;font-size:clamp(1.75rem,3vw,2.5rem);line-height:1}
+    .launch-metric span{display:block;margin-top:10px;font-size:.92rem;font-weight:700;line-height:1.35}
+    .fulfillment-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+    .fulfillment-card{padding:30px 26px;border:1px solid var(--line);border-radius:0;background:rgba(255,250,242,.72)}
+    .fulfillment-card h3{font-size:clamp(1.5rem,2vw,1.95rem);color:#201712}
+    .fulfillment-card ul{margin:20px 0 0;padding-left:20px;color:var(--muted)}
+    .fulfillment-card li+li{margin-top:10px}
+    @media(max-width:600px){.launch-metrics,.fulfillment-grid{grid-template-columns:1fr}}
+
+    #mission{padding:var(--slide-pad) 0;border-bottom:1px solid rgba(32,23,18,.14);scroll-snap-align:none}
+    .mission-scrolly{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:56px;align-items:start;margin-top:14px}
+    .mission-stage{position:sticky;top:100px;align-self:start}
+    .mission-phone{position:relative;border-radius:16px;overflow:hidden;border:1px solid rgba(74,40,24,.16);background:var(--paper);box-shadow:0 30px 80px -58px rgba(74,40,24,.85);aspect-ratio:1.08}
+    .mission-phone img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .45s ease}
+    .mission-phone img.is-shown{opacity:1}
+    .mission-list{list-style:none;margin:0;padding:0}
+    .mission-list li{padding:44px 0;min-height:132px;border-top:1px solid rgba(74,40,24,.16);opacity:.36;transition:opacity .35s ease}
+    .mission-list li:first-child{border-top:0}
+    .mission-list li.is-active{opacity:1}
+    .mission-list b{font-family:"Roboto Mono",monospace;font-size:.78rem;letter-spacing:.08em;color:var(--rust);font-weight:700}
+    .mission-list span{display:block;margin-top:10px;font-family:"Playfair Display",serif;font-size:clamp(1.5rem,2.3vw,2.05rem);line-height:1.12;color:#201712}
+    @media(max-width:900px){
+      .mission-scrolly{grid-template-columns:1fr;gap:0}
+      .mission-stage{position:sticky;top:60px;z-index:6;margin:0 -20px 4px;padding:8px 20px 14px;background:var(--brand-light)}
+      .mission-phone{max-width:320px;margin:0 auto;aspect-ratio:1.16}
+      .mission-list li{padding:30px 0;min-height:0}
+    }
   </style>
 </head>
 <body>
@@ -391,83 +456,51 @@
     <section class="hero">
       <div class="wrap hero-grid">
         <div class="hero-copy reveal">
-          <div class="eyebrow">Session 1 — Opening</div>
-          <h1>Turn every <span data-field="brand_name">Uncle’s Coffee Bean</span> delivered order into a physical retention channel.</h1>
-          <p class="hero-sub">FC (FridgeChannel) = a physical lifecycle AI-powered magnet that ships inside your package, sticks on the <span data-field="brand_name">Uncle’s Coffee Bean</span> client’s fridge door, and turns daily household moments into trackable repeat-purchase behavior.</p>
+          <h1>Turn every delivered order into a physical retention channel.</h1>
+          <p class="hero-sub">Fridge Channel is a physical lifecycle AI-powered magnet that ships inside your package, sticks on the customer’s fridge door, and turns daily household moments into trackable repeat-purchase behavior.</p>
         </div>
-        <div class="hero-visual reveal"><img data-image="hero_image_url" alt="Uncle’s Coffee Bean reward box and NFC magnet"></div>
-      </div>
-    </section>
-
-    <section class="agenda-section" id="agenda">
-      <div class="wrap agenda-layout">
-        <div class="agenda-title reveal">
-          <div class="eyebrow">Overview</div>
-          <h2>What this covers</h2>
+        <div class="hero-visual reveal">
+          <video class="hero-video" poster="/pics/DIsplayProcessPics/dtc-cmo-presence.png" autoplay muted loop playsinline></video>
+          <span class="hero-video-badge">▶ Video placeholder</span>
         </div>
-        <ol class="agenda-list reveal">
-          <li>What goal we're solving for</li>
-          <li>How the household user experiences it</li>
-          <li>Easiest way to configure and launch</li>
-          <li>What the brand gets out of it</li>
-          <li>How we work together</li>
-        </ol>
       </div>
     </section>
 
-    <section class="chapter-divider demo-slide" aria-labelledby="chapter-01-title">
-      <div class="wrap reveal"><div class="chapter-number">01</div><h2 id="chapter-01-title">What goal we're solving for</h2></div>
-    </section>
-
-    <section class="goal-section slide-group" id="goal">
-      <div class="wrap goal-layout">
-        <article class="goal-block demo-slide reveal">
-          <div class="goal-label">
-            <div class="slide-label">01.1 — Immediate win</div>
-            <h2 class="summary-line">Immediate, measurable win</h2>
-          </div>
-          <div class="goal-copy">
-            <h3 class="content-title">Increase repeated orders and refine retention for every customer who already received a package.</h3>
-            <ul class="goal-points">
-              <li>Increase repeat purchase rate</li>
-              <li>Increase purchase frequency</li>
-              <li>Decrease time between orders</li>
-              <li>Reduce churn / winback dormant customers</li>
-              <li>Improve reward redemption rate (coupon → purchase)</li>
-            </ul>
-            <p class="goal-note">This is the KPI the CRM / Lifecycle team owns. FC creates a new trigger point that lives in the home — between emails, between SMS blasts — and keeps the brand present at the exact moment a household is making a kitchen or fridge decision.</p>
-          </div>
-        </article>
-
-        <article class="goal-block north-star demo-slide reveal">
-          <div class="goal-label">
-            <div class="slide-label">01.2 — Strategic North Star</div>
-            <h2 class="summary-line">50%+ Household Active Client rate</h2>
-          </div>
-          <div class="goal-copy">
-            <h3 class="content-title">Grow Household Active Client rate to 50%+.</h3>
-            <p class="definition"><strong>Household Active Client</strong> = a customer whose FC card on the fridge is regularly engaged (tapping, playing, redeeming) — a physical signal that this household is alive to the brand.</p>
-            <ul class="north-star-benefits">
-              <li>The brand has a retention moat that competitors cannot copy digitally — it lives physically in the home</li>
-              <li>Repeat purchase becomes structurally more predictable</li>
-              <li>The household becomes an owned asset, not a paid-acquisition dependency</li>
-              <li>LTV/CAC improves without increasing ad spend</li>
-            </ul>
-            <table class="goal-table">
-              <thead><tr><th>Stage</th><th>Household Active Client Rate</th><th>What It Means</th></tr></thead>
-              <tbody>
-                <tr><td>Pilot</td><td>~5–15%</td><td>Proof of concept, measure incrementality</td></tr>
-                <tr><td>Early scale</td><td>~20–35%</td><td>Retention lift is measurable across cohorts</td></tr>
-                <tr class="north-row"><td><strong>North Star</strong></td><td><strong>50%+</strong></td><td>Half of all shipped households are active — this is the retention moat</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </article>
+    <section class="demo-slide" id="team">
+      <div class="wrap">
+        <div class="section-head reveal no-label">
+          <div><h2 class="summary-line">What FC can move for your brand.</h2><p>One physical channel, connected to the retention metrics that matter.</p></div>
+        </div>
+        <div class="role-grid reveal">
+          <article class="role-card">
+            <h3 class="role-metric">Increase repeat purchase</h3>
+            <p class="role-desc">Create more reasons for customers to return between orders.</p>
+            <div class="role-sub">
+              <span>Repeat purchase rate</span>
+              <span>Reactivation rate</span>
+              <span>Customer LTV</span>
+            </div>
+          </article>
+          <article class="role-card">
+            <h3 class="role-metric">Generate attributable revenue</h3>
+            <p class="role-desc">Connect taps and rewards to product visits, checkouts, and repeat orders.</p>
+            <div class="role-sub">
+              <span>Tap-to-store conversion</span>
+              <span>Reward-to-purchase conversion</span>
+              <span>Returning customer revenue</span>
+            </div>
+          </article>
+          <article class="role-card">
+            <h3 class="role-metric">Capture first-party signals</h3>
+            <p class="role-desc">Learn what customers prefer through missions, games, and surveys.</p>
+            <div class="role-sub">
+              <span>Repeat-tap rate</span>
+              <span>Interaction completion rate</span>
+              <span>Survey response rate</span>
+            </div>
+          </article>
+        </div>
       </div>
-    </section>
-
-    <section class="chapter-divider demo-slide" aria-labelledby="chapter-02-title">
-      <div class="wrap reveal"><div class="chapter-number">02</div><h2 id="chapter-02-title">How the household user experiences it</h2></div>
     </section>
 
     <section class="slide-group" id="touchpoint">
@@ -475,170 +508,115 @@
         <div class="touchpoint-story">
           <article class="touchpoint-part demo-slide reveal">
             <div class="slide-head">
-              <div class="slide-label">02.1 — Physical touchpoint</div>
-              <h2 class="summary-line">Designed to live in the kitchen.</h2>
+              <h2 class="summary-line">FC custom-designs the magnet in your brand language, manufactures it, and ships it ready to be inserted into your orders.</h2>
             </div>
             <div class="touchpoint-slide-grid">
-              <img data-image="physical_image_url" alt="Front and back of the Uncle’s Coffee Bean magnet">
-              <div class="touchpoint-part-copy">
-                <span class="step-label">Product specs</span>
-                <div class="touchpoint-attributes">
-                  <div class="touchpoint-attribute"><strong>Format</strong><p>Double-sided branded NFC fridge magnet</p></div>
-                  <div class="touchpoint-attribute"><strong>Size</strong><p>11.4 × 6.4 cm</p></div>
-                  <div class="touchpoint-attribute"><strong>Surface</strong><p>Creator-selected matte printed medium</p></div>
-                  <div class="touchpoint-attribute"><strong>Interaction</strong><p>Tap-activated NFC</p></div>
-                  <div class="touchpoint-attribute"><strong>Experience</strong><p>Opens a branded web reward page</p></div>
-                  <div class="touchpoint-attribute"><strong>App required</strong><p>No</p></div>
-                  <div class="touchpoint-attribute"><strong>Mobile compatibility</strong><p>Works on NFC-enabled iPhone and Android devices</p></div>
-                  <div class="touchpoint-attribute"><strong>Placement</strong><p>Designed for fridge-door visibility and everyday kitchen presence</p></div>
-                  <div class="touchpoint-attribute"><strong>Design</strong><p>Brand-matched front and back artwork</p></div>
-                  <div class="touchpoint-attribute"><strong>Brand fit</strong><p>Mobile reward page matched to your brand theme, copy, and visual tone</p></div>
-                  <div class="touchpoint-attribute"><strong>Use case</strong><p>Reward unlocks, coupon claims, surveys, loyalty actions, and repeat-purchase flows</p></div>
-                </div>
-              </div>
+              <img data-image="physical_image_url" alt="Front and back of the branded NFC fridge magnet">
             </div>
           </article>
-          <article class="touchpoint-part demo-slide reveal">
-            <div class="touchpoint-part-copy">
-              <div class="slide-label">02.2 — Place &amp; tap</div>
-              <h2 class="summary-line">Place it on the fridge. It’s ready with a single tap.</h2>
+        </div>
+      </div>
+    </section>
+
+    <section id="mission">
+      <div class="wrap">
+        <div class="section-head reveal no-label">
+          <div><h2 class="summary-line">Missions that pull customers back to the brand.</h2><p>Each 10–30 second play session is designed around your product's natural home routines — recipe missions, usage tips, brand stories, loyalty challenges, and reorder triggers. Every mission is a measurable retention signal that earns the customer a reward and keeps your brand in the daily loop.</p></div>
+        </div>
+        <div class="mission-scrolly reveal" aria-label="How it works">
+          <div class="mission-stage">
+            <div class="mission-phone">
+              <img class="is-shown" data-step="0" src="/pics/dtc-cmo-pics/dtctap.png" alt="Customer taps the fridge magnet">
+              <img data-step="1" src="/pics/dtc-cmo-pics/step02.png" alt="Segmented starting offer">
+              <img data-step="2" src="/pics/dtc-cmo-pics/step03.png" alt="Short mission play session">
+              <img data-step="3" src="/pics/dtc-cmo-pics/step04.png" alt="Reward progress and package unlock">
+              <img data-step="4" src="/pics/dtc-cmo-pics/step05.png" alt="Redeem reward on the next purchase">
             </div>
-            <img data-image="tap_image_url" alt="Uncle’s Coffee Bean magnet being placed on a refrigerator">
+          </div>
+          <ol class="mission-list">
+            <li class="is-active" data-step="0"><b>01</b><span>Tap the magnet</span></li>
+            <li data-step="1"><b>02</b><span>Starting offer</span></li>
+            <li data-step="2"><b>03</b><span>Play a 10-30s mission</span></li>
+            <li data-step="3"><b>04</b><span>Earn coins / unlock reward package</span></li>
+            <li data-step="4"><b>05</b><span>Redeem on next purchase</span></li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <section class="demo-slide" id="moat">
+      <div class="wrap">
+        <div class="moat-head reveal">
+          <h2>Built on a retention moat no digital channel can copy.</h2>
+          <p>FC is not a message channel — it's a <em>rewarded physical presence</em> customers choose to engage with, every day. A magnet on the fridge door can't be blocked, muted, unsubscribed, or algorithmed away.</p>
+        </div>
+        <div class="moat-grid reveal">
+          <article class="moat-card">
+            <h3 class="moat-card-title">Ambient Presence <span>&gt; Campaigns</span></h3>
+            <div class="moat-stat">
+              <span class="moat-num">10+</span>
+              <span class="moat-stat-label">Daily Family Impressions</span>
+            </div>
+          </article>
+          <article class="moat-card">
+            <h3 class="moat-card-title">Direct Connection <span>&gt; Algorithmic Distribution</span></h3>
+            <div class="moat-stat">
+              <span class="moat-num">0</span>
+              <span class="moat-stat-label">Algorithm &amp; Ad-Blockers</span>
+            </div>
+          </article>
+          <article class="moat-card">
+            <h3 class="moat-card-title">Habit Activation <span>&gt; Passive Exposure</span></h3>
+            <div class="moat-stat">
+              <span class="moat-num">1</span>
+              <span class="moat-stat-label">Tap –&gt; 1 Mission –&gt; Immediate Progress</span>
+            </div>
           </article>
         </div>
       </div>
     </section>
 
-    <section class="demo-slide" id="experience">
+    <section class="demo-slide" id="fulfillment">
       <div class="wrap">
-        <div class="section-head reveal"><div><div class="slide-label">02.3 — Customer journey</div></div><div><h2 class="summary-line">Five simple moments. One clear reward.</h2><div class="section-kicker-row"><p>A frictionless journey from package arrival to the next purchase.</p><a class="btn" data-link="customer_demo_url" target="_blank" rel="noopener">Open Mobile Experience ↗</a></div></div></div>
-        <div class="journey-single reveal">
-          <img data-image="journey_image_1_url" alt="Uncle’s Coffee Bean customer experience">
+        <div class="fulfillment-head reveal">
+          <h2>You drop it in the box. We handle the rest.</h2>
+          <p>FC handles the physical product, digital experience, data integration, campaign operations, and reporting.</p>
         </div>
-      </div>
-    </section>
-
-    <section class="chapter-divider demo-slide" aria-labelledby="chapter-03-title">
-      <div class="wrap reveal"><div class="chapter-number">03</div><h2 id="chapter-03-title">Easiest way to configure and launch</h2></div>
-    </section>
-
-    <section class="slide-group" id="rewards">
-      <div class="wrap">
-        <div class="config-walkthrough reveal">
-          <div class="config-steps">
-            <article class="config-step demo-slide is-active" data-config-step="config_coupon_image_url" data-config-alt="Coupon configuration screen" tabindex="0">
-              <div class="slide-label">03.1 — Configure coupons</div>
-              <h2 class="summary-line">Define the reward.</h2>
-              <p>Set the coupon type, value, code inventory, usage limits, and Shopify sync rules.</p>
-              <img class="config-step-mobile" data-image="config_coupon_image_url" alt="Coupon configuration screen">
-            </article>
-            <article class="config-step demo-slide" data-config-step="config_segment_image_url" data-config-alt="Segment coupon assignment screen" tabindex="0">
-              <div class="slide-label">03.2 — Assign segments</div>
-              <h2 class="summary-line">Match the right offer to the right customer.</h2>
-              <p>Connect coupons and reward strategies to lifecycle segments such as new, active, winback, and VIP customers.</p>
-              <img class="config-step-mobile" data-image="config_segment_image_url" alt="Segment coupon assignment screen">
-            </article>
-            <article class="config-step demo-slide" data-config-step="config_survey_image_url" data-config-alt="Survey configuration screen" tabindex="0">
-              <div class="slide-label">03.3 — Build the interaction</div>
-              <h2 class="summary-line">Turn customer feedback into a game.</h2>
-              <p>Create branded questions and challenge flows that earn points while capturing useful customer signals.</p>
-              <img class="config-step-mobile" data-image="config_survey_image_url" alt="Survey configuration screen">
-            </article>
-          </div>
-          <div class="config-sticky">
-            <div class="config-sticky-stage">
-              <img data-config-image data-image="config_coupon_image_url" alt="Coupon configuration screen">
-            </div>
+        <div class="launch-summary reveal">
+          <h3>Fast to launch. Light to run.</h3>
+          <div class="launch-metrics">
+            <div class="launch-metric"><strong>15 min</strong><span>Configure and deploy</span></div>
+            <div class="launch-metric"><strong>Under 2 hrs/week</strong><span>Required from your team</span></div>
+            <div class="launch-metric"><strong>No engineering build</strong><span>FC handles integration and operations</span></div>
           </div>
         </div>
-      </div>
-    </section>
-
-    <section class="chapter-divider demo-slide" aria-labelledby="chapter-04-title">
-      <div class="wrap reveal"><div class="chapter-number">04</div><h2 id="chapter-04-title">What the brand gets out of it</h2></div>
-    </section>
-
-    <section class="slide-group" id="results">
-      <div class="wrap">
-        <div class="dashboard-walkthrough reveal">
-          <div class="dashboard-steps">
-            <article class="dashboard-step demo-slide is-active" data-dashboard-step="dashboard_revenue_image_url" data-dashboard-alt="Revenue overview dashboard" tabindex="0">
-              <div class="slide-label">04.1 — Dashboard overview</div>
-              <h2 class="summary-line">From physical tap to measurable revenue.</h2>
-              <p>Track attributed revenue, repeat purchases, retention, revenue growth, and revenue per active magnet.</p>
-              <img class="dashboard-step-mobile" data-image="dashboard_revenue_image_url" alt="Revenue overview dashboard">
-            </article>
-            <article class="dashboard-step demo-slide" data-dashboard-step="dashboard_funnel_image_url" data-dashboard-alt="Physical touchpoint and coupon revenue funnel dashboard" tabindex="0">
-              <div class="slide-label">04.2 — Touchpoint &amp; funnel</div>
-              <h2 class="summary-line">See how engagement becomes revenue.</h2>
-              <p>Follow the journey from active devices and participants through coupons earned, coupons used, orders, and revenue.</p>
-              <img class="dashboard-step-mobile" data-image="dashboard_funnel_image_url" alt="Physical touchpoint and coupon revenue funnel dashboard">
-            </article>
-          </div>
-          <div class="dashboard-sticky">
-            <div class="dashboard-sticky-stage">
-              <img data-dashboard-image data-image="dashboard_revenue_image_url" alt="Revenue overview dashboard">
-            </div>
-          </div>
+        <div class="fulfillment-grid reveal">
+          <article class="fulfillment-card">
+            <h3>You provide</h3>
+            <ul>
+              <li>Brand assets</li>
+              <li>Pilot audience</li>
+              <li>Reward approval</li>
+              <li>Shopify and Klaviyo account access</li>
+            </ul>
+          </article>
+          <article class="fulfillment-card">
+            <h3>FC handles</h3>
+            <ul>
+              <li>Shopify and Klaviyo data integration</li>
+              <li>Customer segmentation and campaign setup</li>
+              <li>Mission and reward configuration</li>
+              <li>Tracking, attribution, and reporting</li>
+              <li>Pilot operations and support</li>
+              <li>Magnet design and manufacturing</li>
+            </ul>
+          </article>
         </div>
-      </div>
-    </section>
-
-    <section class="pricing-host" id="pilot">
-      <div id="pricing-shadow-host" aria-live="polite"></div>
-    </section>
-
-    <section class="chapter-divider demo-slide" aria-labelledby="chapter-05-title">
-      <div class="wrap reveal"><div class="chapter-number">05</div><h2 id="chapter-05-title">How we work together</h2></div>
-    </section>
-
-    <section id="process">
-      <div class="wrap">
-        <div class="section-head reveal"><div class="slide-label">05.1 — Delivery timeline</div><div><h2 class="summary-line">From kickoff to measurable results.</h2><p>From signed agreement to live customer engagement, each step has a clear owner, output, and next action.</p></div></div>
-        <div class="swimlane reveal">
-          <div class="swim-head"><div class="lane-label lane-fc">FC</div><div class="lane-label lane-brand" data-field="brand_name">Uncle’s Coffee Bean</div></div>
-          <div class="swim-steps">
-            <div class="swim-row is-joint"><div class="swim-card"><div class="swim-card-top"><span class="swim-num">01</span></div><h4>Agreement &amp; kickoff</h4><div class="swim-output"><b>Output:</b> Pilot officially starts.</div></div></div>
-            <div class="swim-row is-brand"><div class="swim-card"><div class="swim-card-top"><span class="swim-num">02</span><span class="swim-days">~1 day</span></div><h4>Brand inputs &amp; campaign rules</h4><p>Brand provides logo, colors, product references, target audience, reward rules, and Shopify / Klaviyo requirements. FC translates them into setup requirements.</p><div class="swim-output"><b>Output:</b> Campaign setup brief confirmed.</div></div></div>
-            <div class="swim-row is-fc"><div class="swim-card"><div class="swim-card-top"><span class="swim-num">03</span><span class="swim-days">~2 days</span></div><h4>NFC magnet design</h4><p>FC designs the front and back of the branded NFC fridge magnet and prepares production files. Brand approves — two standard revision rounds included.</p><div class="swim-output"><b>Output:</b> Final magnet artwork approved.</div></div></div>
-            <div class="swim-row is-fc"><div class="swim-card"><div class="swim-card-top"><span class="swim-num">04</span><span class="swim-days">~1 day</span></div><h4>Mobile reward experience &amp; dashboard setup</h4><p>FC configures the branded reward page, challenge flow, points and unlock logic, tracking events, and the campaign dashboard. Brand confirms key rules.</p><div class="swim-output"><b>Output:</b> Tap experience and dashboard ready.</div></div></div>
-            <div class="swim-row is-brand"><div class="swim-card"><div class="swim-card-top"><span class="swim-num">05</span><span class="swim-days">~1 day</span></div><h4>Shopify &amp; Klaviyo connection</h4><p>Brand connects Shopify and Klaviyo through its own secure authorization. FC assists with coupon rules, segment logic, reward setup, and measurement.</p><div class="swim-output"><b>Output:</b> Brand systems connected for launch.</div></div></div>
-            <div class="swim-row is-fc"><div class="swim-card"><div class="swim-card-top"><span class="swim-num">06</span><span class="swim-days">7–10 days</span></div><h4>Production, QA &amp; delivery</h4><p>FC produces the magnets, sets the NFC destination, runs tap tests, verifies reward logic, and ships to the agreed location. Brand confirms the delivery address.</p><div class="swim-note">After final artwork approval — depending on quantity and destination.</div><div class="swim-output"><b>Output:</b> Finished NFC magnets delivered.</div></div></div>
-            <div class="swim-row is-brand"><div class="swim-card"><div class="swim-card-top"><span class="swim-num">07</span></div><h4>Fulfillment launch</h4><p>Brand decides which customers receive magnets and includes them in selected orders via its warehouse, fulfillment team, or 3PL. FC keeps the experience live.</p><div class="swim-output"><b>Output:</b> Magnets enter customer homes through real shipments.</div></div></div>
-            <div class="swim-row is-joint"><div class="swim-card"><div class="swim-card-top"><span class="swim-num">08</span></div><h4>Results review &amp; next step</h4><p>Brand reviews active magnets, taps, challenge participation, rewards unlocked, coupons redeemed, repeat orders, and attributed revenue. FC provides the pilot readout, insights, and scale recommendation.</p><div class="swim-output"><b>Output:</b> Decide whether to scale, adjust, or stop.</div></div></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="questions-section demo-slide" id="questions">
-      <div class="wrap reveal">
-        <h2 class="slide-title">Discovery</h2>
-        <div class="questions-rule" aria-hidden="true"></div>
-      </div>
-    </section>
-
-    <section class="demo-slide" id="faq">
-      <div class="wrap">
-        <div class="section-head reveal"><div class="chapter-label">Appendix — FAQ</div><div><h2 class="slide-title">Brand FAQs</h2><p>Everything your growth, e-commerce, CRM, and operations teams might want to know before launching a first pilot.</p></div></div>
-        <div class="faq-list reveal">
-          <details class="faq-item"><summary>Do customers need to download an app?</summary><div class="faq-answer">No. Customers simply tap the NFC fridge magnet to open your brand’s mobile rewards page directly in their browser.</div></details>
-          <details class="faq-item"><summary>Do customers need to scan a QR code?</summary><div class="faq-answer">No. The feature is activated by NFC touch, so customers do not need to open their camera or scan a QR code.</div></details>
-          <details class="faq-item"><summary>Is this feature supported on iPhone and Android devices?</summary><div class="faq-answer">Yes, this experience is designed for NFC-enabled iPhone and Android devices. During the pilot deployment, FC will verify that tap-to-activate works properly on common devices before the official launch.</div></details>
-          <details class="faq-item"><summary>What specific content do you need to provide?</summary><div class="faq-answer">Brand assets, logos, and color schemes; campaign rules; target audience demographics; terms for coupons or reward packs; Shopify account or coupon settings; Klaviyo account or audience segmentation settings; shipping times; and success-rate metrics.</div></details>
-          <details class="faq-item"><summary>What is FC responsible for?</summary><div class="faq-answer">FC prepares the brand magnet settings, mobile rewards experience, campaign configuration, coupon logic, dashboards, pilot checklists, and reporting structures.</div></details>
-          <details class="faq-item"><summary>How do customers redeem rewards?</summary><div class="faq-answer">Customers tap the “Magnet” button, complete the challenge, and unlock a coupon or reward pack. The system then redirects them back to your checkout, where they can apply the promo code on their next order.</div></details>
-          <details class="faq-item"><summary>How can I determine if the campaign is effective?</summary><div class="faq-answer">The dashboard tracks active magnets, click-throughs, challenge participation, unlocked promo codes, redeemed promo codes, repeat orders, attributed revenue, and revenue generated per active magnet.</div></details>
-          <details class="faq-item"><summary>Can rewards be customized for different customer segments?</summary><div class="faq-answer">Yes. Depending on your selected plan, you can assign offers to segments based on lifecycle stage — such as new, active, returning, repeat, and VIP customers.</div></details>
-          <details class="faq-item"><summary>What happens if a customer doesn’t tap?</summary><div class="faq-answer">This is exactly what the pilot is designed to measure. The initial pilot validates the magnet’s activation rate, click-through behavior, coupon usage, repurchase rate, and whether this channel is worth scaling.</div></details>
-          <details class="faq-item"><summary>What is the recommended next step?</summary><div class="faq-answer">Start with a limited-scope pilot: define the target audience, volume, reward rules, shipping windows, Shopify settings, Klaviyo segmentation, and success metrics. FC will prepare the pilot experience and dashboard before launch.</div></details>
-        </div>
-        <a class="faq-viewall" href="/faq.html">View all the questions brands commonly ask ↗</a>
       </div>
     </section>
 
     <section class="footer footer-slide demo-slide">
-      <div class="wrap"><div class="footer-box reveal"><div><div class="chapter-label">Next step</div><h2 class="slide-title">Turn the next shipment into the next order.</h2></div><a class="btn" data-link="footer_button_url">Schedule a Pilot Planning Call ↗</a></div><p class="fineprint">Sample data shown for demonstration only. Final coupon terms, quantities, Shopify setup, and campaign rules will be confirmed during pilot setup.</p></div>
+      <div class="wrap"><div class="footer-box reveal"><div><div class="chapter-label">Next step</div><h2 class="slide-title">See whether FC can drive measurable repeat purchase for your brand.</h2></div><a class="btn" data-link="footer_button_url">Build a retention pilot</a></div></div>
     </section>
 
   </main>
@@ -824,6 +802,7 @@
 
     async function mountOriginalPricing() {
       const host = document.getElementById('pricing-shadow-host');
+      if (!host) return;
       const html = await fetch('/index.html').then(response => response.text());
       const source = new DOMParser().parseFromString(html,'text/html');
       const originalSection = source.querySelector('section.data-section');
@@ -872,6 +851,35 @@
 
     const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('visible');observer.unobserve(entry.target)}}),{threshold:.12});
     document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+
+    (function(){
+      const section=document.getElementById('mission');
+      if(!section) return;
+      const items=[...section.querySelectorAll('.mission-list li')];
+      const imgs=[...section.querySelectorAll('.mission-phone img')];
+      if(!items.length||!imgs.length) return;
+      let current=-1;
+      function update(){
+        const line=window.innerHeight*0.55;
+        let best=0,bestDist=Infinity;
+        items.forEach((el,idx)=>{
+          const r=el.getBoundingClientRect();
+          const c=r.top+r.height/2;
+          const d=Math.abs(c-line);
+          if(d<bestDist){bestDist=d;best=idx;}
+        });
+        if(best!==current){
+          current=best;
+          items.forEach((el,idx)=>el.classList.toggle('is-active',idx===best));
+          imgs.forEach((el,idx)=>el.classList.toggle('is-shown',idx===best));
+        }
+      }
+      let ticking=false;
+      function onScroll(){ if(!ticking){ticking=true;requestAnimationFrame(()=>{update();ticking=false;});} }
+      window.addEventListener('scroll',onScroll,{passive:true});
+      window.addEventListener('resize',onScroll,{passive:true});
+      update();
+    })();
   </script>
 </body>
 </html>
