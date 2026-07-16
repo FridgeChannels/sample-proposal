@@ -150,7 +150,7 @@
     .hero{background:radial-gradient(circle at 78% 45%,color-mix(in srgb,var(--gold) 12%,transparent),transparent 46%),var(--brand-dark);padding-top:4rem}
     .hero-grid{grid-template-columns:1fr;gap:3rem}
     .hero-copy{max-width:none;padding-bottom:0}
-    .hero-copy h1{max-width:none;font-size:clamp(2.25rem,3.2vw,3.6rem);line-height:1.04;letter-spacing:-.04em}
+    .hero-copy h1{max-width:none;font-size:clamp(2.25rem,3.2vw,3.6rem);font-weight:400;line-height:1.04;letter-spacing:-.04em}
     .hero-copy .hero-sub,.hero-copy .hero-body{max-width:650px}
     .hero-copy h1 em{font-style:normal;color:var(--gold)}
     .hero-sub{font-family:"Inter",sans-serif;font-weight:700;color:#fff}
@@ -257,8 +257,8 @@
     .faq-viewall{display:inline-flex;align-items:center;gap:8px;margin-top:34px;font-family:"Roboto Mono",monospace;text-transform:uppercase;letter-spacing:.12em;font-size:.78rem;font-weight:700;color:var(--gold);text-decoration:none;border-bottom:1px solid var(--gold);padding-bottom:4px;transition:.2s ease}
     .faq-viewall:hover{color:#fff;border-color:#fff}
 
-    /* Section palette: warm cream throughout, with a forest-green final section. */
-    main>section{background:var(--brand-light)!important;color:#201712!important}
+    /* A single neutral canvas across the proposal; the closing CTA remains forest green. */
+    main>section{background:#F5F5F5!important;color:#201712!important}
     main>section .section-head p,
     main>section .hero-body{color:#6b625c}
     main>section .hero-sub,
@@ -273,9 +273,9 @@
     #faq .faq-item{border-color:rgba(32,23,18,.14)}
     #faq .faq-item summary{color:#201712}
     #faq .faq-viewall{color:var(--rust);border-color:var(--rust)}
-    main>section.hero{background:var(--brand-dark)!important;color:#fff!important}
+    main>section.hero{background:#F5F5F5!important;color:#201712!important}
     main>section.hero h1{text-align:center}
-    main>section.hero .hero-sub{max-width:none;color:#f6f0e6;font-weight:400;text-align:center}
+    main>section.hero .hero-sub{max-width:none;color:#201712;font-weight:400;text-align:center}
     .section-kicker-row .btn,
     .section-kicker-row .btn-primary{background:var(--brand-dark);border-color:var(--brand-dark);color:#fff}
     .footer{background:var(--brand-dark)}
@@ -393,27 +393,26 @@
     .moat-head h2{font-size:var(--slide-title);line-height:1.04;letter-spacing:-.04em}
     .moat-head p{margin-top:26px;max-width:760px;color:var(--muted);font-size:clamp(1.05rem,1.5vw,1.2rem);line-height:1.6}
     .moat-head p em{font-style:italic;color:#201712}
-    .moat-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
-    .moat-card{background:rgba(23,56,43,.9);color:#f6f0e6;border:1px solid rgba(246,240,230,.1);border-radius:0;padding:40px 34px;display:flex;flex-direction:column}
-    .moat-card-title{font-family:"Playfair Display",serif;font-size:clamp(1.5rem,2vw,1.95rem);line-height:1.12;color:#f6f0e6;letter-spacing:-.01em}
-    .moat-card-title span{font-size:.72em;color:rgba(246,240,230,.62)}
-    .moat-stat{display:flex;align-items:baseline;gap:16px;margin:30px 0 22px;flex-wrap:wrap}
-    .moat-num{font-family:"Playfair Display",serif;font-size:clamp(3.4rem,5vw,4.6rem);line-height:.9;color:var(--gold);letter-spacing:-.02em}
-    .moat-stat-label{font-weight:800;font-size:1rem;color:var(--gold);letter-spacing:-.01em}
+    .moat-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+    .moat-card{min-height:330px;background:rgba(23,56,43,.9);color:#f6f0e6;border:1px solid rgba(246,240,230,.1);border-radius:0;padding:34px;display:flex;flex-direction:column}
+    .moat-card-title{font-family:"Playfair Display",serif;font-size:clamp(1.2rem,1.65vw,1.55rem);font-weight:400;line-height:1.12;color:#f6f0e6;letter-spacing:-.01em}
+    .moat-card-title span{display:block;margin-top:6px;font-size:.82em;font-weight:400;color:rgba(246,240,230,.58)}
+    .moat-stat{display:block;margin-top:auto}
+    .moat-num{display:block;font-family:"Playfair Display",serif;font-size:clamp(6.25rem,11vw,9rem);font-weight:400;line-height:.72;color:var(--gold);letter-spacing:-.06em}
+    .moat-stat-label{display:block;max-width:23ch;margin-top:28px;padding-top:14px;border-top:1px solid rgba(246,240,230,.2);font-size:.94rem;font-weight:400;line-height:1.35;color:var(--gold);letter-spacing:0}
     .moat-card p{color:rgba(246,240,230,.78);font-size:1rem;line-height:1.62}
     @media(max-width:900px){
       .moat-grid{grid-template-columns:1fr}
       .moat-card{padding:34px 28px}
     }
     #team.demo-slide{padding:var(--slide-pad) 0}
-    .role-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:10px;border-top:1px solid rgba(32,23,18,.2);border-bottom:1px solid rgba(32,23,18,.2)}
-    .role-card{display:flex;flex-direction:column;min-height:330px;padding:32px 32px 36px 0;background:transparent}
-    .role-card+.role-card{padding-left:32px;border-left:1px solid rgba(32,23,18,.2)}
+    .role-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:10px}
+    .role-card{display:flex;flex-direction:column;min-height:330px;padding:30px 28px;background:rgba(255,250,242,.58);border:1px solid rgba(32,23,18,.16);border-radius:16px}
     .role-metric{font-family:"Playfair Display",serif;font-size:clamp(1.6rem,2.1vw,2.2rem);line-height:1.08;letter-spacing:-.03em;color:#201712}
     .role-desc{max-width:32ch;margin-top:18px;color:var(--muted);font-size:1rem;line-height:1.62;flex:1}
     .role-sub{display:grid;gap:0;margin-top:30px;border-top:1px solid rgba(32,23,18,.16)}
     .role-sub span{padding:10px 0;border-bottom:1px solid rgba(32,23,18,.12);font-family:"Roboto Mono",monospace;font-size:.72rem;font-weight:500;letter-spacing:.01em;color:var(--forest)}
-    @media(max-width:760px){.role-grid{grid-template-columns:1fr}.role-card{min-height:0;padding:28px 0}.role-card+.role-card{padding-left:0;border-left:0;border-top:1px solid rgba(32,23,18,.2)}}
+    @media(max-width:760px){.role-grid{grid-template-columns:1fr}.role-card{min-height:0;padding:28px}}
     #fulfillment.demo-slide{padding:var(--slide-pad) 0}
     .fulfillment-head{max-width:1180px;margin-bottom:48px}
     .fulfillment-head h2{font-size:var(--slide-title);line-height:1.04;letter-spacing:-.04em}
@@ -421,15 +420,21 @@
     .launch-summary{margin-bottom:28px}
     .launch-summary h3{font-size:clamp(1.65rem,2.5vw,2.35rem);color:#201712}
     .launch-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:24px}
-    .launch-metric{padding:22px 20px;border:1px solid rgba(246,240,230,.1);border-radius:0;background:rgba(23,56,43,.9);color:#f6f0e6}
+    .launch-metric{padding:22px 20px;border:1px solid rgba(246,240,230,.1);border-radius:18px;background:rgba(23,56,43,.9);color:#f6f0e6}
     .launch-metric strong{display:block;color:var(--gold);font-family:"Playfair Display",serif;font-size:clamp(1.75rem,3vw,2.5rem);line-height:1}
     .launch-metric span{display:block;margin-top:10px;font-size:.92rem;font-weight:700;line-height:1.35}
     .fulfillment-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
-    .fulfillment-card{padding:30px 26px;border:1px solid var(--line);border-radius:0;background:rgba(255,250,242,.72)}
+    .fulfillment-card{padding:30px 26px;border:1px solid var(--line);border-radius:18px;background:rgba(255,250,242,.72)}
     .fulfillment-card h3{font-size:clamp(1.5rem,2vw,1.95rem);color:#201712}
     .fulfillment-card ul{margin:20px 0 0;padding-left:20px;color:var(--muted)}
     .fulfillment-card li+li{margin-top:10px}
     @media(max-width:600px){.launch-metrics,.fulfillment-grid{grid-template-columns:1fr}}
+
+    /* Keep every proposal section on a neutral canvas; reserve forest for the final CTA. */
+    body{background:#F5F5F5}
+    main>section:not(.footer-slide){background:#F5F5F5!important;color:#201712!important}
+    main>section.hero .hero-sub,
+    main>section.hero .hero-body{color:#6b625c!important}
 
     #mission{padding:var(--slide-pad) 0;border-bottom:1px solid rgba(32,23,18,.14);scroll-snap-align:none}
     .mission-scrolly{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:56px;align-items:start;margin-top:14px}
@@ -497,21 +502,6 @@
               <span>Repeat-tap rate</span>
               <span>Interaction completion rate</span>
               <span>Survey response rate</span>
-            </div>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section class="slide-group" id="touchpoint">
-      <div class="wrap">
-        <div class="touchpoint-story">
-          <article class="touchpoint-part demo-slide reveal">
-            <div class="slide-head">
-              <h2 class="summary-line">FC custom-designs the magnet in your brand language, manufactures it, and ships it ready to be inserted into your orders.</h2>
-            </div>
-            <div class="touchpoint-slide-grid">
-              <img data-image="physical_image_url" alt="Front and back of the branded NFC fridge magnet">
             </div>
           </article>
         </div>
