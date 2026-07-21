@@ -1110,7 +1110,14 @@
     @media(max-width:760px){
       /* Four viewport-long scroll beats; the diagram itself remains pinned for one screen. */
       #team.retention-loop-section{position:relative;height:400svh!important;min-height:400svh!important}
-      #team .retention-loop-sticky{position:sticky!important;top:0;height:100svh!important;min-height:100svh!important}
+      #team .retention-loop-sticky{position:sticky!important;top:0;height:100svh!important;min-height:100svh!important;align-items:safe center}
+    }
+    /* Short phone viewports (collapsed browser chrome): slim the pinned stage so node 03 below the ring is never clipped. */
+    @media(max-width:760px) and (max-height:800px){
+      #team .retention-loop-sticky{padding:20px 0 12px!important}
+      #team .retention-loop-layout{gap:12px}
+      #team .retention-loop-copy p{display:none}
+      #team .retention-loop-copy h2{margin-top:10px;font-size:clamp(1.7rem,7.5vw,2rem)!important}
     }
 
     /* Separator-free review mode: keep component outlines and data-visualization lines. */
@@ -1270,7 +1277,7 @@
               <header class="comparison-axis"><span>02</span><strong>Cost</strong></header>
               <div class="comparison-pair">
                 <div class="comparison-panel comparison-legacy"><small>Email · SMS · Ads</small><p>Every impression,<br>paid again.</p></div>
-                <div class="comparison-panel comparison-fc"><small>Fridge Channel</small><p>Pay once.<br>Every impression after: <strong>$0.</strong></p><span class="comparison-proof">0 additional media cost per impression</span></div>
+                <div class="comparison-panel comparison-fc"><small>Fridge Channel</small><p>Pay once.<br>Every impression after: <strong>$0.</strong></p></div>
               </div>
             </article>
 
