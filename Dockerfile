@@ -12,8 +12,8 @@ COPY pics ./pics
 COPY assets ./assets
 
 ENV NODE_ENV=production
-ENV PORT=4173
+ENV PORT=4174
 
-EXPOSE 4173
+EXPOSE 4174
 
 CMD ["node", "server.js"]
