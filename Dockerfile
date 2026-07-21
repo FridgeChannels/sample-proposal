@@ -1,19 +1,31 @@
-FROM node:22-alpine
+FROM node:22-alpine AS build
 
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
+RUN npm ci
+
+COPY vite.config.ts tsconfig.json tsconfig.app.json tsconfig.node.json ./
+COPY gift-challenge-react.html post-meeting.html ./
+COPY src ./src
+
+RUN npm run build
+
+FROM node:22-alpine
+
+WORKDIR /app
+
 COPY server.js ./
-COPY index.html faq.html gift-challenge.html dashboard-return.html ./
 COPY proposal-template.md ./
 COPY ["proposal template doc", "./"]
 COPY data ./data
 COPY pics ./pics
 COPY assets ./assets
+COPY --from=build /app/dist ./dist
 
 ENV NODE_ENV=production
-ENV PORT=4174
+ENV PORT=4173
 
-EXPOSE 4174
+EXPOSE 4173
 
 CMD ["node", "server.js"]
