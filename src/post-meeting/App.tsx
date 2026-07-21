@@ -20,7 +20,13 @@ const STORAGE_KEY = 'fc-order-preview-v1'
 const loadOrder = (): OrderState => {
   try {
     const stored = window.localStorage.getItem(STORAGE_KEY)
-    return stored ? { ...defaultOrder, ...JSON.parse(stored) } : defaultOrder
+    if (!stored) return defaultOrder
+    const parsed = JSON.parse(stored) as Partial<OrderState>
+    const storedPackage = parsed.package
+    const packageSelection = !storedPackage || storedPackage.name === 'Retention Moat'
+      ? defaultOrder.package
+      : { ...defaultOrder.package, ...storedPackage }
+    return { ...defaultOrder, ...parsed, package: packageSelection, timeline: defaultOrder.timeline }
   } catch {
     return defaultOrder
   }
@@ -47,8 +53,8 @@ export function App() {
   }
 
   return (
-    <div className="post-meeting-app">
-      {view !== 'finance' && view !== 'address' && <TopNav active={view} orderStatus={order.status} onChange={openView} />}
+    <div className={`post-meeting-app${view === 'demo' || view === 'content' ? ' has-preview-dock' : ''}`}>
+      <TopNav active={view} onChange={openView} />
       {view === 'demo' && <LiveDemoView />}
       {view === 'content' && <SampleContentView />}
       {view === 'order' && <OrderView order={order} onChange={setOrder} onOpenAddress={() => openView('address')} onOpenFinance={() => openView('finance')} />}

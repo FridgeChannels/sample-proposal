@@ -15,6 +15,8 @@ export const statusLabels: Record<OrderStatus, string> = {
   changes_requested: 'Changes Requested',
 }
 
+export const PILOT_DISCOUNT_RATE = 0.2
+
 export const defaultOrder: OrderState = {
   status: 'ready_for_approval',
   orderNumber: 'FC-2026-001',
@@ -25,9 +27,10 @@ export const defaultOrder: OrderState = {
   unitPrice: 5.49,
   tax: 0,
   package: {
-    name: 'Retention Moat',
-    description: 'FC configures and operates a complete retention experience for your team, from physical touchpoint through campaign reporting.',
-    campaignType: 'Managed retention pilot',
+    id: 'post-purchase-moat',
+    name: 'Post-Purchase Moat',
+    description: 'A complete in-home retention and post-purchase relationship layer, from the physical touchpoint through lifecycle activation and measurement.',
+    campaignType: 'Post-Purchase Moat',
     serviceModel: 'Fully managed by FridgeChannel',
     features: [
       'Custom NFC magnet design and production',
@@ -37,11 +40,63 @@ export const defaultOrder: OrderState = {
       'Performance reporting',
     ],
     integrations: ['Shopify', 'Klaviyo'],
+    includedServices: [
+      {
+        title: 'In-Home Touchpoint',
+        items: [
+          'Branded NFC fridge magnet',
+          'Tap-to-open customer experience',
+          'One branded landing page',
+          'One universal customer CTA',
+          'One universal Fresh Perk or offer',
+          'Basic Tap and engagement tracking',
+          'Basic campaign report',
+        ],
+      },
+      {
+        title: 'Lifecycle Purchase Activation',
+        items: [
+          'Dynamic, segment-based experience',
+          'Customer segment recognition',
+          'Lifecycle-based purchase CTA',
+          'Segment-specific starting offer',
+          'Segment-specific reward rules',
+          'Replenishment-window logic',
+          'Subscriber / non-subscriber logic',
+          'Win-back logic',
+          'Lifecycle targeting: new / active / replenishment / win-back / VIP',
+        ],
+      },
+      {
+        title: 'Integrations & Measurement',
+        items: [
+          'Shopify integration',
+          'Klaviyo integration',
+          'Segment-level measurement',
+          'Repeat-purchase measurement',
+          '60- and 90-day LTV reporting',
+        ],
+      },
+      {
+        title: 'Post-Purchase Relationship Layer',
+        items: [
+          'Surveys, quizzes, and preference capture',
+          'Brand and product education modules',
+          'Newsletter or community enrollment',
+          'Referral and review actions',
+          'UGC collection',
+          'Challenges and customer missions',
+          'Seasonal campaign modules',
+          'New-product launch modules',
+          'Recipe and content experiences',
+        ],
+      },
+    ],
   },
   lineItems: [
     { id: 'magnets', label: '1,500 NFC magnets', detail: '$5.49 per magnet / year', amount: 8235 },
     { id: 'shipping', label: 'Estimated shipping', amount: 350 },
-    { id: 'discount', label: 'Pilot discount', amount: -585, kind: 'discount' },
+    { id: 'discount', label: 'Pilot discount · 20% OFF', amount: -1717, kind: 'discount' },
   ],
   scopeIncluded: [
     'Magnet visual design',
@@ -59,12 +114,14 @@ export const defaultOrder: OrderState = {
     'Customer-paid rewards',
   ],
   timeline: [
-    { title: 'Brand assets submitted', detail: 'Timeline begins after all required assets are received.', requiresCustomer: true },
-    { title: 'Magnet design confirmed', detail: 'Customer approval required before production.', requiresCustomer: true },
-    { title: 'Campaign configured', detail: 'FC builds the approved challenge and reward logic.' },
-    { title: 'Shopify and Klaviyo connected', detail: 'Customer credentials and access required.', requiresCustomer: true },
-    { title: 'Production begins', detail: 'Final quantity is locked for manufacturing.' },
-    { title: 'Campaign goes live', detail: 'Estimated 6-8 weeks after payment and asset receipt.' },
+    { title: 'Ordered', duration: 'Order confirmed', output: 'Pilot officially starts.' },
+    { title: 'Brand inputs & campaign rules', duration: '~1 day', detail: 'Brand provides logo, colors, product references, target audience, reward rules, and Shopify / Klaviyo requirements. FC translates them into setup requirements.', output: 'Campaign setup brief confirmed.' },
+    { title: 'NFC magnet design', duration: '~2 days', detail: 'FC designs the front and back of the branded NFC fridge magnet and prepares production files. Brand approves — two standard revision rounds included.', output: 'Final magnet artwork approved.' },
+    { title: 'Mobile reward experience & dashboard setup', duration: '~1 day', detail: 'FC configures the branded reward page, challenge flow, points and unlock logic, tracking events, and the campaign dashboard. Brand confirms key rules.', output: 'Tap experience and dashboard ready.' },
+    { title: 'Shopify & Klaviyo connection', duration: '~1 day', detail: 'Brand connects Shopify and Klaviyo through its own secure authorization. FC assists with coupon rules, segment logic, reward setup, and measurement.', output: 'Brand systems connected for launch.' },
+    { title: 'Production, QA & delivery', duration: '7–10 days', detail: 'FC produces the magnets, sets the NFC destination, runs tap tests, verifies reward logic, and ships to the agreed location. Brand confirms the delivery address. After final artwork approval — depending on quantity and destination.', output: 'Finished NFC magnets delivered.' },
+    { title: 'Fulfillment launch', duration: 'Launch', detail: 'Brand decides which customers receive magnets and includes them in selected orders via its warehouse, fulfillment team, or 3PL. FC keeps the experience live.', output: 'Magnets enter customer homes through real shipments.' },
+    { title: 'Results review & next step', duration: 'Pilot review', detail: 'Brand reviews active magnets, taps, challenge participation, rewards unlocked, coupons redeemed, repeat orders, and attributed revenue. FC provides the pilot readout, insights, and scale recommendation.', output: 'Decide whether to scale, adjust, or stop.' },
   ],
   estimatedLaunch: '6-8 weeks after payment and asset receipt',
   paymentTerms: 'Due on receipt',
@@ -93,10 +150,19 @@ export const orderSubtotal = (order: OrderState) =>
 
 export const orderTotal = (order: OrderState) => orderSubtotal(order) + order.tax
 
-export const resolvedLineItems = (order: OrderState) => order.lineItems
-  .filter((item) => item.id !== 'setup' && item.id !== 'production')
-  .map((item) =>
+export const resolvedLineItems = (order: OrderState) => {
+  const items = order.lineItems
+    .filter((item) => item.id !== 'setup' && item.id !== 'production')
+    .map((item) =>
     item.id === 'magnets'
       ? { ...item, label: `${new Intl.NumberFormat('en-US').format(order.quantity)} NFC magnets`, amount: order.quantity * order.unitPrice }
       : item,
+    )
+  const discountableAmount = items.filter((item) => item.id !== 'discount').reduce((sum, item) => sum + item.amount, 0)
+  const discountAmount = -Math.round(discountableAmount * PILOT_DISCOUNT_RATE * 100) / 100
+
+  return items.map((item) => item.id === 'discount'
+    ? { ...item, label: 'Pilot discount · 20% OFF', amount: discountAmount }
+    : item,
   )
+}

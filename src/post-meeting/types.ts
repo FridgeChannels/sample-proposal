@@ -15,12 +15,14 @@ export type OrderStatus =
 export type PaymentMethod = 'ach' | 'bank_transfer' | 'card'
 
 export type SelectedPackage = {
+  id: 'presence' | 'in-home-retention-asset' | 'post-purchase-moat'
   name: string
   description: string
   campaignType: string
   serviceModel: string
   features: string[]
   integrations: string[]
+  includedServices: Array<{ title: string; items: string[] }>
 }
 
 export type OrderLineItem = {
@@ -85,7 +87,7 @@ export type OrderState = {
   lineItems: OrderLineItem[]
   scopeIncluded: string[]
   scopeExcluded: string[]
-  timeline: Array<{ title: string; detail: string; requiresCustomer?: boolean }>
+  timeline: Array<{ title: string; duration: string; detail?: string; output: string }>
   estimatedLaunch: string
   paymentTerms: string
   approval?: ApprovalRecord

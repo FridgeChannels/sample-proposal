@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { orderSubtotal, orderTotal, resolvedLineItems } from '../config'
+import { orderTotal, resolvedLineItems } from '../config'
 import type { OrderState } from '../types'
 import { Modal } from './Modal'
 import { SendFinanceModal } from './SendFinanceModal'
@@ -11,6 +11,7 @@ export function OrderView({ order, onChange, onOpenAddress, onOpenFinance }: { o
   const [showFinance, setShowFinance] = useState(false)
   const [showApproval, setShowApproval] = useState(false)
   const [financeSent, setFinanceSent] = useState(false)
+  const [servicesExpanded, setServicesExpanded] = useState(false)
   const [notice, setNotice] = useState('')
   const [approval, setApproval] = useState({ confirmed: false, name: '', email: '', jobTitle: '' })
   const [approvalErrors, setApprovalErrors] = useState<Record<string, string>>({})
@@ -68,24 +69,22 @@ export function OrderView({ order, onChange, onOpenAddress, onOpenFinance }: { o
             <span className="address-icon">⌖</span><span className="address-entry-copy"><small>DELIVERY ADDRESS</small><strong>{hasShippingAddress ? order.shippingAddress.recipientName : 'Add delivery address'}</strong><span>{hasShippingAddress ? `${shippingAddressText}, ${order.shippingAddress.country}` : 'Required before placing your order'}</span></span><b>→</b>
           </button>
           <section className="order-block product-order-block">
-            <div className="block-label"><span>01</span><strong>Your Package</strong></div>
+            <div className="block-label"><span>01</span><strong>Your Package: {order.package.name}</strong></div>
             <div className="product-order-grid">
               <figure className="product-thumbnail"><img src="/pics/visual_pic.png" alt="Branded NFC fridge magnet shown in use with a smartphone" /></figure>
               <div className="product-order-copy">
-                <p className="eyebrow">{order.package.campaignType}</p><h2>{order.package.name}</h2><p>{order.package.description}</p>
-                <div className="product-meta"><div><span>Service</span><strong>{order.package.serviceModel}</strong></div><div><span>Integrations</span><strong>{order.package.integrations.join(' + ')}</strong></div></div>
+                <h2>Double-sided branded NFC fridge magnet</h2><p>{order.package.description}</p>
                 <div className="quantity-order-row">
                   <label><span>Magnet quantity</span><div className="quantity-control"><button type="button" disabled={isLocked || order.quantity <= 1000} onClick={() => onChange({ ...order, quantity: Math.max(1000, order.quantity - 100) })} aria-label="Decrease quantity">−</button><input type="number" min="1000" step="100" disabled={isLocked} value={order.quantity} onChange={(event) => onChange({ ...order, quantity: Math.max(1000, Number(event.target.value) || 1000) })} /><button type="button" disabled={isLocked} onClick={() => onChange({ ...order, quantity: order.quantity + 100 })} aria-label="Increase quantity">+</button></div><small>Minimum 1,000 magnets</small></label>
                 </div>
               </div>
             </div>
-            <div className="included-services"><div><p className="eyebrow">INCLUDED SERVICES</p><h3>Everything needed to launch.</h3></div><div><ul className="scope-grid">{order.scopeIncluded.map((item) => <li key={item}><span>✓</span>{item}</li>)}</ul><div className="not-included compact-not-included"><strong>Not included</strong><p>{order.scopeExcluded.join(' · ')}</p></div></div></div>
-            <div className="order-key-details"><div><span>Estimated launch</span><strong>{order.estimatedLaunch}</strong></div></div>
+            <div className={`included-services ${servicesExpanded ? 'is-expanded' : ''}`}><button className="included-services-toggle" type="button" onClick={() => setServicesExpanded(!servicesExpanded)} aria-expanded={servicesExpanded} aria-controls="package-included-services"><span className="eyebrow">INCLUDED SERVICES</span><span>{servicesExpanded ? 'Collapse' : 'View all'} <b>{servicesExpanded ? '−' : '+'}</b></span></button>{servicesExpanded && <div className="package-service-groups" id="package-included-services">{order.package.includedServices.map((group) => <section className="package-service-group" key={group.title}><strong>{group.title}</strong><ul className="scope-grid">{group.items.map((item) => <li key={item}><span>✓</span>{item}</li>)}</ul></section>)}</div>}</div>
+            <div className="order-key-details"><div><span>Pilot plan</span><strong>{order.package.campaignType}</strong></div></div>
             <section className="price-breakdown" aria-labelledby="price-breakdown-title">
               <h3 id="price-breakdown-title">Price breakdown</h3>
               <div className="line-items" role="table" aria-label="Order amount breakdown">
                 {resolvedLineItems(order).map((item) => <div role="row" key={item.id}><div role="cell"><strong>{item.label}</strong>{item.detail && <small>{item.detail}</small>}</div><b role="cell" className={item.kind === 'discount' ? 'discount' : ''}>{item.amount < 0 ? `−${money.format(Math.abs(item.amount))}` : money.format(item.amount)}</b></div>)}
-                <div role="row"><div role="cell"><strong>Subtotal</strong></div><b role="cell">{money.format(orderSubtotal(order))}</b></div>
                 <div role="row"><div role="cell"><strong>Tax</strong><small>Calculated when applicable</small></div><b role="cell">{money.format(order.tax)}</b></div>
                 <div className="line-total" role="row"><div role="cell"><strong>Total</strong><small>Estimated order total</small></div><b role="cell">{money.format(total)}</b></div>
               </div>
@@ -93,9 +92,9 @@ export function OrderView({ order, onChange, onOpenAddress, onOpenFinance }: { o
             {isApproved && <div className="order-placed-message"><span>✓</span><div><strong>Order placed by {order.approval?.name}</strong><small>You can now send it to finance or continue to payment.</small></div></div>}
           </section>
 
-          <section className="after-order-info">
-            <p className="eyebrow">WHAT HAPPENS AFTER YOU ORDER</p><h2>From approval to launch.</h2>
-            <ol><li><span>01</span><div><strong>Confirm creative</strong><p>Submit brand assets and approve the final magnet design.</p></div></li><li><span>02</span><div><strong>Configure & produce</strong><p>FC configures the campaign and integrations while magnet production begins.</p></div></li><li><span>03</span><div><strong>Go live</strong><p>Launch is estimated {order.estimatedLaunch.toLowerCase()}.</p></div></li></ol>
+          <section className="after-order-info collaboration-timeline">
+            <p className="eyebrow">COLLABORATION TIMELINE</p><h2>From order to scale.</h2>
+            <div className="collaboration-phases">{order.timeline.map((phase, index) => <div className="collaboration-phase-wrap" key={phase.title}><details className="collaboration-phase"><summary><span className="phase-index">{String(index + 1).padStart(2, '0')}</span><span className="phase-summary"><small>{phase.duration}</small><strong>{phase.title}</strong></span><span className="phase-toggle" aria-hidden="true">+</span></summary><div className="phase-detail">{phase.detail && <p>{phase.detail}</p>}<p><span>Output</span>{phase.output}</p></div></details>{index < order.timeline.length - 1 && <span className="phase-arrow" aria-hidden="true">↓</span>}</div>)}</div>
           </section>
 
         </div>

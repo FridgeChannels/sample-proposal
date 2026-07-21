@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { orderSubtotal, orderTotal, resolvedLineItems, statusLabels } from '../config'
+import { orderTotal, resolvedLineItems, statusLabels } from '../config'
 import type { BillingDetails, OrderState, PaymentMethod } from '../types'
 
 const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 })
@@ -100,7 +100,7 @@ export function FinanceView({ order, onChange, onBack }: { order: OrderState; on
             <div className="invoice-package"><div><span>Package</span><strong>{order.package.name}</strong></div><div><span>Quantity</span><strong>{number.format(order.quantity)} magnets</strong></div></div>
             <div className="line-items compact-line-items">
               {resolvedLineItems(order).map((item) => <div key={item.id}><div><strong>{item.label}</strong>{item.detail && <small>{item.detail}</small>}</div><b className={item.kind === 'discount' ? 'discount' : ''}>{item.amount < 0 ? `−${money.format(Math.abs(item.amount))}` : money.format(item.amount)}</b></div>)}
-              <div><div><strong>Subtotal</strong></div><b>{money.format(orderSubtotal(order))}</b></div><div><div><strong>Tax</strong></div><b>{money.format(order.tax)}</b></div><div className="line-total"><div><strong>Amount due</strong></div><b>{money.format(total)}</b></div>
+              <div><div><strong>Tax</strong></div><b>{money.format(order.tax)}</b></div><div className="line-total"><div><strong>Amount due</strong></div><b>{money.format(total)}</b></div>
             </div>
           </section>
 
