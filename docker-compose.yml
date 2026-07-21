@@ -1,0 +1,13 @@
+services:
+  proposal:
+    build: .
+    image: sample-proposal:latest
+    container_name: sample-proposal
+    ports:
+      - "${PORT:-4173}:4173"
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      PORT: "4173"
+    restart: unless-stopped

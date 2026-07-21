@@ -1,0 +1,16 @@
+.git
+.claude
+.playwright-cli
+.preview
+docs
+node_modules
+.env
+.env.*
+!.env.example
+*.md
+!proposal-template.md
+.DS_Store
+.gitignore
+vercel.json
+Dockerfile
+docker-compose.yml
