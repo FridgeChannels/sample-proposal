@@ -556,6 +556,29 @@
     .experiment-merge{background:linear-gradient(var(--diagram-line),var(--diagram-line)) 25% top/1px 23px no-repeat,linear-gradient(var(--diagram-line),var(--diagram-line)) 75% top/1px 23px no-repeat,linear-gradient(90deg,var(--diagram-line),var(--diagram-line)) center 22px/50% 1px no-repeat,linear-gradient(var(--diagram-line),var(--diagram-line)) center 22px/1px 22px no-repeat}
     .experiment-compare{position:relative;width:max-content;max-width:100%;margin:0 auto 44px;padding:9px 14px;border-radius:999px;background:color-mix(in oklch,var(--forest) 8%,#fff);color:var(--forest);font-size:.72rem;font-weight:650;letter-spacing:.06em;text-align:center;text-transform:uppercase}
     .experiment-compare:after{content:"";position:absolute;left:50%;top:100%;width:1px;height:44px;background:var(--diagram-line)}
+    /* Incrementality test: a readable timeline with a clear parallel branch. */
+    .experiment-flow{max-width:720px;margin:0 auto}
+    .experiment-flow .experiment-step{position:relative;display:grid;grid-template-columns:44px minmax(0,1fr);gap:16px;align-items:start}
+    .experiment-flow .step-index{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--forest);color:#fff;font-family:"Roboto Mono",monospace;font-size:.65rem;font-weight:700;line-height:1}
+    .experiment-flow .step-copy{padding-top:1px}
+    .experiment-flow .step-kicker{display:block;font-family:"Roboto Mono",monospace;font-size:.64rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--forest)}
+    .experiment-flow .step-title{display:block;margin-top:8px;color:#0A0A0A;font-size:clamp(1.25rem,2vw,1.65rem);font-weight:650;line-height:1.12;letter-spacing:-.035em}
+    .experiment-flow .step-copy p{margin-top:7px;color:#737373;font-size:.88rem;line-height:1.45}
+    .experiment-flow .flow-connector{width:1px;height:28px;margin-left:17px;background:var(--diagram-line)}
+    .experiment-flow .parallel-label{margin:0 0 12px;color:var(--forest);font-family:"Roboto Mono",monospace;font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+    .experiment-flow .parallel-branches{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .experiment-flow .parallel-branch{min-height:132px;padding:18px;border:1px solid #E5E5E5;border-radius:16px;background:#fff}
+    .experiment-flow .parallel-branch--treatment{border-color:color-mix(in srgb,var(--forest) 42%,#E5E5E5);background:color-mix(in srgb,var(--forest) 5%,#fff)}
+    .experiment-flow .parallel-branch--holdout{background:#ebe0e0}
+    .experiment-flow .parallel-branch b{display:block;font-family:"Roboto Mono",monospace;font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--forest)}
+    .experiment-flow .parallel-branch strong{display:block;margin-top:12px;color:#0A0A0A;font-size:1.05rem;font-weight:650;line-height:1.18;letter-spacing:-.025em}
+    .experiment-flow .parallel-branch p{margin-top:8px;color:#737373;font-size:.78rem;line-height:1.4}
+    .experiment-flow .experiment-compare{margin:0 0 0 60px;max-width:none;width:auto;border-radius:14px;font-size:.68rem;line-height:1.35}
+    .experiment-flow .outcome-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;margin-top:28px;padding:0;border:0;border-radius:0;background:transparent}
+    .experiment-flow .outcome-metric span{display:none}
+    .experiment-flow .outcome-metric strong{max-width:none;margin-top:0}
+    /* Keep the pilot story focused on the content, not presentation metadata. */
+    main .pilot-module-label{display:none!important}
     .pilot-question{padding:clamp(76px,9vw,120px) 0;border-top:1px solid #E5E5E5;border-bottom:1px solid #E5E5E5}
     .pilot-question blockquote{max-width:1120px;margin:0;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:clamp(2.4rem,5vw,5.6rem);font-weight:700;line-height:1;letter-spacing:-.06em;color:#0A0A0A}
     .pilot-question blockquote em{font-style:normal;color:var(--rust)}
@@ -649,12 +672,27 @@
       .experiment-merge{background-size:1px 18px,1px 18px,50% 1px,1px 17px;background-position:25% top,75% top,center 17px,center 17px}
       .experiment-compare{margin-bottom:36px;padding:8px 12px;font-size:.58rem;line-height:1.25;letter-spacing:.05em}
       .experiment-compare:after{height:36px}
+      .experiment-flow{max-width:none}
+      .experiment-flow .experiment-step{grid-template-columns:34px minmax(0,1fr);gap:12px}
+      .experiment-flow .step-index{width:30px;height:30px;font-size:.58rem}
+      .experiment-flow .step-kicker{font-size:.58rem;letter-spacing:.08em}
+      .experiment-flow .step-title{margin-top:6px;font-size:1.18rem;line-height:1.15}
+      .experiment-flow .step-copy p{margin-top:6px;font-size:.78rem;line-height:1.4}
+      .experiment-flow .flow-connector{height:22px;margin-left:14px}
+      .experiment-flow .parallel-label{margin:0 0 9px;font-size:.56rem;letter-spacing:.08em}
+      .experiment-flow .parallel-branches{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+      .experiment-flow .parallel-branch{min-height:138px;padding:15px 12px;border-radius:15px}
+      .experiment-flow .parallel-branch b{font-size:.56rem;letter-spacing:.08em}
+      .experiment-flow .parallel-branch strong{margin-top:7px;font-size:.94rem}
+      .experiment-flow .parallel-branch p{margin-top:5px;font-size:.68rem}
+      .experiment-flow .experiment-compare{margin:0 0 0 46px;padding:10px 12px;font-size:.57rem;line-height:1.35}
+      .experiment-flow .outcome-summary{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:20px}
       .pilot-question{padding:38px 0}
       .pilot-question blockquote{font-size:clamp(1.85rem,9vw,2.7rem);line-height:1.03}
       .scale-layout{grid-template-columns:1fr;gap:18px}
       .scale-number{display:flex;align-items:end;gap:16px;padding:0 0 16px;border-right:0;border-bottom:1px solid #E5E5E5}
       .scale-number strong{font-size:4.2rem}
-      .scale-number span{max-width:14ch;margin:0 0 2px}
+      .scale-number span{flex:1 1 auto;min-width:0;max-width:none;margin:0 0 2px}
       .pilot-timeline{grid-template-columns:1fr;gap:0;width:max-content;max-width:100%;margin-inline:auto;padding:0 0 0 34px}
       .pilot-timeline:before,.pilot-timeline:after{display:none}
       .timeline-step{padding:0 0 34px;opacity:.16;transform:translateY(12px);transition:opacity .65s cubic-bezier(.16,1,.3,1),transform .65s cubic-bezier(.16,1,.3,1)}
@@ -1075,9 +1113,27 @@
       border-color:transparent!important;
     }
     @media(max-width:760px){
-      .effort-grid,.effort-item{border:0!important}
+      .effort-grid{gap:0;border-top:0!important;border-bottom:0!important}
+      .effort-item{min-height:150px;padding:18px 14px;border:0!important;border-radius:0;background:transparent}
       .effort-item:nth-child(even){border-left:1px solid var(--leg-border)!important}
       .effort-item:nth-child(n+3){border-top:1px solid var(--leg-border)!important}
+      .effort-item span{margin-top:12px;font-size:.78rem;line-height:1.4}
+
+      /* Give the responsibilities screen a compact, balanced phone layout. */
+      main > section.pilot-continuation--workflow[aria-label="Pilot responsibilities"]{
+        display:flex;
+        min-height:100svh!important;
+        align-items:center;
+        padding:56px 0!important;
+      }
+      main > section.pilot-continuation--workflow[aria-label="Pilot responsibilities"] > .wrap{
+        width:min(100% - 32px,1180px);
+      }
+      .responsibility-tabs{border-radius:20px}
+      .responsibility-tablist{gap:6px;padding:6px}
+      .responsibility-tablist button{min-height:54px;padding:12px 10px;font-size:.92rem}
+      .responsibility-panel{display:flex;min-height:clamp(300px,44svh,480px);align-items:center;padding:clamp(28px,6vh,56px) 22px}
+      .responsibility-panel ul{width:100%;gap:clamp(12px,3vh,24px);font-size:clamp(.84rem,2.5vw,1rem);line-height:1.45}
     }
     h1,h2,h3{max-width:none!important}
   </style>
@@ -1211,44 +1267,58 @@
     <section class="pilot-section" id="fulfillment" aria-labelledby="pilot-title">
       <div class="wrap">
         <header class="pilot-head reveal">
-          <h2 id="pilot-title">Designed to test retention—not consume your team.</h2>
+          <h2 id="pilot-title">Measure the lift from FC.</h2>
         </header>
 
         <section class="pilot-module reveal" aria-label="How the pilot proves incremental value">
           <div class="pilot-module-label"><span>01</span> Incrementality test</div>
-          <div class="experiment-system">
-            <div class="experiment-cohort">
-              <span>Matched cohort</span>
-              <strong>Customers with comparable purchase history and order profiles.</strong>
+          <div class="experiment-system experiment-flow">
+            <div class="experiment-step">
+              <span class="step-index">01</span>
+              <div class="step-copy">
+                <strong class="step-title">Find comparable customers.</strong>
+              </div>
             </div>
 
-            <div class="experiment-split" aria-hidden="true"></div>
+            <div class="flow-connector" aria-hidden="true"></div>
 
-            <div class="test-groups">
-              <article class="test-group test-group--experiment">
-                <span class="test-group-kicker">Treatment group</span>
-                <h3>FC in the order.</h3>
+            <div class="experiment-step">
+              <span class="step-index">02</span>
+              <div class="step-copy">
+                <strong class="step-title">Split them into two groups.</strong>
+              </div>
+            </div>
+
+            <div class="flow-connector" aria-hidden="true"></div>
+            <div class="parallel-branches">
+              <article class="parallel-branch parallel-branch--treatment">
+                <b>With FC</b>
+                <strong>FC in the order.</strong>
+                <p>The new journey is enabled.</p>
               </article>
-              <article class="test-group">
-                <span class="test-group-kicker">Holdout</span>
-                <h3>Existing journey. No FC.</h3>
+              <article class="parallel-branch parallel-branch--holdout">
+                <b>Without FC</b>
+                <strong>Existing journey.</strong>
+                <p>Nothing changes.</p>
               </article>
             </div>
 
-            <div class="experiment-merge" aria-hidden="true"></div>
-            <div class="experiment-compare">Compare both groups over the same pilot window</div>
+            <div class="flow-connector" aria-hidden="true"></div>
+            <div class="experiment-step">
+                <span class="step-index">03</span>
+                <div class="step-copy">
+                <strong class="step-title">The difference is the lift from FC.</strong>
+              </div>
+            </div>
 
             <div class="outcome-summary" aria-label="Three incremental outcomes">
               <article class="outcome-metric">
-                <span>Customer behavior</span>
                 <strong>First-to-second purchase lift</strong>
               </article>
               <article class="outcome-metric">
-                <span>Revenue</span>
                 <strong>Incremental retained revenue</strong>
               </article>
               <article class="outcome-metric">
-                <span>Profit</span>
                 <strong>Incremental retained contribution</strong>
               </article>
             </div>
