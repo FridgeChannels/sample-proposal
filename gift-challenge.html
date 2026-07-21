@@ -577,6 +577,9 @@
     .experiment-flow .outcome-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;margin-top:28px;padding:0;border:0;border-radius:0;background:transparent}
     .experiment-flow .outcome-metric span{display:none}
     .experiment-flow .outcome-metric strong{max-width:none;margin-top:0}
+    .incrementality-statement{max-width:760px;margin:0 auto;text-align:center}
+    .incrementality-statement strong{display:block;color:#0A0A0A;font-size:clamp(1.8rem,3.8vw,3.15rem);font-weight:400;line-height:1.03;letter-spacing:-.045em}
+    .incrementality-statement p{max-width:48ch;margin:20px auto 0;color:#737373;font-size:clamp(1rem,1.5vw,1.25rem);line-height:1.45}
     /* Keep the pilot story focused on the content, not presentation metadata. */
     main .pilot-module-label{display:none!important}
     .pilot-question{padding:clamp(76px,9vw,120px) 0;border-top:1px solid #E5E5E5;border-bottom:1px solid #E5E5E5}
@@ -1265,62 +1268,14 @@
       </div>
     </section>
 
-    <section class="pilot-section" id="fulfillment" aria-labelledby="pilot-title">
+    <section class="pilot-section" id="fulfillment" aria-label="Incremental repeat-purchase lift from FC">
       <div class="wrap">
-        <header class="pilot-head reveal">
-          <h2 id="pilot-title">Measure the lift from FC.</h2>
-        </header>
-
         <section class="pilot-module reveal" aria-label="How the pilot proves incremental value">
           <div class="pilot-module-label"><span>01</span> Incrementality test</div>
           <div class="experiment-system experiment-flow">
-            <div class="experiment-step">
-              <span class="step-index">01</span>
-              <div class="step-copy">
-                <strong class="step-title">Find comparable customers.</strong>
-              </div>
-            </div>
-
-            <div class="flow-connector" aria-hidden="true"></div>
-
-            <div class="experiment-step">
-              <span class="step-index">02</span>
-              <div class="step-copy">
-                <strong class="step-title">Split them into two groups.</strong>
-              </div>
-            </div>
-
-            <div class="flow-connector" aria-hidden="true"></div>
-            <div class="parallel-branches">
-              <article class="parallel-branch parallel-branch--treatment">
-                <b>With FC</b>
-                <strong>FC in the order.</strong>
-              </article>
-              <article class="parallel-branch parallel-branch--holdout">
-                <b>Without FC</b>
-                <strong>Existing journey.</strong>
-                <p>Nothing changes.</p>
-              </article>
-            </div>
-
-            <div class="flow-connector" aria-hidden="true"></div>
-            <div class="experiment-step">
-                <span class="step-index">03</span>
-                <div class="step-copy">
-                <strong class="step-title">The difference is the lift from FC.</strong>
-              </div>
-            </div>
-
-            <div class="outcome-summary" aria-label="Three incremental outcomes">
-              <article class="outcome-metric">
-                <strong>First-to-second purchase lift</strong>
-              </article>
-              <article class="outcome-metric">
-                <strong>Incremental retained revenue</strong>
-              </article>
-              <article class="outcome-metric">
-                <strong>Incremental retained contribution</strong>
-              </article>
+            <div class="incrementality-statement">
+              <strong>Measure the incremental repeat-purchase lift from FC.</strong>
+              <p>Compare customers who receive FC with customers who stay on the existing journey after 6–8 weeks.</p>
             </div>
           </div>
         </section>
