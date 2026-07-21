@@ -1,4 +1,4 @@
-import giftChallengeDocument from '../../gift-challenge.html?raw'
+import giftChallengeDocument from './gift-challenge.html?raw'
 
 type TemplateConfig = {
   bodyMarkup: string

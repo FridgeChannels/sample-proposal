@@ -442,7 +442,7 @@
     .retention-loop-copy .chapter-label{color:var(--forest);font-size:16.4px;letter-spacing:.14em}
     .retention-loop-copy h2{margin-top:22px;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:clamp(2.65rem,4.5vw,5.25rem)!important;font-weight:700!important;line-height:.98;letter-spacing:-.055em;color:#0a0a0a}
     .retention-loop-copy p{max-width:34rem;margin-top:28px;font-size:clamp(16.4px,1.35vw,1.18rem);line-height:1.62;color:#64605b}
-    .retention-loop-visual{position:relative;min-height:min(74svh,720px);isolation:isolate}
+    .retention-loop-visual{position:relative;width:min(100%,720px,74svh);aspect-ratio:1/1;margin-inline:auto;isolation:isolate}
     .retention-loop-svg{position:absolute;inset:50% auto auto 50%;width:min(100%,720px);height:auto;overflow:visible;transform:translate(-50%,-50%)}
     .retention-loop-track,.retention-loop-progress{fill:none;stroke-width:2}
     .retention-loop-track{stroke:rgba(10,10,10,.1)}
@@ -454,25 +454,30 @@
     .retention-node strong{display:flex;align-items:baseline;gap:9px;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:clamp(16.4px,1.3vw,1.22rem);font-weight:650;line-height:1.16;letter-spacing:-.025em;color:#0a0a0a}
     .retention-node .retention-index{font-family:"Roboto Mono",monospace;font-size:16.4px;font-weight:700;letter-spacing:.1em;color:var(--rust)}
     .retention-node .retention-metric{display:block;margin-top:12px;color:var(--forest)}
-    .retention-node--presence .retention-metrics{display:flex;justify-content:center;gap:22px;margin-top:12px}
+    .retention-loop-center{position:absolute;left:50%;top:50%;z-index:2;width:46%;transform:translate(-50%,-50%);text-align:center}
+    .retention-loop-center .retention-metrics{display:flex;flex-direction:column;align-items:center;gap:30px}
+    .retention-loop-center .retention-metric{display:flex;flex-direction:column;align-items:center;gap:10px;color:var(--forest)}
+    .retention-loop-center .retention-number,.retention-node .retention-number{display:inline-block;margin-right:7px;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:clamp(2rem,3vw,3.15rem);font-weight:700;line-height:.85;letter-spacing:-.06em;vertical-align:baseline}
+    .retention-loop-center .retention-number{margin-right:0}
+    .retention-loop-center .retention-unit,.retention-node .retention-unit{display:inline-block;max-width:110px;font-size:16.4px;font-weight:600;line-height:1.2;vertical-align:baseline}
+    .retention-loop-center .retention-unit{max-width:170px}
+    .retention-node--presence .retention-metrics{display:none;justify-content:center;gap:22px;margin-top:12px}
     .retention-node--presence .retention-metric{display:flex;align-items:baseline;margin-top:0;text-align:left}
-    .retention-node .retention-number{display:inline-block;margin-right:7px;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:clamp(2rem,3vw,3.15rem);font-weight:700;line-height:.85;letter-spacing:-.06em;vertical-align:baseline}
-    .retention-node .retention-unit{display:inline-block;max-width:110px;font-size:16.4px;font-weight:600;line-height:1.2;vertical-align:baseline}
-    .retention-node--presence{left:50%;top:3%;width:300px;text-align:center;transform-origin:center bottom;margin-left:-150px}
+    .retention-node--presence{left:50%;top:auto;bottom:calc(83.06% + 20.5px);width:300px;text-align:center;transform-origin:center bottom;margin-left:-150px}
     .retention-node--presence strong,.retention-node--mission strong{justify-content:center}
     .retention-node--presence:before{left:50%;bottom:-25px;transform:translateX(-50%)}
-    .retention-node--tap{right:-1%;top:50%;transform-origin:left center;margin-top:-58px}
+    .retention-node--tap{left:calc(83.06% + 22.5px);right:auto;top:50%;transform-origin:left center;transform:translateY(calc(var(--node-y) - 50%)) scale(var(--node-scale))}
     .retention-node--tap:before{left:-27px;top:50%;transform:translateY(-50%)}
-    .retention-node--mission{left:50%;bottom:1%;text-align:center;transform-origin:center top;margin-left:-95px}
+    .retention-node--mission{left:50%;bottom:auto;top:calc(83.06% + 20.5px);text-align:center;transform-origin:center top;margin-left:-95px}
     .retention-node--mission:before{left:50%;top:-25px;transform:translateX(-50%)}
-    .retention-node--behavior{left:-1%;top:50%;text-align:right;transform-origin:right center;margin-top:-58px}
+    .retention-node--behavior{right:calc(83.06% + 22.5px);left:auto;top:50%;text-align:right;transform-origin:right center;transform:translateY(calc(var(--node-y) - 50%)) scale(var(--node-scale))}
     .retention-node--behavior strong{justify-content:flex-end}
     .retention-node--behavior:before{right:-27px;top:50%;transform:translateY(-50%)}
     @media(max-width:980px){
       #team.retention-loop-section{height:auto}
       .retention-loop-sticky{position:relative;min-height:auto;padding:84px 0}
       .retention-loop-layout{grid-template-columns:1fr;gap:64px}
-      .retention-loop-visual{min-height:700px;max-width:720px;width:100%;margin:0 auto}
+      .retention-loop-visual{min-height:0;max-width:720px;width:min(100%,720px);aspect-ratio:1/1;margin:0 auto}
     }
     @media(max-width:640px){
       .retention-loop-sticky{padding:72px 0}
@@ -953,12 +958,13 @@
       .retention-loop-sticky{position:relative!important;min-height:auto!important}
       .retention-loop-layout,.fit-layout{grid-template-columns:1fr;gap:56px}
       .retention-loop-svg{display:none}
-      .retention-loop-visual{display:grid;min-height:0;gap:0}
+      .retention-loop-visual{display:grid;width:100%;aspect-ratio:auto;min-height:0;margin:0;gap:0}
       .retention-node{position:relative;left:auto;right:auto;top:auto;bottom:auto;width:100%;min-height:112px;margin:0!important;padding:24px 0 24px 40px;text-align:left;opacity:1;transform:none;border-bottom:1px solid var(--leg-border)}
       .retention-node:before{left:5px;right:auto;top:30px;bottom:auto;transform:none}
       .retention-node:not(.retention-node--behavior):after{content:"";position:absolute;left:9px;top:42px;bottom:-1px;width:1px;background:var(--leg-border)}
       .retention-node strong,.retention-node--presence strong,.retention-node--mission strong,.retention-node--behavior strong{justify-content:flex-start}
-      .retention-node--presence .retention-metrics{justify-content:flex-start;flex-wrap:wrap}
+      .retention-loop-center{display:none}
+      .retention-node--presence .retention-metrics{display:flex;justify-content:flex-start;flex-wrap:wrap}
     }
     @media(max-width:760px){
       .wrap{width:min(100% - 40px,1280px)}
@@ -977,28 +983,34 @@
       .retention-loop-layout{display:grid;grid-template-columns:1fr;gap:28px}
       .retention-loop-copy h2,.fit-head h2,.comparison-intro h2,.pilot-head h2{font-size:clamp(2.05rem,9vw,2.35rem)!important;line-height:1.07!important;letter-spacing:-.035em!important}
       .retention-loop-copy p{margin-top:18px;font-size:16.4px;line-height:1.5}
-      .retention-loop-visual{position:relative;display:block;min-height:320px;margin-top:0;overflow:visible}
-      .retention-loop-svg{display:block;position:absolute;left:50%;top:50%;width:144px;height:144px;transform:translate(-50%,-50%)}
+      .retention-loop-visual{position:relative;display:block;width:100%;aspect-ratio:auto;min-height:470px;margin:0;overflow:visible}
+      .retention-loop-svg{display:block;position:absolute;left:50%;top:50%;width:280px;height:280px;transform:translate(-50%,-50%)}
+      .retention-loop-center{display:block;position:absolute;left:50%;top:50%;width:150px;transform:translate(-50%,-50%);text-align:center;padding:0;border:0}
+      .retention-loop-center .retention-metrics{flex-direction:column;align-items:center;gap:12px}
+      .retention-loop-center .retention-metric{align-items:center;gap:4px;text-align:center}
+      .retention-loop-center .retention-number{font-size:1.5rem}
+      .retention-loop-center .retention-unit{max-width:120px;font-size:15px;line-height:1.15}
+      .retention-node strong{background:var(--leg-card);box-shadow:0 0 0 6px var(--leg-card)}
       .retention-node{position:absolute;min-height:0;padding:0;border:0;opacity:var(--node-opacity,0)!important;transform:none;transition:opacity .55s cubic-bezier(.16,1,.3,1)}
       .retention-node:after{display:none!important}
       .retention-node strong{gap:6px;font-size:16.4px;line-height:1.08}
       .retention-node .retention-index{font-size:16.4px!important}
       .retention-node:before{width:7px;height:7px;box-shadow:0 0 0 5px var(--leg-card),0 0 0 6px var(--leg-border)!important}
-      .retention-node--presence{left:50%;top:0;width:100%;margin:0;transform:translateX(-50%);text-align:center}
+      .retention-node--presence{left:50%;top:86px;width:100%;margin:0;transform:translateX(-50%);text-align:center}
       .retention-node--presence strong{justify-content:center}
       .retention-node--presence:before{left:50%;top:auto;bottom:-38px;transform:translateX(-50%)}
-      .retention-node--presence .retention-metrics{justify-content:center;flex-wrap:nowrap;gap:10px;margin-top:8px}
+      .retention-node--presence .retention-metrics{display:none}
       .retention-node--presence .retention-number{font-size:1.85rem}
       .retention-node--presence .retention-unit{max-width:78px;font-size:16.4px;line-height:1.15}
       .retention-node--tap{left:auto;right:0;top:50%;width:78px;margin:0;transform:translateY(-50%);text-align:left}
-      .retention-node--tap:before{left:-9px;right:auto;top:50%;transform:translateY(-50%)}
-      .retention-node--mission{left:50%;bottom:50px;width:180px;margin:0;transform:translateX(-50%);text-align:center}
+      .retention-node--tap:before{left:-17px;right:auto;top:50%;transform:translateY(-50%)}
+      .retention-node--mission{left:50%;bottom:88px;width:180px;margin:0;transform:translateX(-50%);text-align:center}
       .retention-node--mission strong{justify-content:center}
       .retention-node--mission:before{left:50%;top:-32px;bottom:auto;transform:translateX(-50%)}
-      .retention-node--behavior{left:0;right:auto;top:50%;width:92px;margin:0;transform:translateY(-50%);text-align:right}
+      .retention-node--behavior{left:0;right:auto;top:50%;width:92px;margin:0;transform:translateY(14px);text-align:right}
       .retention-node--behavior strong{display:block}
       .retention-node--behavior .retention-index{display:block;margin-bottom:4px}
-      .retention-node--behavior:before{left:auto;right:11px;top:50%;transform:translateY(-50%)}
+      .retention-node--behavior:before{left:auto;right:12px;top:-16px;transform:none}
       .fit-layout{gap:38px}
       .fit-signals{gap:28px}
       .fit-signal{grid-template-columns:34px 1fr;gap:12px;padding:0}
@@ -1179,6 +1191,13 @@
               <path class="retention-loop-arrow" d="M374 122 L348 108 L348 136 Z"></path>
             </svg>
 
+            <div class="retention-loop-center">
+              <span class="retention-metrics">
+                <span class="retention-metric"><span class="retention-number" data-loop-count="10">0+</span><span class="retention-unit">Daily family impressions</span></span>
+                <span class="retention-metric"><span class="retention-number">0</span><span class="retention-unit">Algorithms &amp; ad-blockers</span></span>
+              </span>
+            </div>
+
             <article class="retention-node retention-node--presence" data-loop-node="0">
               <strong><span class="retention-index">01</span>Physical presence</strong>
               <span class="retention-metrics">
@@ -1196,7 +1215,7 @@
             </article>
 
             <article class="retention-node retention-node--behavior" data-loop-node="3">
-              <strong><span class="retention-index">04</span>Repeat order &amp; reactivation</strong>
+              <strong><span class="retention-index">04</span>Repeat order</strong>
             </article>
           </div>
         </div>
@@ -1227,9 +1246,6 @@
             </article>
           </div>
 
-          <aside class="fit-note">
-            <p>Whether you are a growth-stage brand doing <strong>$1M in annual sales</strong> or a more mature DTC team, the <strong>pilot is tailored to your order volume.</strong></p>
-          </aside>
         </div>
       </div>
     </section>
@@ -1362,10 +1378,11 @@
             <h2 id="closing-title">Everything you need to see, launch, and measure FC for your brand.</h2>
           </header>
           <div class="closing-gains package-gains">
-            <span class="closing-gains-label">Included in your package <span class="package-badge">Included</span></span>
+            <span class="closing-gains-label">Included in your package</span>
             <ul>
               <li>A practical, click-through demo customized specifically for your brand.</li>
               <li>A complete setup and launch process.</li>
+              <li>A defined Pilot launch plan.</li>
               <li>Recommended package options and pricing.</li>
             </ul>
             <a class="btn" data-link="footer_button_url">Build my custom pilot package</a>
@@ -1507,102 +1524,6 @@
       .then(applyData)
       .catch(error => { console.error(error); document.body.dataset.loadError='true'; });
 
-    const packageData = {
-      presence:{name:'Presence',price:3.99,annualOrders:1.64},
-      ltv:{name:'LTV Lift',price:4.99,annualOrders:2.40},
-      moat:{name:'Retention Moat',price:5.49,annualOrders:3.49}
-    };
-
-    let pricingRoot;
-    const pricingMoney = new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0});
-    const pricingNumber = new Intl.NumberFormat('en-US',{maximumFractionDigits:0});
-    const pq = selector => pricingRoot && pricingRoot.querySelector(selector);
-
-    window.selectPackage = function(key) {
-      Object.keys(packageData).forEach(name => pq(`#roas-col-${name}`)?.classList.toggle('is-selected', name === key));
-    };
-
-    window.runCalc = function() {
-      const aov = parseFloat((pq('#calc-aov')?.value || '').replace(/,/g,'')) || 0;
-      const households = parseInt((pq('#calc-hh')?.value || '').replace(/,/g,''),10) || 0;
-      if (!aov || !households) return;
-      const guide = pq('#calc-guide');
-      const results = pq('#roas-results');
-      if (guide) guide.style.display = 'none';
-      if (results) results.style.display = 'block';
-      if (pq('#calc-summary')) pq('#calc-summary').textContent = `Based on AOV ${pricingMoney.format(aov)} · ${pricingNumber.format(households)} households`;
-      Object.entries(packageData).forEach(([key,pkg]) => {
-        const investment = households * pkg.price;
-        const annualOrders = households * pkg.annualOrders;
-        const revenue = annualOrders * aov;
-        const roas = revenue / investment;
-        pq(`#roas-val-${key}`).textContent = `${roas.toFixed(1)}x`;
-        pq(`#rev-val-${key}`).textContent = pricingMoney.format(revenue);
-        pq(`#inv-val-${key}`).textContent = pricingMoney.format(investment);
-        pq(`#orders-val-${key}`).innerHTML = `${(annualOrders/12).toFixed(1)} / mo <span class="lift-arrow">↑</span>`;
-        pq(`#annual-lift-val-${key}`).innerHTML = `${pricingNumber.format(annualOrders)} <span class="lift-arrow">↑</span>`;
-      });
-    };
-
-    window.choosePlan = function(key) {
-      const calculator = pq('#calculator-section');
-      if (!calculator) return;
-      calculator.style.display = 'block';
-      pq('#selected-pkg-label').textContent = packageData[key]?.name || '';
-      pq('#calc-aov').value = pq('#calc-aov').value || '65';
-      pq('#calc-hh').value = pq('#calc-hh').value || '1,500';
-      window.selectPackage(key);
-      calculator.scrollIntoView({behavior:'smooth',block:'start'});
-    };
-
-    async function mountOriginalPricing() {
-      const host = document.getElementById('pricing-shadow-host');
-      if (!host) return;
-      const html = await fetch('/index.html').then(response => response.text());
-      const source = new DOMParser().parseFromString(html,'text/html');
-      const originalSection = source.querySelector('section.data-section');
-      const originalStyle = source.querySelector('style');
-      if (!host || !originalSection || !originalStyle) throw new Error('Original pricing section unavailable');
-      const packageEyebrow = originalSection.querySelector('.mono');
-      if (packageEyebrow) packageEyebrow.textContent = '04.3 // PACKAGE';
-      pricingRoot = host.attachShadow({mode:'open'});
-      pricingRoot.innerHTML = `
-        <style>${originalStyle.textContent}</style>
-        <style>
-          :host{--nike-orange:var(--proposal-primary,#FF5A1F);--nike-volt:var(--proposal-secondary,#D8FF2F);--on-nike-volt:#000;display:block}
-          .reveal{opacity:1!important;transform:none!important}
-          section.data-section{min-height:0!important}
-          section.data-section .mono{font-size:16.4px!important;line-height:1.5!important}
-        </style>
-        ${originalSection.outerHTML}
-      `;
-      const featureTable = pq('.package-feature-table');
-      if (featureTable) {
-        const columnNames = [null,'presence','ltv','moat'];
-        let columnIndex = 0;
-        [...featureTable.children].forEach(cell => {
-          if (cell.classList.contains('feature-section-header')) {
-            columnIndex = 0;
-            return;
-          }
-          if (columnIndex > 0) cell.dataset.col = columnNames[columnIndex];
-          columnIndex = (columnIndex + 1) % 4;
-        });
-      }
-      pricingRoot.addEventListener('click', event => {
-        const button = event.target.closest('[data-package-toggle]');
-        if (!button) return;
-        const key = button.dataset.packageToggle;
-        const table = pq('.package-feature-table');
-        if (table) table.dataset.active = key;
-        const panel = pq('#package-feature-panel');
-        if (panel) panel.removeAttribute('hidden');
-        pq('#package-feature-title').textContent = `${packageData[key]?.name || ''} full feature set`;
-        pricingRoot.querySelectorAll('[data-package-card]').forEach(card => card.classList.toggle('is-active',card.dataset.packageCard === key));
-      });
-      ['calc-aov','calc-hh'].forEach(id => pq(`#${id}`)?.addEventListener('input', window.runCalc));
-    }
-    mountOriginalPricing().catch(error => console.error(error));
 
     const sectionRevealTargets=Array.from(document.querySelectorAll('main>section')).map(section=>section.firstElementChild||section);
     sectionRevealTargets.forEach(el=>el.classList.add('section-reveal'));
@@ -1754,7 +1675,7 @@
       const section=document.getElementById('team');
       const progressRing=section?.querySelector('.retention-loop-progress');
       const nodes=section?[...section.querySelectorAll('[data-loop-node]')]:[];
-      const count=section?.querySelector('[data-loop-count]');
+      const counts=section?[...section.querySelectorAll('[data-loop-count]')]:[];
       if(!section||!progressRing||!nodes.length) return;
 
       const radius=Number(progressRing.getAttribute('r'))||238;
@@ -1774,7 +1695,7 @@
           node.style.setProperty('--node-y',`${(1-eased)*18}px`);
           node.style.setProperty('--node-scale',`${.96+eased*.04}`);
         });
-        if(count) count.textContent=`${Math.round(10*Math.max(0,Math.min(1,(value-.025)/.18)))}+`;
+        counts.forEach(count=>{count.textContent=`${Math.round(10*Math.max(0,Math.min(1,(value-.025)/.18)))}+`;});
         section.classList.toggle('is-complete',value>.94);
       }
 

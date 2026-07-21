@@ -6,7 +6,7 @@
       "use": "@vercel/node",
       "config": {
         "includeFiles": [
-          "index.html",
+          "dist/**",
           "data/**",
           "pics/**",
           "assets/**",

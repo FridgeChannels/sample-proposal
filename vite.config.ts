@@ -6,7 +6,21 @@ import { resolve } from 'node:path'
 const projectRoot = fileURLToPath(new URL('.', import.meta.url))
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    {
+      // Homepage is the React gift-challenge page, matching server.js's `/` route
+      name: 'serve-gift-challenge-as-index',
+      configureServer(server) {
+        server.middlewares.use((req, _res, next) => {
+          if (req.url === '/') {
+            req.url = '/gift-challenge-react.html'
+          }
+          next()
+        })
+      },
+    },
+  ],
   build: {
     rollupOptions: {
       input: {

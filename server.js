@@ -3,6 +3,7 @@ const fs = require('fs/promises');
 const path = require('path');
 
 const ROOT = __dirname;
+const DIST_ROOT = path.join(__dirname, 'dist');
 const DASHBOARD2_ROOT = path.join(require('os').homedir(), 'Downloads', 'DTC-dashboard-2');
 const NOTION_VERSION = '2025-09-03';
 
@@ -484,20 +485,9 @@ async function sendJson(res, status, payload) {
   res.end(JSON.stringify(payload));
 }
 
-async function serveIndex(res) {
-  try {
-    const body = await fs.readFile(path.join(ROOT, 'index.html'));
-    res.writeHead(200, { 'Content-Type': MIME_TYPES['.html'] });
-    res.end(body);
-  } catch (error) {
-    res.writeHead(500);
-    res.end('Failed to load index.html');
-  }
-}
-
 async function serveStatic(req, res) {
   const requestUrl = new URL(req.url, `http://${req.headers.host}`);
-  const pathname = requestUrl.pathname === '/' ? '/index.html' : decodeURIComponent(requestUrl.pathname);
+  const pathname = decodeURIComponent(requestUrl.pathname);
 
   // Serve /dashboard2/* directly from DTC-dashboard-2 folder (no copy needed)
   if (pathname.startsWith('/dashboard2')) {
@@ -523,50 +513,46 @@ async function serveStatic(req, res) {
     return;
   }
 
-  try {
-    const body = await fs.readFile(filePath);
-    const ext = path.extname(filePath);
-    res.writeHead(200, { 'Content-Type': MIME_TYPES[ext] || 'application/octet-stream' });
-    res.end(body);
-  } catch (error) {
-    res.writeHead(404);
-    res.end('Not found');
+  const ext = path.extname(filePath);
+  // Vite-built bundles (e.g. /assets/*.js) live in dist/, project files in ROOT
+  for (const candidate of [filePath, path.normalize(path.join(DIST_ROOT, pathname))]) {
+    try {
+      const body = await fs.readFile(candidate);
+      res.writeHead(200, { 'Content-Type': MIME_TYPES[ext] || 'application/octet-stream' });
+      res.end(body);
+      return;
+    } catch (error) {
+      // try next candidate
+    }
   }
+  res.writeHead(404);
+  res.end('Not found');
 }
 
 /**
- * Pretty path /proposal/{id} (and bare /proposal or /proposal/) all serve
- * the SPA shell (index.html). The front-end reads `id` from the URL and
- * calls /api/proposal?id=... internally.
- *
- * Gift challenge decks are served from gift-challenge.html via:
- *   /gift-proposal/{id}  or short /p/{id}
+ * Gift challenge decks are served from the built React page
+ * (dist/gift-challenge-react.html) via:
+ *   /  or  /gift-proposal/{id}  or short /p/{id}
+ * The front-end reads `id` from the URL and calls /api/proposal?id=... internally.
  */
-const PROPOSAL_ROUTE_RE = /^\/proposal(?:\/([^/?#]+))?\/?$/;
 const GIFT_PROPOSAL_ROUTE_RE = /^\/(?:gift-proposal|p)(?:\/([^/?#]+))?\/?$/;
 
 async function serveGiftChallenge(res) {
   try {
-    const body = await fs.readFile(path.join(ROOT, 'gift-challenge.html'));
+    const body = await fs.readFile(path.join(DIST_ROOT, 'gift-challenge-react.html'));
     res.writeHead(200, { 'Content-Type': MIME_TYPES['.html'] });
     res.end(body);
   } catch (error) {
     res.writeHead(500);
-    res.end('Failed to load gift challenge proposal');
+    res.end('Failed to load gift challenge proposal (run `npm run build` to generate dist/)');
   }
 }
 
 async function handleRequest(req, res) {
   const requestUrl = new URL(req.url, `http://${req.headers.host}`);
 
-  if (requestUrl.pathname === '/') {
-    res.writeHead(302, { Location: '/gift-challenge.html' });
-    res.end();
-    return;
-  }
-
-  if (PROPOSAL_ROUTE_RE.test(requestUrl.pathname)) {
-    await serveIndex(res);
+  if (requestUrl.pathname === '/' || requestUrl.pathname === '/gift-challenge-react.html') {
+    await serveGiftChallenge(res);
     return;
   }
 
