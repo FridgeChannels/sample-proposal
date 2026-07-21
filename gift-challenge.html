@@ -1373,7 +1373,7 @@
   </main>
 
   <script>
-    const pathMatch = /^\/gift-proposal\/([^/?#]+)\/?$/.exec(location.pathname);
+    const pathMatch = /^\/(?:gift-proposal|p)\/([^/?#]+)\/?$/.exec(location.pathname);
     const proposalParams = new URLSearchParams(location.search);
     const proposalId = pathMatch
       ? decodeURIComponent(pathMatch[1])

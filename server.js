@@ -538,9 +538,23 @@ async function serveStatic(req, res) {
  * Pretty path /proposal/{id} (and bare /proposal or /proposal/) all serve
  * the SPA shell (index.html). The front-end reads `id` from the URL and
  * calls /api/proposal?id=... internally.
+ *
+ * Gift challenge decks are served from gift-challenge.html via:
+ *   /gift-proposal/{id}  or short /p/{id}
  */
 const PROPOSAL_ROUTE_RE = /^\/proposal(?:\/([^/?#]+))?\/?$/;
-const GIFT_PROPOSAL_ROUTE_RE = /^\/gift-proposal(?:\/([^/?#]+))?\/?$/;
+const GIFT_PROPOSAL_ROUTE_RE = /^\/(?:gift-proposal|p)(?:\/([^/?#]+))?\/?$/;
+
+async function serveGiftChallenge(res) {
+  try {
+    const body = await fs.readFile(path.join(ROOT, 'gift-challenge.html'));
+    res.writeHead(200, { 'Content-Type': MIME_TYPES['.html'] });
+    res.end(body);
+  } catch (error) {
+    res.writeHead(500);
+    res.end('Failed to load gift challenge proposal');
+  }
+}
 
 async function handleRequest(req, res) {
   const requestUrl = new URL(req.url, `http://${req.headers.host}`);
@@ -557,14 +571,7 @@ async function handleRequest(req, res) {
   }
 
   if (GIFT_PROPOSAL_ROUTE_RE.test(requestUrl.pathname)) {
-    try {
-      const body = await fs.readFile(path.join(ROOT, 'gift-challenge.html'));
-      res.writeHead(200, { 'Content-Type': MIME_TYPES['.html'] });
-      res.end(body);
-    } catch (error) {
-      res.writeHead(500);
-      res.end('Failed to load gift challenge proposal');
-    }
+    await serveGiftChallenge(res);
     return;
   }
 

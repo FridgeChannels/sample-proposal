@@ -4,10 +4,12 @@ services:
     image: sample-proposal:latest
     container_name: sample-proposal
     ports:
-      - "${HOST_PORT:-4173}:4173"
+      # host:container — host uses 4174 to avoid clashing with .env PORT=4173
+      - "4174:4173"
     env_file:
       - path: .env
         required: false
     environment:
+      # App listens on 4173 inside the container only
       PORT: "4173"
     restart: unless-stopped
