@@ -6,7 +6,7 @@ COPY package.json package-lock.json* ./
 COPY server.js ./
 COPY index.html faq.html gift-challenge.html dashboard-return.html ./
 COPY proposal-template.md ./
-COPY "proposal template doc" ./
+COPY ["proposal template doc", "./"]
 COPY data ./data
 COPY pics ./pics
 COPY assets ./assets
