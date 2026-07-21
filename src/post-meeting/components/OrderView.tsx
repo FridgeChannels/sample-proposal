@@ -12,6 +12,7 @@ export function OrderView({ order, onChange, onOpenAddress, onOpenFinance }: { o
   const [showApproval, setShowApproval] = useState(false)
   const [financeSent, setFinanceSent] = useState(false)
   const [servicesExpanded, setServicesExpanded] = useState(false)
+  const [timelineExpanded, setTimelineExpanded] = useState(false)
   const [notice, setNotice] = useState('')
   const [approval, setApproval] = useState({ confirmed: false, name: '', email: '', jobTitle: '' })
   const [approvalErrors, setApprovalErrors] = useState<Record<string, string>>({})
@@ -20,6 +21,7 @@ export function OrderView({ order, onChange, onOpenAddress, onOpenFinance }: { o
   const isLocked = isApproved || order.status !== 'ready_for_approval'
   const shippingAddressText = [order.shippingAddress.addressLine1, order.shippingAddress.addressLine2, order.shippingAddress.city, order.shippingAddress.state, order.shippingAddress.postalCode].filter(Boolean).join(', ')
   const hasShippingAddress = Boolean(order.shippingAddress.recipientName && order.shippingAddress.addressLine1 && order.shippingAddress.city && order.shippingAddress.state && order.shippingAddress.postalCode)
+  const includedServiceCount = order.package.includedServices.reduce((count, group) => count + group.items.length, 0)
 
   const showNotice = (message: string) => {
     setNotice(message)
@@ -65,13 +67,10 @@ export function OrderView({ order, onChange, onOpenAddress, onOpenFinance }: { o
     <main className="view-shell order-view">
       <div className="order-layout full-order-layout">
         <div className="order-main">
-          <button className={`address-entry ${hasShippingAddress ? 'has-address' : ''}`} type="button" onClick={onOpenAddress}>
-            <span className="address-icon">⌖</span><span className="address-entry-copy"><small>DELIVERY ADDRESS</small><strong>{hasShippingAddress ? order.shippingAddress.recipientName : 'Add delivery address'}</strong><span>{hasShippingAddress ? `${shippingAddressText}, ${order.shippingAddress.country}` : 'Required before placing your order'}</span></span><b>→</b>
-          </button>
           <section className="order-block product-order-block">
-            <div className="block-label"><span>01</span><strong>Your Package: {order.package.name}</strong></div>
+            <div className="package-selection-label"><span>Package</span><strong>{order.package.name}</strong></div>
             <div className="product-order-grid">
-              <figure className="product-thumbnail"><img src="/pics/visual_pic.png" alt="Branded NFC fridge magnet shown in use with a smartphone" /></figure>
+              <figure className="product-thumbnail"><img src="/pics/DIsplayProcessPics/front_back.png" alt="Double-sided branded NFC fridge magnet sample" /></figure>
               <div className="product-order-copy">
                 <h2>Double-sided branded NFC fridge magnet</h2><p>{order.package.description}</p>
                 <div className="quantity-order-row">
@@ -79,8 +78,10 @@ export function OrderView({ order, onChange, onOpenAddress, onOpenFinance }: { o
                 </div>
               </div>
             </div>
-            <div className={`included-services ${servicesExpanded ? 'is-expanded' : ''}`}><button className="included-services-toggle" type="button" onClick={() => setServicesExpanded(!servicesExpanded)} aria-expanded={servicesExpanded} aria-controls="package-included-services"><span className="eyebrow">INCLUDED SERVICES</span><span>{servicesExpanded ? 'Collapse' : 'View all'} <b>{servicesExpanded ? '−' : '+'}</b></span></button>{servicesExpanded && <div className="package-service-groups" id="package-included-services">{order.package.includedServices.map((group) => <section className="package-service-group" key={group.title}><strong>{group.title}</strong><ul className="scope-grid">{group.items.map((item) => <li key={item}><span>✓</span>{item}</li>)}</ul></section>)}</div>}</div>
-            <div className="order-key-details"><div><span>Pilot plan</span><strong>{order.package.campaignType}</strong></div></div>
+            <div className={`included-services ${servicesExpanded ? 'is-expanded' : ''}`}><button className="included-services-toggle" type="button" onClick={() => setServicesExpanded(!servicesExpanded)} aria-expanded={servicesExpanded} aria-controls="package-included-services"><span>Included Services · {includedServiceCount}</span><b aria-hidden="true">{servicesExpanded ? '−' : '+'}</b></button>{servicesExpanded && <div className="package-service-groups" id="package-included-services">{order.package.includedServices.map((group) => <section className="package-service-group" key={group.title}><strong>{group.title}</strong><ul className="scope-grid">{group.items.map((item) => <li key={item}><span>✓</span>{item}</li>)}</ul></section>)}</div>}</div>
+            <button className={`address-entry ${hasShippingAddress ? 'has-address' : ''}`} type="button" onClick={onOpenAddress}>
+              <span className="address-entry-copy"><small>Delivery Address</small><strong>{hasShippingAddress ? order.shippingAddress.recipientName : 'Required before order'}</strong><span>{hasShippingAddress ? `${shippingAddressText}, ${order.shippingAddress.country}` : 'Add delivery address'}</span></span><b>→</b>
+            </button>
             <section className="price-breakdown" aria-labelledby="price-breakdown-title">
               <h3 id="price-breakdown-title">Price breakdown</h3>
               <div className="line-items" role="table" aria-label="Order amount breakdown">
@@ -93,8 +94,8 @@ export function OrderView({ order, onChange, onOpenAddress, onOpenFinance }: { o
           </section>
 
           <section className="after-order-info collaboration-timeline">
-            <p className="eyebrow">COLLABORATION TIMELINE</p><h2>From order to scale.</h2>
-            <div className="collaboration-phases">{order.timeline.map((phase, index) => <div className="collaboration-phase-wrap" key={phase.title}><details className="collaboration-phase"><summary><span className="phase-index">{String(index + 1).padStart(2, '0')}</span><span className="phase-summary"><small>{phase.duration}</small><strong>{phase.title}</strong></span><span className="phase-toggle" aria-hidden="true">+</span></summary><div className="phase-detail">{phase.detail && <p>{phase.detail}</p>}<p><span>Output</span>{phase.output}</p></div></details>{index < order.timeline.length - 1 && <span className="phase-arrow" aria-hidden="true">↓</span>}</div>)}</div>
+            <button className="timeline-section-toggle" type="button" onClick={() => setTimelineExpanded(!timelineExpanded)} aria-expanded={timelineExpanded} aria-controls="collaboration-phases"><span><strong>Collaboration Timeline</strong><small>{order.timeline.length} stages · Ordered to results review</small></span><b aria-hidden="true">{timelineExpanded ? '−' : '+'}</b></button>
+            {timelineExpanded && <div className="collaboration-phases" id="collaboration-phases">{order.timeline.map((phase, index) => <div className="collaboration-phase-wrap" key={phase.title}><details className="collaboration-phase"><summary><span className="phase-index">{String(index + 1).padStart(2, '0')}</span><span className="phase-summary"><small>{phase.duration}</small><strong>{phase.title}</strong></span><span className="phase-toggle" aria-hidden="true">+</span></summary><div className="phase-detail">{phase.detail && <p>{phase.detail}</p>}<p><span>Output</span>{phase.output}</p></div></details>{index < order.timeline.length - 1 && <span className="phase-arrow" aria-hidden="true">↓</span>}</div>)}</div>}
           </section>
 
         </div>

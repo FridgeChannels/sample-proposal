@@ -53,7 +53,7 @@ export function App() {
   }
 
   return (
-    <div className={`post-meeting-app${view === 'demo' || view === 'content' ? ' has-preview-dock' : ''}`}>
+    <div className={`post-meeting-app${view === 'demo' || view === 'content' ? ' has-preview-dock' : ''}${view === 'order' ? ' has-order-dock' : ''}`}>
       <TopNav active={view} onChange={openView} />
       {view === 'demo' && <LiveDemoView />}
       {view === 'content' && <SampleContentView />}
