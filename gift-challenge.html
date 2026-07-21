@@ -567,7 +567,7 @@
     .experiment-flow .flow-connector{width:1px;height:28px;margin-left:17px;background:var(--diagram-line)}
     .experiment-flow .parallel-label{margin:0 0 12px;color:var(--forest);font-family:"Roboto Mono",monospace;font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
     .experiment-flow .parallel-branches{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-    .experiment-flow .parallel-branch{min-height:132px;padding:18px;border:1px solid #E5E5E5;border-radius:16px;background:#fff}
+    .experiment-flow .parallel-branch{min-height:0;padding:18px;border:1px solid #E5E5E5;border-radius:16px;background:#fff}
     .experiment-flow .parallel-branch--treatment{border-color:color-mix(in srgb,var(--forest) 42%,#E5E5E5);background:color-mix(in srgb,var(--forest) 5%,#fff)}
     .experiment-flow .parallel-branch--holdout{background:#ebe0e0}
     .experiment-flow .parallel-branch b{display:block;font-family:"Roboto Mono",monospace;font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--forest)}
@@ -681,7 +681,7 @@
       .experiment-flow .flow-connector{height:22px;margin-left:14px}
       .experiment-flow .parallel-label{margin:0 0 9px;font-size:.56rem;letter-spacing:.08em}
       .experiment-flow .parallel-branches{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-      .experiment-flow .parallel-branch{min-height:138px;padding:15px 12px;border-radius:15px}
+      .experiment-flow .parallel-branch{min-height:0;padding:15px 12px;border-radius:15px}
       .experiment-flow .parallel-branch b{font-size:.56rem;letter-spacing:.08em}
       .experiment-flow .parallel-branch strong{margin-top:7px;font-size:.94rem}
       .experiment-flow .parallel-branch p{margin-top:5px;font-size:.68rem}
@@ -1294,7 +1294,6 @@
               <article class="parallel-branch parallel-branch--treatment">
                 <b>With FC</b>
                 <strong>FC in the order.</strong>
-                <p>The new journey is enabled.</p>
               </article>
               <article class="parallel-branch parallel-branch--holdout">
                 <b>Without FC</b>
@@ -1396,7 +1395,6 @@
       <div class="wrap">
         <div class="footer-box closing-box reveal">
           <header class="closing-copy">
-            <div class="chapter-label">Your pilot package</div>
             <h2 id="closing-title">Everything you need to see, launch, and measure FC for your brand.</h2>
           </header>
           <div class="closing-gains package-gains">
