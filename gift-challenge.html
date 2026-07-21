@@ -621,6 +621,8 @@
     .responsibility-panel{padding:24px 28px}
     .responsibility-panel[hidden]{display:none}
     .responsibility-panel ul{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 28px;margin:0;padding-left:18px;color:#737373;font-size:.86rem;line-height:1.45}
+    .responsibility-note{margin:24px 0 0;color:#737373;font-size:.76rem;line-height:1.45}
+    .responsibility-note strong{display:inline;color:var(--forest);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase}
     @media(max-width:760px){
       #fulfillment.pilot-section{padding:44px 0;scroll-snap-align:none}
       .pilot-head{margin-bottom:28px}
@@ -1135,8 +1137,9 @@
       .responsibility-tabs{border-radius:20px}
       .responsibility-tablist{gap:6px;padding:6px}
       .responsibility-tablist button{min-height:54px;padding:12px 10px;font-size:.92rem}
-      .responsibility-panel{display:flex;min-height:clamp(300px,44svh,480px);align-items:center;padding:clamp(28px,6vh,56px) 22px}
+      .responsibility-panel{display:flex;min-height:clamp(300px,44svh,480px);flex-direction:column;align-items:stretch;justify-content:center;padding:clamp(28px,6vh,56px) 22px}
       .responsibility-panel ul{width:100%;gap:clamp(12px,3vh,24px);font-size:clamp(.84rem,2.5vw,1rem);line-height:1.45}
+      .responsibility-note{margin-top:clamp(20px,3vh,28px);font-size:.76rem}
     }
     .closing-gains li:before{background:transparent!important;color:var(--rust)!important}
     h1,h2,h3{max-width:none!important}
@@ -1275,7 +1278,7 @@
           <div class="experiment-system experiment-flow">
             <div class="incrementality-statement">
               <strong>Measure the incremental repeat-purchase lift from FC.</strong>
-              <p>Compare customers who receive FC with customers who stay on the existing journey after 6–8 weeks.</p>
+              <p>Randomly assign eligible customers to FC and holdout groups, then compare incremental repeat purchase, retained revenue, and contribution over the agreed measurement window.</p>
             </div>
           </div>
         </section>
@@ -1331,6 +1334,7 @@
                 <li>Reward approval</li>
                 <li>Shopify and Klaviyo account access</li>
               </ul>
+              <p class="responsibility-note"><strong>Data &amp; security:</strong> Read-only where possible. No changes to your existing workflows</p>
             </div>
             <div class="responsibility-panel" role="tabpanel" id="responsibility-panel-fc" aria-labelledby="responsibility-tab-fc" data-responsibility-panel="fc" hidden>
               <ul>
