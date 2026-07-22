@@ -26,6 +26,8 @@ export const defaultOrder: OrderState = {
   currency: 'USD',
   unitPrice: 5.49,
   tax: 0,
+  offerStartedAt: '',
+  offerExpiresAt: '',
   package: {
     id: 'post-purchase-moat',
     name: 'Post-Purchase Moat',
@@ -145,12 +147,31 @@ export const defaultOrder: OrderState = {
   paymentMethod: 'ach',
 }
 
-export const orderSubtotal = (order: OrderState) =>
-  resolvedLineItems(order).reduce((sum, item) => sum + item.amount, 0)
+export type PilotOfferPhase = 'active' | 'urgent' | 'secured' | 'expired'
 
-export const orderTotal = (order: OrderState) => orderSubtotal(order) + order.tax
+export const pilotOfferRemainingMs = (order: OrderState, now = Date.now()) => {
+  const expiry = Date.parse(order.offerExpiresAt)
+  return Number.isFinite(expiry) ? Math.max(0, expiry - now) : 0
+}
 
-export const resolvedLineItems = (order: OrderState) => {
+export const pilotOfferPhase = (order: OrderState, now = Date.now()): PilotOfferPhase => {
+  const expiry = Date.parse(order.offerExpiresAt)
+  const approvedAt = order.approval ? Date.parse(order.approval.approvedAt) : Number.NaN
+  if (Number.isFinite(approvedAt) && approvedAt <= expiry) return 'secured'
+  const remaining = pilotOfferRemainingMs(order, now)
+  if (remaining <= 0) return 'expired'
+  return remaining <= 24 * 60 * 60 * 1000 ? 'urgent' : 'active'
+}
+
+export const isPilotDiscountApplied = (order: OrderState, now = Date.now()) =>
+  pilotOfferPhase(order, now) !== 'expired'
+
+export const orderSubtotal = (order: OrderState, now = Date.now()) =>
+  resolvedLineItems(order, now).reduce((sum, item) => sum + item.amount, 0)
+
+export const orderTotal = (order: OrderState, now = Date.now()) => orderSubtotal(order, now) + order.tax
+
+export const resolvedLineItems = (order: OrderState, now = Date.now()) => {
   const items = order.lineItems
     .filter((item) => item.id !== 'setup' && item.id !== 'production')
     .map((item) =>
@@ -161,8 +182,10 @@ export const resolvedLineItems = (order: OrderState) => {
   const discountableAmount = items.filter((item) => item.id !== 'discount').reduce((sum, item) => sum + item.amount, 0)
   const discountAmount = -Math.round(discountableAmount * PILOT_DISCOUNT_RATE * 100) / 100
 
-  return items.map((item) => item.id === 'discount'
-    ? { ...item, label: 'Pilot discount · 20% OFF', amount: discountAmount }
-    : item,
-  )
+  return items
+    .filter((item) => item.id !== 'discount' || isPilotDiscountApplied(order, now))
+    .map((item) => item.id === 'discount'
+      ? { ...item, label: 'Pilot discount · 20% OFF', amount: discountAmount }
+      : item,
+    )
 }

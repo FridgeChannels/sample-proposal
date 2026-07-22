@@ -1,22 +1,21 @@
 import { useState, type FormEvent } from 'react'
 import { orderTotal, resolvedLineItems } from '../config'
-import type { OrderState } from '../types'
+import type { FinanceContact, FinanceHandoff, OrderState } from '../types'
 import { Modal } from './Modal'
 import { SendFinanceModal } from './SendFinanceModal'
 
 const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 })
 const number = new Intl.NumberFormat('en-US')
 
-export function OrderView({ order, onChange, onOpenAddress, onOpenFinance }: { order: OrderState; onChange: (order: OrderState) => void; onOpenAddress: () => void; onOpenFinance: () => void }) {
+export function OrderView({ order, now, onChange, onOpenAddress, onOpenFinance }: { order: OrderState; now: number; onChange: (order: OrderState) => void; onOpenAddress: () => void; onOpenFinance: () => void }) {
   const [showFinance, setShowFinance] = useState(false)
   const [showApproval, setShowApproval] = useState(false)
-  const [financeSent, setFinanceSent] = useState(false)
   const [servicesExpanded, setServicesExpanded] = useState(false)
   const [timelineExpanded, setTimelineExpanded] = useState(false)
   const [notice, setNotice] = useState('')
   const [approval, setApproval] = useState({ confirmed: false, name: '', email: '', jobTitle: '' })
   const [approvalErrors, setApprovalErrors] = useState<Record<string, string>>({})
-  const total = orderTotal(order)
+  const total = orderTotal(order, now)
   const isApproved = !!order.approval
   const isLocked = isApproved || order.status !== 'ready_for_approval'
   const shippingAddressText = [order.shippingAddress.addressLine1, order.shippingAddress.addressLine2, order.shippingAddress.city, order.shippingAddress.state, order.shippingAddress.postalCode].filter(Boolean).join(', ')
@@ -58,9 +57,17 @@ export function OrderView({ order, onChange, onOpenAddress, onOpenFinance }: { o
   }
 
   const copyPaymentLink = async () => {
-    const link = `${window.location.origin}${window.location.pathname}#finance`
+    const link = order.financeHandoff?.paymentUrl || `${window.location.origin}${window.location.pathname}#finance`
     try { await navigator.clipboard.writeText(link); showNotice('Payment link copied.') }
     catch { showNotice(link) }
+  }
+
+  const sendToFinance = async (contact: FinanceContact): Promise<FinanceHandoff> => {
+    const response = await fetch('/api/finance-handoffs', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ order, email: contact.email, name: contact.name, message: contact.message, ccEmail: contact.ccCurrentContact ? order.approval?.email : '', baseUrl: window.location.origin }) })
+    const data = await response.json()
+    if (!response.ok) throw new Error(data.error || 'Unable to send finance handoff.')
+    onChange({ ...order, financeContact: contact, financeHandoff: data.handoff, billing: { ...order.billing, email: contact.email }, status: 'sent_to_finance', sentAt: data.handoff.sentAt })
+    return data.handoff
   }
 
   return (
@@ -80,17 +87,18 @@ export function OrderView({ order, onChange, onOpenAddress, onOpenFinance }: { o
             </div>
             <div className={`included-services ${servicesExpanded ? 'is-expanded' : ''}`}><button className="included-services-toggle" type="button" onClick={() => setServicesExpanded(!servicesExpanded)} aria-expanded={servicesExpanded} aria-controls="package-included-services"><span>Included Services · {includedServiceCount}</span><b aria-hidden="true">{servicesExpanded ? '−' : '+'}</b></button>{servicesExpanded && <div className="package-service-groups" id="package-included-services">{order.package.includedServices.map((group) => <section className="package-service-group" key={group.title}><strong>{group.title}</strong><ul className="scope-grid">{group.items.map((item) => <li key={item}><span>✓</span>{item}</li>)}</ul></section>)}</div>}</div>
             <button className={`address-entry ${hasShippingAddress ? 'has-address' : ''}`} type="button" onClick={onOpenAddress}>
-              <span className="address-entry-copy"><small>Delivery Address</small><strong>{hasShippingAddress ? order.shippingAddress.recipientName : 'Required before order'}</strong><span>{hasShippingAddress ? `${shippingAddressText}, ${order.shippingAddress.country}` : 'Add delivery address'}</span></span><b>→</b>
+              <span className="address-entry-copy"><small>Delivery Address</small><strong>{hasShippingAddress ? order.shippingAddress.recipientName : 'Required before order'}</strong><span>{hasShippingAddress ? `${shippingAddressText}, ${order.shippingAddress.country}` : 'Add delivery address'}</span></span>{!hasShippingAddress && <b aria-hidden="true">+</b>}
             </button>
             <section className="price-breakdown" aria-labelledby="price-breakdown-title">
               <h3 id="price-breakdown-title">Price breakdown</h3>
               <div className="line-items" role="table" aria-label="Order amount breakdown">
-                {resolvedLineItems(order).map((item) => <div role="row" key={item.id}><div role="cell"><strong>{item.label}</strong>{item.detail && <small>{item.detail}</small>}</div><b role="cell" className={item.kind === 'discount' ? 'discount' : ''}>{item.amount < 0 ? `−${money.format(Math.abs(item.amount))}` : money.format(item.amount)}</b></div>)}
+                {resolvedLineItems(order, now).map((item) => <div role="row" key={item.id}><div role="cell"><strong>{item.kind === 'discount' ? <>Pilot discount · <span className="discount-rate">20% OFF</span></> : item.label}</strong>{item.detail && <small>{item.detail}</small>}</div><b role="cell" className={item.kind === 'discount' ? 'discount' : ''}>{item.amount < 0 ? `−${money.format(Math.abs(item.amount))}` : money.format(item.amount)}</b></div>)}
                 <div role="row"><div role="cell"><strong>Tax</strong><small>Calculated when applicable</small></div><b role="cell">{money.format(order.tax)}</b></div>
                 <div className="line-total" role="row"><div role="cell"><strong>Total</strong><small>Estimated order total</small></div><b role="cell">{money.format(total)}</b></div>
               </div>
             </section>
             {isApproved && <div className="order-placed-message"><span>✓</span><div><strong>Order placed by {order.approval?.name}</strong><small>You can now send it to finance or continue to payment.</small></div></div>}
+            {order.financeHandoff && <div className={`finance-handoff-status is-${order.financeHandoff.status}`}><div><small>FINANCE HANDOFF</small><strong>{order.financeHandoff.status === 'viewed' ? 'Viewed by finance' : order.financeHandoff.status === 'payment_pending' ? 'Payment pending' : order.financeHandoff.status === 'paid' ? 'Payment complete' : order.financeHandoff.status === 'preview' ? 'Email preview ready' : 'Sent to finance'}</strong><span>{order.financeHandoff.email}</span>{order.financeHandoff.status === 'preview' && <em>Email delivery is not configured. Copy and send the secure link manually.</em>}</div><div><button type="button" onClick={copyPaymentLink}>Copy link</button><button type="button" onClick={() => setShowFinance(true)}>Change</button></div></div>}
           </section>
 
           <section className="after-order-info collaboration-timeline">
@@ -113,8 +121,7 @@ export function OrderView({ order, onChange, onOpenAddress, onOpenFinance }: { o
       </div>
 
       {showApproval && <Modal title="Place Order" description={`Confirm ${number.format(order.quantity)} magnets for ${money.format(total)}.`} onClose={() => setShowApproval(false)}><form onSubmit={(event) => { approve(event); if (approval.confirmed && approval.name.trim() && /^\S+@\S+\.\S+$/.test(approval.email)) setShowApproval(false) }} noValidate><label className={`confirmation-box ${approvalErrors.confirmed ? 'has-error' : ''}`}><input type="checkbox" checked={approval.confirmed} onChange={(e) => setApproval({ ...approval, confirmed: e.target.checked })} /><span>I confirm that the package, included services, quantity, pricing, and payment terms match what was agreed with FC.</span></label>{approvalErrors.confirmed && <small className="field-error">{approvalErrors.confirmed}</small>}<div className="form-grid approval-fields"><label><span>Name *</span><input value={approval.name} onChange={(e) => setApproval({ ...approval, name: e.target.value })} aria-invalid={!!approvalErrors.name} />{approvalErrors.name && <small>{approvalErrors.name}</small>}</label><label><span>Work email *</span><input type="email" value={approval.email} onChange={(e) => setApproval({ ...approval, email: e.target.value })} aria-invalid={!!approvalErrors.email} />{approvalErrors.email && <small>{approvalErrors.email}</small>}</label><label><span>Job title</span><input value={approval.jobTitle} onChange={(e) => setApproval({ ...approval, jobTitle: e.target.value })} /></label></div><button type="submit" className="primary-action wide-action">Confirm & Place Order <span>→</span></button><p className="backend-note">This preview stores the order locally. Server audit records will connect later.</p></form></Modal>}
-      {showFinance && <SendFinanceModal initial={order.financeContact} onClose={() => setShowFinance(false)} onSend={(contact) => { onChange({ ...order, financeContact: contact, billing: { ...order.billing, companyName: contact.companyName, email: contact.billingEmail, address: contact.billingAddress || '', poNumber: contact.poNumber || '' }, status: 'sent_to_finance', sentAt: new Date().toISOString() }); setShowFinance(false); setFinanceSent(true) }} />}
-      {financeSent && <Modal title="Sent to Finance" description={`The order and invoice are prepared for ${order.financeContact?.email || 'your finance contact'}.`} onClose={() => setFinanceSent(false)}><div className="success-panel"><span>✓</span><p>The email delivery is a backend placeholder. You can still open and review the complete finance payment page now.</p><div className="modal-actions"><button className="secondary-action" type="button" onClick={copyPaymentLink}>Copy payment link <span>↗</span></button><button className="primary-action" type="button" onClick={onOpenFinance}>Review finance page <span>→</span></button></div></div></Modal>}
+      {showFinance && <SendFinanceModal initial={order.financeContact} approverEmail={order.approval?.email || ''} onClose={() => setShowFinance(false)} onSend={sendToFinance} />}
       {notice && <div className="toast" role="status">{notice}</div>}
     </main>
   )

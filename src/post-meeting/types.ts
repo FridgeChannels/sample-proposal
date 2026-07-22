@@ -55,6 +55,19 @@ export type FinanceContact = {
   taxExemptionInfo?: string
 }
 
+export type FinanceHandoffStatus = 'sending' | 'sent' | 'preview' | 'viewed' | 'payment_pending' | 'paid' | 'failed' | 'expired' | 'revoked'
+
+export type FinanceHandoff = {
+  token: string
+  email: string
+  name?: string
+  status: FinanceHandoffStatus
+  paymentUrl: string
+  sentAt: string
+  viewedAt?: string
+  expiresAt: string
+}
+
 export type BillingDetails = {
   companyName: string
   contactName: string
@@ -83,6 +96,8 @@ export type OrderState = {
   currency: 'USD'
   unitPrice: number
   tax: number
+  offerStartedAt: string
+  offerExpiresAt: string
   package: SelectedPackage
   lineItems: OrderLineItem[]
   scopeIncluded: string[]
@@ -92,6 +107,7 @@ export type OrderState = {
   paymentTerms: string
   approval?: ApprovalRecord
   financeContact?: FinanceContact
+  financeHandoff?: FinanceHandoff
   shippingAddress: ShippingAddress
   billing: BillingDetails
   paymentMethod: PaymentMethod

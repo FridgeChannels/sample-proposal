@@ -1,6 +1,7 @@
 const http = require('http');
 const fs = require('fs/promises');
 const path = require('path');
+const crypto = require('crypto');
 
 const ROOT = __dirname;
 const DIST_ROOT = path.join(__dirname, 'dist');
@@ -9,6 +10,48 @@ const NOTION_VERSION = '2025-09-03';
 
 // Cache the discovered data source id so we don't re-fetch on every request.
 let CACHED_DATA_SOURCE_ID = null;
+const FINANCE_HANDOFFS = new Map();
+const FINANCE_LINK_TTL_MS = 14 * 24 * 60 * 60 * 1000;
+
+async function readJsonBody(req) {
+  const chunks = [];
+  for await (const chunk of req) chunks.push(chunk);
+  const raw = Buffer.concat(chunks).toString('utf8');
+  if (!raw || raw.length > 1_000_000) throw new Error('Invalid request body');
+  return JSON.parse(raw);
+}
+
+const validEmail = value => /^\S+@\S+\.\S+$/.test(String(value || ''));
+const escapeHtml = value => String(value || '')
+  .replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;')
+  .replace(/'/g, '&#039;');
+
+function normalizeBaseUrl(value) {
+  const parsed = new URL(String(value || ''));
+  if (!['http:', 'https:'].includes(parsed.protocol)) throw new Error('Invalid proposal URL.');
+  return parsed.origin;
+}
+
+async function deliverFinanceEmail({ to, cc, financeName, approverName, order, paymentUrl, message }) {
+  if (!process.env.RESEND_API_KEY) return { status: 'preview', providerId: null };
+  const total = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(order.approval.confirmedAmount);
+  const response = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      from: process.env.FINANCE_FROM_EMAIL || 'FridgeChannel <orders@fridgechannel.com>',
+      to: [to], cc: cc ? [cc] : undefined,
+      subject: `Payment requested for FridgeChannel order ${order.orderNumber}`,
+      html: `<div style="font-family:Arial,sans-serif;max-width:560px;margin:auto;color:#14281f"><p>Hi ${escapeHtml(financeName || 'Finance team')},</p><p><strong>${escapeHtml(approverName)}</strong> approved this FridgeChannel order and asked you to complete payment.</p><hr><p>Order: <strong>${escapeHtml(order.orderNumber)}</strong><br>Package: <strong>${escapeHtml(order.package.name)}</strong><br>Quantity: <strong>${order.quantity.toLocaleString()} NFC magnets</strong></p><p style="font-size:30px">${total}</p>${message ? `<p>${escapeHtml(message)}</p>` : ''}<p><a href="${escapeHtml(paymentUrl)}" style="display:inline-block;padding:14px 20px;background:#0b3a28;color:white;text-decoration:none">Review &amp; Pay Invoice →</a></p><p style="color:#66736d;font-size:12px">This secure link expires in 14 days.</p></div>`
+    })
+  });
+  if (!response.ok) throw new Error(`Email provider returned ${response.status}`);
+  const result = await response.json();
+  return { status: 'sent', providerId: result.id || null };
+}
 
 async function loadDotEnv() {
   const envPaths = [path.join(ROOT, '.env'), path.join(ROOT, '..', '.env')];
@@ -550,6 +593,46 @@ async function serveGiftChallenge(res) {
 
 async function handleRequest(req, res) {
   const requestUrl = new URL(req.url, `http://${req.headers.host}`);
+
+  if (requestUrl.pathname === '/api/finance-handoffs' && req.method === 'POST') {
+    try {
+      const body = await readJsonBody(req);
+      if (!body.order || !body.order.approval) return sendJson(res, 409, { error: 'The order must be approved before sending to finance.' });
+      if (!validEmail(body.email)) return sendJson(res, 400, { error: 'Enter a valid finance email.' });
+      const token = crypto.randomBytes(24).toString('hex');
+      let baseUrl;
+      try { baseUrl = normalizeBaseUrl(body.baseUrl); }
+      catch { return sendJson(res, 400, { error: 'Invalid proposal URL.' }); }
+      const paymentUrl = `${baseUrl}/post-meeting.html?finance=${token}#finance`;
+      const createdAt = new Date().toISOString();
+      const record = { token, order: body.order, email: body.email, name: body.name || '', message: body.message || '', status: 'sending', paymentUrl, createdAt, expiresAt: new Date(Date.now() + FINANCE_LINK_TTL_MS).toISOString(), viewedAt: null, providerId: null };
+      FINANCE_HANDOFFS.set(token, record);
+      const delivery = await deliverFinanceEmail({ to: body.email, cc: body.ccEmail, financeName: body.name, approverName: body.order.approval.name, order: body.order, paymentUrl, message: body.message });
+      Object.assign(record, delivery);
+      await sendJson(res, 201, { handoff: { token, email: record.email, name: record.name, status: record.status, paymentUrl, sentAt: createdAt, expiresAt: record.expiresAt } });
+    } catch (error) { await sendJson(res, 500, { error: error.message || 'Unable to send finance handoff.' }); }
+    return;
+  }
+
+  const handoffMatch = requestUrl.pathname.match(/^\/api\/finance-handoffs\/([a-f0-9]{48})$/);
+  if (handoffMatch) {
+    if (!['GET', 'PATCH'].includes(req.method)) { await sendJson(res, 405, { error: 'Method not allowed.' }); return; }
+    const record = FINANCE_HANDOFFS.get(handoffMatch[1]);
+    if (!record) { await sendJson(res, 404, { error: 'Finance link not found or no longer available.' }); return; }
+    if (Date.now() > Date.parse(record.expiresAt)) { record.status = 'expired'; await sendJson(res, 410, { error: 'This finance link has expired.' }); return; }
+    if (req.method === 'PATCH') {
+      try {
+        const body = await readJsonBody(req);
+        const allowed = ['viewed', 'payment_pending', 'paid', 'revoked'];
+        if (!allowed.includes(body.status)) return sendJson(res, 400, { error: 'Invalid handoff status.' });
+        const terminalOrPending = ['payment_pending', 'paid', 'revoked'];
+        if (!(body.status === 'viewed' && terminalOrPending.includes(record.status))) record.status = body.status;
+        if (body.status === 'viewed' && !record.viewedAt) record.viewedAt = new Date().toISOString();
+      } catch (error) { await sendJson(res, 400, { error: 'Invalid status update.' }); return; }
+    }
+    await sendJson(res, 200, { order: record.order, handoff: { token: record.token, email: record.email, name: record.name, status: record.status, paymentUrl: record.paymentUrl, sentAt: record.createdAt, viewedAt: record.viewedAt, expiresAt: record.expiresAt } });
+    return;
+  }
 
   if (requestUrl.pathname === '/' || requestUrl.pathname === '/gift-challenge-react.html') {
     await serveGiftChallenge(res);
