@@ -30,6 +30,34 @@ export function App() {
     }
   }, [template])
 
+  useEffect(() => {
+    const video = hostRef.current?.querySelector<HTMLVideoElement>('.hero-video')
+    if (!video) return
+
+    const startPlayback = () => {
+      video.muted = true
+      video.defaultMuted = true
+      void video.play().catch(() => {
+        // Browsers may still defer autoplay in data-saving or low-power modes.
+      })
+    }
+
+    const resumeWhenVisible = () => {
+      if (document.visibilityState === 'visible') startPlayback()
+    }
+
+    video.addEventListener('loadeddata', startPlayback)
+    video.addEventListener('canplay', startPlayback)
+    document.addEventListener('visibilitychange', resumeWhenVisible)
+    startPlayback()
+
+    return () => {
+      video.removeEventListener('loadeddata', startPlayback)
+      video.removeEventListener('canplay', startPlayback)
+      document.removeEventListener('visibilitychange', resumeWhenVisible)
+    }
+  }, [template])
+
   return (
     <>
       <style data-proposal-style-config>{template.css}</style>
