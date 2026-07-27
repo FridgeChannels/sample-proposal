@@ -979,14 +979,14 @@ import{n as e,r as t,t as n}from"./jsx-runtime-M5tw2uBi.js";var r=t(),i=e(),a=`<
     @media(max-width:760px){
       .wrap{width:min(100% - 40px,1280px)}
       main>section{padding:88px 0!important}
-      .hero{position:relative;min-height:100svh!important;padding:0!important;overflow:hidden}
-      .hero-grid{position:relative;display:block!important;width:100%!important;min-height:100svh;gap:0}
-      .hero-copy{position:relative;z-index:2;width:min(100% - 40px,680px);margin:0 auto;padding:clamp(64px,10svh,92px) 0 0;text-align:center}
+      .hero{position:relative;min-height:100svh!important;padding:32px 0!important;overflow:hidden}
+      .hero-grid{position:relative;display:flex!important;width:min(100% - 40px,680px)!important;min-height:calc(100svh - 64px);flex-direction:column;justify-content:center;gap:28px}
+      .hero-copy{position:relative;z-index:2;width:100%;margin:0 auto;padding:0;text-align:center}
       .hero-copy h1{font-size:clamp(2.05rem,9vw,2.35rem)!important;line-height:1.08!important;letter-spacing:-.035em!important}
       .hero-copy .hero-sub{max-width:34ch;margin:28px auto 0;font-size:16.4px;line-height:1.55}
-      .hero-visual{position:absolute;inset:0;z-index:0;width:100%;height:100%;border:0!important;border-radius:0!important;box-shadow:none!important;overflow:hidden}
-      .hero-visual:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(245,245,245,.94) 0%,rgba(245,245,245,.78) 36%,rgba(245,245,245,.12) 72%,rgba(245,245,245,.04) 100%);pointer-events:none}
-      .hero-video{width:100%!important;height:100%!important;aspect-ratio:auto!important;border-radius:0!important;object-fit:cover!important;object-position:30% center}
+      .hero-visual{position:relative;inset:auto;z-index:1;width:100%;height:auto;aspect-ratio:16/9;border:1px solid var(--leg-border)!important;border-radius:16px!important;box-shadow:var(--leg-shadow)!important;overflow:hidden}
+      .hero-visual:after{display:none}
+      .hero-video{width:100%!important;height:100%!important;aspect-ratio:16/9!important;border-radius:0!important;object-fit:contain!important;object-position:center;background:#000}
       .hero-video-badge{display:none!important}
       .retention-loop-section{height:auto!important}
       .retention-loop-sticky{position:relative!important;min-height:auto!important;padding:72px 0 54px!important;overflow:hidden}
@@ -1176,6 +1176,73 @@ import{n as e,r as t,t as n}from"./jsx-runtime-M5tw2uBi.js";var r=t(),i=e(),a=`<
     }
     .closing-gains li:before{background:transparent!important;color:var(--rust)!important}
     h1,h2,h3{max-width:none!important}
+
+    /* Closing decision flow: one flat selector and one primary action. */
+    .hero-copy .hero-body{max-width:760px!important;margin:20px auto 0;color:var(--leg-muted-foreground)!important;font-size:16.4px;line-height:1.6}
+    .hero-copy .hero-sub.hero-sequence{margin-top:40px}
+    .hero-copy .hero-body{margin-top:32px}
+    .hero-copy .hero-body strong{font-weight:650;color:var(--leg-foreground)}
+    .hero-copy .hero-body em{font-style:italic}
+    .hero-sequence{opacity:0;filter:blur(10px);transform:translateY(14px)}
+    .hero-sequence.is-visible{animation:heroSentenceReveal .8s cubic-bezier(.16,1,.3,1) forwards}
+    .hero-sequence--1.is-visible{animation-delay:.12s}
+    .hero-sequence--2.is-visible{animation-delay:.32s}
+    .hero-sequence--3.is-visible{animation-delay:.62s}
+    .hero-sequence--4.is-visible{animation-delay:.92s}
+    .hero-body .hero-sequence{display:block}
+    .hero-body .hero-sequence+.hero-sequence{margin-top:16px}
+    .hero-visual.reveal{transition-delay:2.05s}
+    @keyframes heroSentenceReveal{
+      to{opacity:1;filter:blur(0);transform:translateY(0)}
+    }
+    @media(prefers-reduced-motion:reduce){
+      .hero-sequence{opacity:1!important;filter:none!important;transform:none!important;animation:none!important}
+      .hero-visual.reveal{transition-delay:0s!important}
+    }
+    .closing-box--pilot{grid-template-columns:minmax(0,.82fr) minmax(460px,1.18fr)!important}
+    .closing-copy-text{max-width:38ch;margin-top:24px;color:color-mix(in oklch,var(--leg-brand-foreground) 76%,transparent);font-size:clamp(16.4px,1.35vw,1.15rem);line-height:1.55}
+    .closing-copy-text+.closing-copy-text{margin-top:14px}
+    .pilot-priority{margin:0}
+    .pilot-priority-label{display:block;width:100%;margin:0 0 12px;font-family:var(--leg-font);font-size:1.15rem;font-weight:500;color:var(--leg-brand-foreground)}
+    .pilot-priority-menu{width:100%}
+    .pilot-priority-menu summary{display:flex;min-height:56px;align-items:center;justify-content:space-between;gap:16px;padding:0 10px 0 20px;list-style:none;border:1px solid color-mix(in oklch,var(--leg-brand-foreground) 36%,transparent);border-radius:var(--leg-pill);background:var(--leg-brand-foreground);color:var(--leg-brand-dark);font:500 16.4px/1.3 var(--leg-font);cursor:pointer;box-shadow:0 12px 30px rgba(0,0,0,.1);transition:border-color .2s ease,box-shadow .2s ease}
+    .pilot-priority-menu summary::-webkit-details-marker{display:none}
+    .pilot-priority-menu summary:focus-visible{outline:2px solid var(--leg-brand-foreground);outline-offset:4px}
+    .pilot-priority-chevron{display:grid;width:36px;height:36px;flex:0 0 auto;place-items:center;border-radius:50%;background:var(--leg-brand-dark);color:var(--leg-brand-foreground);transition:transform .25s cubic-bezier(.16,1,.3,1),background-color .2s ease}
+    .pilot-priority-chevron:before{content:"⌄";font-size:1.1rem;line-height:1;transform:translateY(-2px)}
+    .pilot-priority-menu[open] summary{border-color:var(--rust);box-shadow:0 16px 36px rgba(0,0,0,.16)}
+    .pilot-priority-menu[open] .pilot-priority-chevron{background:var(--rust);transform:rotate(180deg)}
+    .pilot-priority-options{margin-top:8px;padding:8px 20px;border-radius:28px;background:var(--leg-brand-foreground);box-shadow:0 18px 42px rgba(0,0,0,.18)}
+    .pilot-priority-option{display:flex;width:100%;min-height:48px;align-items:center;justify-content:space-between;gap:16px;padding:8px 0;border:0;border-bottom:1px solid var(--leg-border);background:transparent;color:color-mix(in oklch,var(--leg-brand-dark) 72%,transparent);font:500 16.4px/1.3 var(--leg-font);text-align:left;cursor:pointer}
+    .pilot-priority-option:last-child{border-bottom:0}
+    .pilot-priority-option:after{content:"";width:10px;height:10px;flex:0 0 auto;border:1px solid color-mix(in oklch,var(--leg-brand-dark) 35%,transparent);border-radius:50%}
+    .pilot-priority-option[aria-selected="true"]{color:var(--rust)}
+    .pilot-priority-option[aria-selected="true"]:after{border:3px solid var(--rust);background:var(--leg-brand-foreground)}
+    .pilot-priority-option:focus-visible{outline:2px solid var(--rust);outline-offset:2px}
+    .pilot-design-copy{margin-top:24px;color:color-mix(in oklch,var(--leg-brand-foreground) 76%,transparent);font-size:16.4px;line-height:1.55}
+    .pilot-design-copy em{color:var(--leg-brand-foreground)}
+    @media(max-width:760px){
+      main>section.hero{display:block!important;min-height:auto!important;padding:0!important}
+      main>section.hero .hero-grid{display:flex!important;width:100%!important;min-height:0!important;gap:0!important}
+      main>section.hero .hero-copy{display:block!important;width:100%;max-width:none;margin:0;text-align:center}
+      main>section.hero .hero-copy h1.hero-sequence{display:flex;min-height:100svh;width:min(100% - 40px,680px);margin:0 auto;padding:32px 0;align-items:center;justify-content:center}
+      .hero-supporting-copy{width:min(100% - 40px,680px);margin:0 auto;padding:80px 0 48px}
+      .hero-copy .hero-sub.hero-sequence{margin-top:0}
+      .hero-copy .hero-body{max-width:34ch!important;margin-top:28px;font-size:15px;line-height:1.5}
+      .hero-body .hero-sequence+.hero-sequence{margin-top:12px}
+      main>section.hero .hero-visual{width:min(100% - 40px,680px)!important;margin:0 auto 32px}
+      .closing-box--pilot{grid-template-columns:1fr!important;gap:36px!important;justify-items:center!important;text-align:center!important}
+      .closing-box--pilot .closing-copy,.closing-box--pilot .closing-gains{width:100%}
+      .closing-copy-text{max-width:34ch;margin:20px auto 0;font-size:16.4px}
+      .closing-copy-text+.closing-copy-text{margin-top:14px}
+      .pilot-priority{width:100%;max-width:300px;margin-inline:auto}
+      .pilot-priority-label{font-size:1.08rem;text-align:center}
+      .pilot-priority-menu summary{padding-left:20px;text-align:left}
+      .pilot-design-copy{margin-top:22px}
+      .pilot-design-copy{max-width:34ch;margin-right:auto;margin-left:auto;text-align:center}
+      .closing-gains .btn{width:max-content;max-width:100%;min-height:60px;margin-right:auto;margin-left:auto;padding:8px 12px 8px 24px;white-space:nowrap}
+      .closing-gains .btn:after{width:32px;height:32px;margin-left:8px}
+    }
   </style>
 </head>
 <body>
@@ -1183,12 +1250,27 @@ import{n as e,r as t,t as n}from"./jsx-runtime-M5tw2uBi.js";var r=t(),i=e(),a=`<
     <section class="hero">
       <div class="wrap hero-grid">
         <div class="hero-copy reveal">
-          <h1>Turn every delivered order into a <em>physical retention channel</em>.</h1>
-          <p class="hero-sub">Fridge Channel is a physical lifecycle AI-powered magnet that ships inside your package, sticks on the customer’s fridge door, and turns daily household moments into trackable repeat-purchase behavior.</p>
+          <h1 class="hero-sequence hero-sequence--1"><span>You just tapped a <em>Fridge Channel Magnet.</em></span></h1>
+          <div class="hero-supporting-copy">
+            <p class="hero-sub hero-sequence hero-sequence--2">This is exactly what your customers will do on their fridge door.</p>
+            <p class="hero-body">
+              <span class="hero-sequence hero-sequence--3">This <strong>Fridge Channel Magnet</strong> ships inside your orders, lives on the fridge door, and turns everyday taps into repeat purchases.</span>
+              <em class="hero-sequence hero-sequence--4">Now watch it work — from your customer’s kitchen, delivery to next order.</em>
+            </p>
+          </div>
         </div>
         <div class="hero-visual reveal">
-          <video class="hero-video" poster="/pics/DIsplayProcessPics/dtc-cmo-presence.png" autoplay muted loop playsinline></video>
-          <span class="hero-video-badge">▶ Video placeholder</span>
+          <video
+            class="hero-video"
+            src="/videos/final-version.mp4"
+            poster="/pics/DIsplayProcessPics/dtc-cmo-presence.png"
+            autoplay
+            muted
+            loop
+            playsinline
+            controls
+            preload="auto"
+          ></video>
         </div>
       </div>
     </section>
@@ -1274,32 +1356,32 @@ import{n as e,r as t,t as n}from"./jsx-runtime-M5tw2uBi.js";var r=t(),i=e(),a=`<
         <div class="comparison-carousel reveal" data-comparison-carousel aria-label="Comparison of rented digital channels and Fridge Channel">
           <div class="comparison-track" data-comparison-track>
             <article class="comparison-slide">
-              <header class="comparison-axis"><span>01</span><strong>Location</strong></header>
+              <header class="comparison-axis"><span>01</span><strong>Presence</strong></header>
               <div class="comparison-pair">
-                <div class="comparison-panel comparison-legacy"><small>Email · SMS · Ads</small><p>Rented space.<br>Their rules.</p></div>
-                <div class="comparison-panel comparison-fc"><small>Fridge Channel</small><p>The fridge door. Owned.<br><strong>No algorithm. No auction.</strong></p></div>
+                <div class="comparison-panel comparison-legacy"><small>Email · SMS · Ads</small><p>Appears when sent. Buried, filtered, or scrolled past.</p></div>
+                <div class="comparison-panel comparison-fc"><small>Fridge Channel</small><p>On the fridge door, seen at every glance. Never needs to be re-sent.</p></div>
               </div>
             </article>
 
             <article class="comparison-slide comparison-slide--memory">
-              <header class="comparison-axis"><span>02</span><strong>Cost</strong></header>
+              <header class="comparison-axis"><span>02</span><strong>Temperature</strong></header>
               <div class="comparison-pair">
-                <div class="comparison-panel comparison-legacy"><small>Email · SMS · Ads</small><p>Every impression,<br>paid again.</p></div>
-                <div class="comparison-panel comparison-fc"><small>Fridge Channel</small><p>Pay once.<br>Every impression after: <strong>$0.</strong></p></div>
+                <div class="comparison-panel comparison-legacy"><small>Email · SMS · Ads</small><p>Waits for customers to go cold — then pays to win them back. Win-back is the most expensive touch you’ll ever buy.</p></div>
+                <div class="comparison-panel comparison-fc"><small>Fridge Channel</small><p>Keeps customers warm between orders. No cooling, no rescue mission.</p></div>
               </div>
             </article>
 
             <article class="comparison-slide">
-              <header class="comparison-axis"><span>03</span><strong>Moment of reorder</strong></header>
+              <header class="comparison-axis"><span>03</span><strong>The reorder moment</strong></header>
               <div class="comparison-pair">
-                <div class="comparison-panel comparison-legacy"><small>Email · SMS · Ads</small><p>Tries to predict when customers may run low.</p></div>
-                <div class="comparison-panel comparison-fc"><small>Fridge Channel</small><p>When it’s time to reorder, your brand is already there.<br><strong>Tap → next order.</strong></p></div>
+                <div class="comparison-panel comparison-legacy"><small>Email · SMS · Ads</small><p>Tries to <em>predict</em> when they’ll run low.</p></div>
+                <div class="comparison-panel comparison-fc"><small>Fridge Channel</small><p>Is already there when they run low. <strong>Tap → next order.</strong></p></div>
               </div>
             </article>
           </div>
           <div class="comparison-pager" role="tablist" aria-label="Comparison topics">
-            <button type="button" class="is-active" data-comparison-dot="0" aria-label="Show location comparison" aria-selected="true"></button>
-            <button type="button" data-comparison-dot="1" aria-label="Show cost comparison" aria-selected="false"></button>
+            <button type="button" class="is-active" data-comparison-dot="0" aria-label="Show presence comparison" aria-selected="true"></button>
+            <button type="button" data-comparison-dot="1" aria-label="Show temperature comparison" aria-selected="false"></button>
             <button type="button" data-comparison-dot="2" aria-label="Show reorder moment comparison" aria-selected="false"></button>
           </div>
         </div>
@@ -1320,25 +1402,6 @@ import{n as e,r as t,t as n}from"./jsx-runtime-M5tw2uBi.js";var r=t(),i=e(),a=`<
       </div>
     </section>
 
-    <section class="pilot-section pilot-continuation" aria-label="Pilot scale and timeline">
-      <div class="wrap">
-        <section class="pilot-module reveal" aria-label="Pilot scale and timeline">
-          <div class="pilot-module-label"><span>02</span> Can your volume produce a meaningful read?</div>
-          <div class="scale-layout">
-            <div class="scale-number"><strong>200+</strong><span>monthly orders can support a meaningful pilot</span></div>
-            <div>
-              <div class="pilot-timeline">
-                <article class="timeline-step"><b>Launch</b><strong>Pilot starts</strong><p>Audience, window, and sample size are agreed in the design session.</p></article>
-                <article class="timeline-step"><b>Day 30</b><strong>Behavior signals</strong><p>First taps, mission completion, and perk redemption show whether FC is being used.</p></article>
-                <article class="timeline-step"><b>Day 60–90</b><strong>Business read</strong><p>Compare repeat rate, purchase frequency, and retained revenue.</p></article>
-              </div>
-              <p class="measurement-note">The pilot size and measurement window are calibrated to your actual order volume so the result is statistically credible.</p>
-            </div>
-          </div>
-        </section>
-      </div>
-    </section>
-
     <section class="pilot-section pilot-continuation" aria-label="Brand effort and pilot cost">
       <div class="wrap">
         <section class="pilot-module reveal" aria-label="Brand effort and pilot cost">
@@ -1347,7 +1410,7 @@ import{n as e,r as t,t as n}from"./jsx-runtime-M5tw2uBi.js";var r=t(),i=e(),a=`<
             <article class="effort-item"><strong aria-label="15 minutes"><span data-effort-count="15">0</span> min</strong><span>Guided campaign setup after audience, assets, and access are approved.</span></article>
             <article class="effort-item"><strong>&lt;2 hrs</strong><span>Weekly brand oversight while the pilot is live.</span></article>
             <article class="effort-item"><strong>0 engineers</strong><span>No custom build and no dedicated developer required.</span></article>
-            <article class="effort-item effort-item--price"><strong>$3.5+</strong><span>Per magnet, per year, with no hidden fees.</span></article>
+            <article class="effort-item effort-item--price"><strong>$5.5+</strong><span>Per magnet, per year, with no hidden fees.</span></article>
           </div>
         </section>
       </div>
@@ -1388,19 +1451,32 @@ import{n as e,r as t,t as n}from"./jsx-runtime-M5tw2uBi.js";var r=t(),i=e(),a=`<
 
     <section class="footer footer-slide demo-slide" aria-labelledby="closing-title">
       <div class="wrap">
-        <div class="footer-box closing-box reveal">
+        <div class="footer-box closing-box closing-box--pilot reveal">
           <header class="closing-copy">
-            <h2 id="closing-title">Everything you need to see, launch, and measure FC for your brand.</h2>
+            <h2 id="closing-title">One magnet. Every stage of retention.</h2>
+            <p class="closing-copy-text">First order → second. Subscriber → renewal. Cooling → warm. Gift recipient → repeat buyer. All other segment in your life circle management.</p>
+            <p class="closing-copy-text">The magnet you’re holding can run any of these — same magnet, different mission.</p>
           </header>
           <div class="closing-gains package-gains">
-            <span class="closing-gains-label">Included in your package</span>
-            <ul>
-              <li>A practical, click-through demo customized specifically for your brand.</li>
-              <li>A complete setup and launch process.</li>
-              <li>A defined Pilot launch plan.</li>
-              <li>Recommended package options and pricing.</li>
-            </ul>
-            <a class="btn" data-link="footer_button_url">Build my custom pilot package</a>
+            <div class="pilot-priority" data-pilot-priority>
+              <span class="pilot-priority-label" id="pilot-priority-label">Pick the one you want solved first.</span>
+              <details class="pilot-priority-menu">
+                <summary aria-labelledby="pilot-priority-label pilot-priority-value">
+                  <span id="pilot-priority-value" data-pilot-priority-value>First order → second</span>
+                  <span class="pilot-priority-chevron" aria-hidden="true"></span>
+                </summary>
+                <div class="pilot-priority-options" role="listbox" aria-labelledby="pilot-priority-label">
+                  <button class="pilot-priority-option" type="button" role="option" aria-selected="true" data-pilot-priority-option="First order → second">First order → second</button>
+                  <button class="pilot-priority-option" type="button" role="option" aria-selected="false" data-pilot-priority-option="Subscriber → renewal">Subscriber → renewal</button>
+                  <button class="pilot-priority-option" type="button" role="option" aria-selected="false" data-pilot-priority-option="Cooling → warm">Cooling → warm</button>
+                  <button class="pilot-priority-option" type="button" role="option" aria-selected="false" data-pilot-priority-option="Gift recipient → repeat buyer">Gift recipient → repeat buyer</button>
+                  <button class="pilot-priority-option" type="button" role="option" aria-selected="false" data-pilot-priority-option="Another lifecycle segment">Another lifecycle segment</button>
+                  <button class="pilot-priority-option" type="button" role="option" aria-selected="false" data-pilot-priority-option="Others">Others</button>
+                </div>
+              </details>
+            </div>
+            <p class="pilot-design-copy">Then one design session is all it takes: your magnet flips from sample to <em>your brand</em> — live before the first 20 minutes are up, built around the problem you picked. No reprint. Nothing to install.</p>
+            <a class="btn" data-link="footer_button_url" data-pilot-cta>Make it mine — live in 20 minutes</a>
           </div>
         </div>
       </div>
@@ -1458,6 +1534,23 @@ import{n as e,r as t,t as n}from"./jsx-runtime-M5tw2uBi.js";var r=t(),i=e(),a=`<
       const description = document.querySelector('meta[name="description"]');
       if (description) description.content = \`\${data.campaign_name || brandName} proposal\`;
     }
+
+    (function initPilotPriorityMenu() {
+      const menu = document.querySelector('.pilot-priority-menu');
+      const summary = menu?.querySelector('summary');
+      const value = menu?.querySelector('[data-pilot-priority-value]');
+      const options = menu ? [...menu.querySelectorAll('[data-pilot-priority-option]')] : [];
+      if (!menu || !summary || !value || !options.length) return;
+
+      options.forEach(option => {
+        option.addEventListener('click', () => {
+          value.textContent = option.dataset.pilotPriorityOption;
+          options.forEach(item => item.setAttribute('aria-selected', String(item === option)));
+          menu.open = false;
+          summary.focus();
+        });
+      });
+    })();
 
     function showJourneyStep(step) {
       const image = document.querySelector('[data-journey-image]');
@@ -1544,6 +1637,14 @@ import{n as e,r as t,t as n}from"./jsx-runtime-M5tw2uBi.js";var r=t(),i=e(),a=`<
     sectionRevealTargets.forEach(el=>el.classList.add('section-reveal'));
     const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('visible');observer.unobserve(entry.target)}}),{threshold:.12,rootMargin:'0px 0px -6%'});
     document.querySelectorAll('.reveal,.section-reveal').forEach(el=>observer.observe(el));
+
+    const heroSentenceObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        entry.target.classList.add('is-visible');
+        heroSentenceObserver.unobserve(entry.target);
+      }
+    }),{threshold:.3,rootMargin:'0px 0px -8%'});
+    document.querySelectorAll('.hero-sequence').forEach(el=>heroSentenceObserver.observe(el));
 
     document.querySelectorAll('[data-blur-text]').forEach(p => {
       const words = p.querySelectorAll('.blur-word');
@@ -1770,4 +1871,4 @@ import{n as e,r as t,t as n}from"./jsx-runtime-M5tw2uBi.js";var r=t(),i=e(),a=`<
 </body>
 </html>
 `;function o(e=a){let t=new DOMParser().parseFromString(e,`text/html`),n=[...t.querySelectorAll(`style`)].map(e=>e.textContent||``).join(`
-`),r=[...t.body.querySelectorAll(`script`)].map(e=>e.textContent||``),i=[...t.head.querySelectorAll(`link[href]`)].map(e=>e.getAttribute(`href`)||``).filter(e=>e.includes(`fonts.googleapis.com`)||e.includes(`fonts.gstatic.com`));return t.body.querySelectorAll(`script`).forEach(e=>e.remove()),{bodyMarkup:t.body.innerHTML,css:n,scripts:r.filter(Boolean),fontLinks:i}}var s=n();function c(){let e=(0,r.useRef)(null),t=(0,r.useMemo)(()=>o(),[]);return(0,r.useEffect)(()=>{let e=t.fontLinks.map(e=>{let t=document.createElement(`link`);return t.rel=e.includes(`fonts.googleapis.com`)?`stylesheet`:`preconnect`,t.href=e,e.includes(`fonts.gstatic.com`)&&(t.crossOrigin=`anonymous`),t.dataset.proposalFont=`true`,document.head.appendChild(t),t}),n=t.scripts.map(e=>{let t=document.createElement(`script`);return t.text=e,t.dataset.proposalBehavior=`true`,document.body.appendChild(t),t});return()=>{n.forEach(e=>e.remove()),e.forEach(e=>e.remove())}},[t]),(0,s.jsxs)(s.Fragment,{children:[(0,s.jsx)(`style`,{"data-proposal-style-config":!0,children:t.css}),(0,s.jsx)(`div`,{ref:e,dangerouslySetInnerHTML:{__html:t.bodyMarkup}})]})}(0,i.createRoot)(document.getElementById(`root`)).render((0,s.jsx)(c,{}));
+`),r=[...t.body.querySelectorAll(`script`)].map(e=>e.textContent||``),i=[...t.head.querySelectorAll(`link[href]`)].map(e=>e.getAttribute(`href`)||``).filter(e=>e.includes(`fonts.googleapis.com`)||e.includes(`fonts.gstatic.com`));return t.body.querySelectorAll(`script`).forEach(e=>e.remove()),{bodyMarkup:t.body.innerHTML,css:n,scripts:r.filter(Boolean),fontLinks:i}}var s=n();function c(){let e=(0,r.useRef)(null),t=(0,r.useMemo)(()=>o(),[]);return(0,r.useEffect)(()=>{let e=t.fontLinks.map(e=>{let t=document.createElement(`link`);return t.rel=e.includes(`fonts.googleapis.com`)?`stylesheet`:`preconnect`,t.href=e,e.includes(`fonts.gstatic.com`)&&(t.crossOrigin=`anonymous`),t.dataset.proposalFont=`true`,document.head.appendChild(t),t}),n=t.scripts.map(e=>{let t=document.createElement(`script`);return t.text=e,t.dataset.proposalBehavior=`true`,document.body.appendChild(t),t});return()=>{n.forEach(e=>e.remove()),e.forEach(e=>e.remove())}},[t]),(0,r.useEffect)(()=>{let t=e.current?.querySelector(`.hero-video`);if(!t)return;let n=()=>{t.muted=!0,t.defaultMuted=!0,t.play().catch(()=>{})},r=()=>{document.visibilityState===`visible`&&n()};return t.addEventListener(`loadeddata`,n),t.addEventListener(`canplay`,n),document.addEventListener(`visibilitychange`,r),n(),()=>{t.removeEventListener(`loadeddata`,n),t.removeEventListener(`canplay`,n),document.removeEventListener(`visibilitychange`,r)}},[t]),(0,s.jsxs)(s.Fragment,{children:[(0,s.jsx)(`style`,{"data-proposal-style-config":!0,children:t.css}),(0,s.jsx)(`div`,{ref:e,dangerouslySetInnerHTML:{__html:t.bodyMarkup}})]})}(0,i.createRoot)(document.getElementById(`root`)).render((0,s.jsx)(c,{}));
