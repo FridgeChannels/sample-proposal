@@ -1476,7 +1476,7 @@ import{n as e,r as t,t as n}from"./jsx-runtime-M5tw2uBi.js";var r=t(),i=e(),a=`<
               </details>
             </div>
             <p class="pilot-design-copy">Then one design session is all it takes: your magnet flips from sample to <em>your brand</em> — live before the first 20 minutes are up, built around the problem you picked. No reprint. Nothing to install.</p>
-            <a class="btn" data-link="footer_button_url" data-pilot-cta>Make it mine — live in 20 minutes</a>
+            <a class="btn" href="https://calendly.com/billy-fridgechannels/fridge-channel-pilot-meeting" data-link="footer_button_url" data-pilot-cta>Make it mine — live in 20 minutes</a>
           </div>
         </div>
       </div>

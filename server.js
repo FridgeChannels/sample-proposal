@@ -8,7 +8,7 @@ const DIST_ROOT = path.join(__dirname, 'dist');
 const DASHBOARD2_ROOT = path.join(require('os').homedir(), 'Downloads', 'DTC-dashboard-2');
 const NOTION_VERSION = '2025-09-03';
 
-// Cache the discovered data source id so we don't re-fetch on every request.
+// Legacy Notion helpers remain for compatibility, but proposal routes no longer call them.
 let CACHED_DATA_SOURCE_ID = null;
 const FINANCE_HANDOFFS = new Map();
 const FINANCE_LINK_TTL_MS = 14 * 24 * 60 * 60 * 1000;
@@ -341,7 +341,8 @@ async function loadFallbackProposalById(proposalId) {
     if (!file.endsWith('.json')) continue;
     const raw = await fs.readFile(path.join(dir, file), 'utf8');
     const data = JSON.parse(raw);
-    if (String(data.id || '').trim() === target) {
+    const aliases = Array.isArray(data.route_aliases) ? data.route_aliases : [];
+    if (String(data.id || '').trim() === target || aliases.some(alias => String(alias).trim() === target)) {
       return data;
     }
   }
@@ -647,29 +648,18 @@ async function handleRequest(req, res) {
   if (requestUrl.pathname === '/api/proposal') {
     const id = requestUrl.searchParams.get('id');
     const brand = requestUrl.searchParams.get('brand');
-    const debug = requestUrl.searchParams.get('debug') === '1';
-    const reasons = [];
 
     try {
       if (id) {
-        const { proposal: notionProposal, reason } = await fetchNotionProposalById(id);
-        if (reason) reasons.push(`notion: ${reason}`);
-        if (notionProposal) {
-          await sendJson(res, 200, notionProposal);
-          return;
-        }
         try {
           const proposal = await loadFallbackProposalById(id);
           await sendJson(res, 200, proposal);
           return;
-        } catch (fallbackErr) {
-          reasons.push(`fallback: ${fallbackErr.message}`);
+        } catch (error) {
           await sendJson(res, 404, {
             error: 'Proposal not found',
             id,
-            reasons: debug ? reasons : undefined,
-            hint:
-              'Check that NOTION_TOKEN is a real integration token, that the integration is shared with the database, and that NOTION_DATA_SOURCE_ID (or NOTION_DATABASE_ID) points to the database that owns this row.'
+            hint: 'Add this id or a matching route_aliases value to a JSON file in data/proposals.'
           });
           return;
         }
@@ -681,8 +671,7 @@ async function handleRequest(req, res) {
         return;
       }
 
-      const notionProposal = await fetchNotionProposal(brand);
-      const proposal = notionProposal || (await loadFallbackProposal(brand));
+      const proposal = await loadFallbackProposal(brand);
       await sendJson(res, 200, proposal);
     } catch (error) {
       console.error('[api/proposal] unexpected error:', error && error.message);
