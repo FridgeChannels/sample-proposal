@@ -1262,7 +1262,7 @@ import{n as e,r as t,t as n}from"./jsx-runtime-M5tw2uBi.js";var r=t(),i=e(),a=`<
         <div class="hero-visual reveal">
           <video
             class="hero-video"
-            src="/videos/final-version.mp4"
+            src="https://amzn-s3-fc-bucket.s3.sa-east-1.amazonaws.com/videos/magnet_unbox_final.mp4"
             poster="/pics/DIsplayProcessPics/dtc-cmo-presence.png"
             autoplay
             muted
