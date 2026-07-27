@@ -1530,7 +1530,7 @@ import{n as e,r as t,t as n}from"./jsx-runtime-M5tw2uBi.js";var r=t(),i=e(),a=`<
         if (imageAltByField[field]) el.alt = imageAltByField[field];
       });
       document.querySelectorAll('[data-link]').forEach(el => { const value=data[el.dataset.link]; if(value) el.href=value; });
-      document.title = \`\${data.campaign_name || data.brand_name || 'Reward Challenge'} | Proposal\`;
+      document.title = data.page_title || \`\${data.campaign_name || data.brand_name || 'Reward Challenge'} | Proposal\`;
       const description = document.querySelector('meta[name="description"]');
       if (description) description.content = \`\${data.campaign_name || brandName} proposal\`;
     }
