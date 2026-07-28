@@ -1,15 +1,8 @@
 import type { OrderState, OrderStatus } from './types'
 
-/** Host for the embedded customer demo (same /p/{sn} shape as sample.fridgechannels.com). */
 export const LIVE_DEMO_ORIGIN = 'https://dealquest.fridgechannels.com'
-
-/** @deprecated Prefer liveDemoUrlForSn — kept for callers that need a default demo URL. */
 export const LIVE_DEMO_URL = `${LIVE_DEMO_ORIGIN}/p/I9B44VTIHP`
 
-/**
- * Read magnet SN from /p/{sn} (or legacy /gift-proposal/{sn}), then ?sn= / ?id=.
- * Used so the live iframe tracks the customer link without hardcoding SN.
- */
 export const snFromLocation = (location: Pick<Location, 'pathname' | 'search'> = window.location): string | null => {
   const pathMatch = /^\/(?:gift-proposal|p)\/([^/?#]+)\/?$/.exec(location.pathname)
   if (pathMatch?.[1]) return decodeURIComponent(pathMatch[1])
@@ -23,9 +16,9 @@ export const liveDemoUrlForSn = (sn: string) =>
 export const statusLabels: Record<OrderStatus, string> = {
   draft: 'Draft',
   ready_for_approval: 'Ready for Approval',
+  ready_for_checkout: 'Ready to Pay',
   approved: 'Approved',
   sent_to_finance: 'Sent to Finance',
-  viewed_by_finance: 'Viewed by Finance',
   payment_pending: 'Payment Pending',
   paid: 'Paid',
   expired: 'Expired',
@@ -33,23 +26,10 @@ export const statusLabels: Record<OrderStatus, string> = {
   changes_requested: 'Changes Requested',
 }
 
-/** Fallback only before /api/pilot-quote loads. Prefer order.pricing.discountPercentOff. */
 export const PILOT_DISCOUNT_RATE = 0.2
 
-export const defaultPricing = {
-  loaded: false,
-  magnetSn: null as string | null,
-  minQuantity: 1000,
-  discountRatio: 0.8,
-  discountPercentOff: 20,
-  discountActive: true,
-  discountId: null as string | null,
-  taxLabel: 'Not collected',
-  taxCollected: false,
-}
-
 export const defaultOrder: OrderState = {
-  status: 'ready_for_approval',
+  status: 'ready_for_checkout',
   orderNumber: 'FC-2026-001',
   invoiceNumber: 'INV-FC-2026-001',
   version: 1,
@@ -59,10 +39,19 @@ export const defaultOrder: OrderState = {
   tax: 0,
   offerStartedAt: '',
   offerExpiresAt: '',
-  pricing: { ...defaultPricing },
+  pricing: {
+    loaded: false,
+    magnetSn: null,
+    minQuantity: 1000,
+    discountRatio: 0.8,
+    discountPercentOff: 20,
+    discountActive: true,
+    discountId: null,
+    taxLabel: 'Not collected',
+    taxCollected: false,
+  },
   package: {
     id: 'post-purchase-moat',
-    code: 'PKG-PPM',
     name: 'Post-Purchase Moat',
     description: 'A complete in-home retention and post-purchase relationship layer, from the physical touchpoint through lifecycle activation and measurement.',
     campaignType: 'Post-Purchase Moat',
@@ -128,9 +117,9 @@ export const defaultOrder: OrderState = {
       },
     ],
   },
-  // Shipping deferred — omitted from breakdown until packages.shipping_* is wired.
   lineItems: [
     { id: 'magnets', label: '1,500 NFC magnets', detail: '$5.49 per magnet / year', amount: 8235 },
+    { id: 'shipping', label: 'Estimated shipping', amount: 350 },
     { id: 'discount', label: 'Pilot discount · 20% OFF', amount: -1717, kind: 'discount' },
   ],
   scopeIncluded: [
@@ -169,8 +158,6 @@ export const defaultOrder: OrderState = {
     state: '',
     postalCode: '',
     country: 'United States',
-    phone: '',
-    email: '',
   },
   billing: {
     companyName: 'Nike, Inc.',
@@ -179,17 +166,10 @@ export const defaultOrder: OrderState = {
     address: '',
     poNumber: '',
   },
-  paymentMethod: 'card',
-  dbOrderId: null,
-  shippingAddressId: null,
+  paymentMethod: 'ach',
 }
 
-export type PilotOfferPhase = 'active' | 'urgent' | 'secured' | 'expired' | 'none'
-
-export const discountRateForOrder = (order: OrderState) => {
-  if (order.pricing?.discountPercentOff != null) return order.pricing.discountPercentOff / 100
-  return PILOT_DISCOUNT_RATE
-}
+export type PilotOfferPhase = 'active' | 'urgent' | 'secured' | 'expired'
 
 export const pilotOfferRemainingMs = (order: OrderState, now = Date.now()) => {
   const expiry = Date.parse(order.offerExpiresAt)
@@ -197,21 +177,16 @@ export const pilotOfferRemainingMs = (order: OrderState, now = Date.now()) => {
 }
 
 export const pilotOfferPhase = (order: OrderState, now = Date.now()): PilotOfferPhase => {
-  if (order.pricing?.loaded && !order.pricing.discountActive) return 'none'
   const expiry = Date.parse(order.offerExpiresAt)
-  const approvedAt = order.approval ? Date.parse(order.approval.approvedAt) : Number.NaN
-  if (Number.isFinite(approvedAt) && (!Number.isFinite(expiry) || approvedAt <= expiry)) return 'secured'
-  if (!Number.isFinite(expiry)) return order.pricing?.discountActive ? 'active' : 'none'
+  const paidAt = order.paidAt ? Date.parse(order.paidAt) : Number.NaN
+  if (Number.isFinite(paidAt) && paidAt <= expiry) return 'secured'
   const remaining = pilotOfferRemainingMs(order, now)
   if (remaining <= 0) return 'expired'
   return remaining <= 24 * 60 * 60 * 1000 ? 'urgent' : 'active'
 }
 
-export const isPilotDiscountApplied = (order: OrderState, now = Date.now()) => {
-  const phase = pilotOfferPhase(order, now)
-  if (phase === 'none' || phase === 'expired') return false
-  return (order.pricing?.discountPercentOff ?? 0) > 0 || !order.pricing?.loaded
-}
+export const isPilotDiscountApplied = (order: OrderState, now = Date.now()) =>
+  pilotOfferPhase(order, now) !== 'expired'
 
 export const orderSubtotal = (order: OrderState, now = Date.now()) =>
   resolvedLineItems(order, now).reduce((sum, item) => sum + item.amount, 0)
@@ -219,132 +194,20 @@ export const orderSubtotal = (order: OrderState, now = Date.now()) =>
 export const orderTotal = (order: OrderState, now = Date.now()) => orderSubtotal(order, now) + order.tax
 
 export const resolvedLineItems = (order: OrderState, now = Date.now()) => {
-  const unitDetail = `$${order.unitPrice.toFixed(2)} per magnet / year`
   const items = order.lineItems
-    .filter((item) => item.id !== 'setup' && item.id !== 'production' && item.id !== 'shipping')
+    .filter((item) => item.id !== 'setup' && item.id !== 'production')
     .map((item) =>
-      item.id === 'magnets'
-        ? {
-            ...item,
-            label: `${new Intl.NumberFormat('en-US').format(order.quantity)} NFC magnets`,
-            detail: unitDetail,
-            amount: order.quantity * order.unitPrice,
-          }
-        : item,
+    item.id === 'magnets'
+      ? { ...item, label: `${new Intl.NumberFormat('en-US').format(order.quantity)} NFC magnets`, amount: order.quantity * order.unitPrice }
+      : item,
     )
-
   const discountableAmount = items.filter((item) => item.id !== 'discount').reduce((sum, item) => sum + item.amount, 0)
-  const rate = discountRateForOrder(order)
-  const discountAmount = -Math.round(discountableAmount * rate * 100) / 100
-  const percentLabel = Math.round(rate * 100)
+  const discountAmount = -Math.round(discountableAmount * PILOT_DISCOUNT_RATE * 100) / 100
 
   return items
     .filter((item) => item.id !== 'discount' || isPilotDiscountApplied(order, now))
-    .map((item) =>
-      item.id === 'discount'
-        ? { ...item, label: `Pilot discount · ${percentLabel}% OFF`, amount: discountAmount }
-        : item,
+    .map((item) => item.id === 'discount'
+      ? { ...item, label: 'Pilot discount · 20% OFF', amount: discountAmount }
+      : item,
     )
-}
-
-export const clampQuantity = (quantity: number, minQuantity: number) =>
-  Math.max(minQuantity, Number.isFinite(quantity) ? quantity : minQuantity)
-
-/** Map /api/pilot-quote payload onto order state (prices come from server only). */
-export const applyPilotQuoteToOrder = (order: OrderState, quote: {
-  sn: string
-  brandName?: string | null
-  package: {
-    id: string
-    code: string
-    name: string
-    description: string
-    year1Price: number
-    currency: string
-    billingUnit: string
-    minQuantity: number
-  }
-  includedServices?: Array<{ title: string; items: string[] }>
-  discount: {
-    id: string
-    ratio: number
-    percentOff: number
-    active: boolean
-    expiresAt: string | null
-  }
-  tax: { collected: boolean; label: string; amount: number }
-}): OrderState => {
-  const minQuantity = quote.package.minQuantity || order.pricing.minQuantity || 1000
-  const quantity = clampQuantity(order.quantity, minQuantity)
-  const unitPrice = quote.package.year1Price
-  const offerExpiresAt = quote.discount.expiresAt || order.offerExpiresAt
-  const offerStartedAt = order.offerStartedAt || new Date().toISOString()
-
-  return {
-    ...order,
-    quantity,
-    unitPrice,
-    tax: quote.tax.amount || 0,
-    offerStartedAt,
-    offerExpiresAt: offerExpiresAt || '',
-    pricing: {
-      loaded: true,
-      magnetSn: quote.sn,
-      minQuantity,
-      discountRatio: quote.discount.ratio,
-      discountPercentOff: quote.discount.percentOff,
-      discountActive: quote.discount.active,
-      discountId: quote.discount.id,
-      taxLabel: quote.tax.label || 'Not collected',
-      taxCollected: Boolean(quote.tax.collected),
-    },
-    package: {
-      ...order.package,
-      id: quote.package.code || quote.package.id,
-      code: quote.package.code,
-      name: quote.package.name,
-      description: quote.package.description || order.package.description,
-      campaignType: quote.package.name,
-      includedServices: quote.includedServices?.length ? quote.includedServices : order.package.includedServices,
-    },
-    lineItems: [
-      {
-        id: 'magnets',
-        label: `${new Intl.NumberFormat('en-US').format(quantity)} NFC magnets`,
-        detail: `$${unitPrice.toFixed(2)} per magnet / year`,
-        amount: quantity * unitPrice,
-      },
-      {
-        id: 'discount',
-        label: `Pilot discount · ${Math.round(quote.discount.percentOff)}% OFF`,
-        amount: 0,
-        kind: 'discount',
-      },
-    ],
-    billing: {
-      ...order.billing,
-      companyName: order.billing.companyName || quote.brandName || order.billing.companyName,
-    },
-    shippingAddress: {
-      ...order.shippingAddress,
-      companyName: order.shippingAddress.companyName || quote.brandName || order.shippingAddress.companyName,
-    },
-  }
-}
-
-export async function createStripeCheckout(payload: { orderId?: number | null; sn?: string | null; quantity: number; financeToken?: string }) {
-  const response = await fetch('/api/stripe/checkout', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      orderId: payload.orderId || undefined,
-      sn: payload.sn || undefined,
-      quantity: payload.quantity,
-      financeToken: payload.financeToken || undefined,
-      baseUrl: window.location.origin,
-    }),
-  })
-  const data = await response.json()
-  if (!response.ok) throw new Error(data.error || 'Unable to start Stripe Checkout.')
-  return data as { url: string; id: string }
 }

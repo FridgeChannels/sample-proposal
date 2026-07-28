@@ -1,104 +1,78 @@
-import { useState, type FormEvent } from 'react'
-import { clampQuantity, createStripeCheckout, orderTotal, resolvedLineItems, snFromLocation } from '../config'
+import { useEffect, useRef, useState } from 'react'
+import { orderTotal, resolvedLineItems } from '../config'
 import type { FinanceContact, FinanceHandoff, OrderState } from '../types'
-import { Modal } from './Modal'
 import { SendFinanceModal } from './SendFinanceModal'
 
 const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 })
 const number = new Intl.NumberFormat('en-US')
 
-export function OrderView({ order, now, onChange, onOpenAddress }: { order: OrderState; now: number; onChange: (order: OrderState) => void; onOpenAddress: () => void; onOpenFinance?: () => void }) {
+export function OrderView({ order, now, onChange, onOpenAddress, onOpenFinance, onOpenLogin }: { order: OrderState; now: number; onChange: (order: OrderState) => void; onOpenAddress: () => void; onOpenFinance: () => void; onOpenLogin: () => void }) {
   const [showFinance, setShowFinance] = useState(false)
-  const [showApproval, setShowApproval] = useState(false)
   const [servicesExpanded, setServicesExpanded] = useState(false)
   const [timelineExpanded, setTimelineExpanded] = useState(false)
   const [notice, setNotice] = useState('')
-  const [checkoutLoading, setCheckoutLoading] = useState(false)
-  const [placing, setPlacing] = useState(false)
-  const [approval, setApproval] = useState({ confirmed: false, name: '', email: '', jobTitle: '' })
-  const [approvalErrors, setApprovalErrors] = useState<Record<string, string>>({})
+  const [addressRequired, setAddressRequired] = useState(false)
+  const addressEntryRef = useRef<HTMLButtonElement>(null)
   const total = orderTotal(order, now)
-  const isApproved = !!order.approval
-  const isLocked = isApproved || order.status !== 'ready_for_approval'
-  const minQuantity = order.pricing?.minQuantity || 1000
-  const discountPercent = Math.round(order.pricing?.discountPercentOff ?? 20)
-  const taxLabel = order.pricing?.taxLabel || 'Not collected'
+  const isSignedIn = !!order.viewer
+  const isPaymentComplete = order.status === 'paid' || order.financeHandoff?.status === 'paid'
+  const isLocked = ['sent_to_finance', 'payment_pending', 'paid'].includes(order.status)
   const shippingAddressText = [order.shippingAddress.addressLine1, order.shippingAddress.addressLine2, order.shippingAddress.city, order.shippingAddress.state, order.shippingAddress.postalCode].filter(Boolean).join(', ')
-  const hasShippingAddress = Boolean(order.shippingAddressId && order.shippingAddress.recipientName && order.shippingAddress.addressLine1 && order.shippingAddress.city && order.shippingAddress.state && order.shippingAddress.postalCode && order.shippingAddress.phone)
-  const includedServiceCount = order.package.includedServices.reduce((count, group) => count + group.items.length, 0)
+  const hasShippingAddress = Boolean(order.shippingAddress.recipientName && order.shippingAddress.addressLine1 && order.shippingAddress.city && order.shippingAddress.state && order.shippingAddress.postalCode)
+  const servicePreview = order.package.includedServices.map((group) => group.items[0]).filter(Boolean).slice(0, 4)
 
   const showNotice = (message: string) => {
     setNotice(message)
     window.setTimeout(() => setNotice(''), 3600)
   }
 
-  const setQuantity = (next: number) => {
-    onChange({ ...order, quantity: clampQuantity(next, minQuantity) })
+  const requireShippingAddress = () => {
+    if (hasShippingAddress) return true
+    setAddressRequired(true)
+    window.requestAnimationFrame(() => {
+      addressEntryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      addressEntryRef.current?.focus({ preventScroll: true })
+    })
+    return false
   }
 
-  const approve = async (event: FormEvent) => {
-    event.preventDefault()
-    const errors: Record<string, string> = {}
-    if (!approval.confirmed) errors.confirmed = 'Confirm the order terms before approval.'
-    if (!approval.name.trim()) errors.name = 'Your name is required.'
-    if (!/^\S+@\S+\.\S+$/.test(approval.email)) errors.email = 'Enter a valid work email.'
-    setApprovalErrors(errors)
-    if (Object.keys(errors).length) return
+  const openAddress = () => {
+    setAddressRequired(false)
+    onOpenAddress()
+  }
 
-    const sn = order.pricing.magnetSn || snFromLocation()
-    if (!sn) return showNotice('Missing sample SN — open this page via /p/{sn}.')
-    if (!order.shippingAddressId) return onOpenAddress()
-
-    setPlacing(true)
-    try {
-      const approvalPayload = {
-        name: approval.name.trim(),
-        email: approval.email.trim(),
-        jobTitle: approval.jobTitle.trim(),
-        approvedAt: new Date().toISOString(),
-        orderVersion: order.version,
-        confirmedAmount: total,
+  useEffect(() => {
+    if (!timelineExpanded && !servicesExpanded) return
+    const previousOverflow = document.body.style.overflow
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setTimelineExpanded(false)
+        setServicesExpanded(false)
       }
-      const response = await fetch('/api/pilot-orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sn,
-          quantity: order.quantity,
-          shippingAddressId: order.shippingAddressId,
-          approval: approvalPayload,
-        }),
-      })
-      const data = await response.json()
-      if (!response.ok) throw new Error(data.error || 'Unable to place order.')
-
-      onChange({
-        ...order,
-        status: 'approved',
-        orderNumber: data.orderNo,
-        invoiceNumber: `INV-${data.orderNo}`,
-        dbOrderId: data.orderId,
-        billing: {
-          ...order.billing,
-          companyName: order.billing.companyName || order.shippingAddress.companyName,
-          address: order.billing.address || shippingAddressText,
-          email: approval.email.trim(),
-          contactName: approval.name.trim(),
-        },
-        approval: approvalPayload,
-      })
-      setShowApproval(false)
-      showNotice('Order placed and saved.')
-    } catch (error) {
-      showNotice(error instanceof Error ? error.message : 'Unable to place order.')
-    } finally {
-      setPlacing(false)
     }
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', closeOnEscape)
+    return () => {
+      document.body.style.overflow = previousOverflow
+      window.removeEventListener('keydown', closeOnEscape)
+    }
+  }, [timelineExpanded, servicesExpanded])
+
+  useEffect(() => {
+    if (hasShippingAddress) setAddressRequired(false)
+  }, [hasShippingAddress])
+
+  const openFinanceHandoff = () => {
+    if (!isSignedIn) return onOpenLogin()
+    if (!requireShippingAddress()) return
+    setShowFinance(true)
   }
 
-  const openApproval = () => {
-    if (!hasShippingAddress) return onOpenAddress()
-    setShowApproval(true)
+  const openPayment = () => {
+    if (!isSignedIn) return onOpenLogin()
+    if (!requireShippingAddress()) return
+    onChange({ ...order, billing: { ...order.billing, companyName: order.billing.companyName || order.shippingAddress.companyName, contactName: order.billing.contactName || order.viewer?.name || '', email: order.billing.email || order.viewer?.email || '', address: order.billing.address || shippingAddressText }, status: 'payment_pending', paidAt: undefined })
+    onOpenFinance()
   }
 
   const copyPaymentLink = async () => {
@@ -108,48 +82,11 @@ export function OrderView({ order, now, onChange, onOpenAddress }: { order: Orde
   }
 
   const sendToFinance = async (contact: FinanceContact): Promise<FinanceHandoff> => {
-    if (!order.dbOrderId) throw new Error('Place the order before sending to finance.')
-    const response = await fetch('/api/finance-handoffs', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        orderId: order.dbOrderId,
-        email: contact.email,
-        name: contact.name,
-        message: contact.message,
-        ccEmail: contact.ccCurrentContact ? order.approval?.email : '',
-        baseUrl: window.location.origin,
-      }),
-    })
+    const response = await fetch('/api/finance-handoffs', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ order, total, email: contact.email, name: contact.name, message: contact.message, ccEmail: contact.ccCurrentContact ? order.viewer?.email : '', baseUrl: window.location.origin }) })
     const data = await response.json()
     if (!response.ok) throw new Error(data.error || 'Unable to send finance handoff.')
-    onChange({
-      ...order,
-      financeContact: contact,
-      financeHandoff: data.handoff,
-      billing: { ...order.billing, email: contact.email },
-      status: 'sent_to_finance',
-      sentAt: data.handoff.sentAt,
-    })
+    onChange({ ...order, financeContact: contact, financeHandoff: data.handoff, billing: { ...order.billing, email: contact.email }, status: 'payment_pending', sentAt: data.handoff.sentAt })
     return data.handoff
-  }
-
-  const payWithStripe = async () => {
-    const sn = order.pricing.magnetSn || snFromLocation()
-    setCheckoutLoading(true)
-    try {
-      const session = await createStripeCheckout({
-        orderId: order.dbOrderId,
-        sn,
-        quantity: order.quantity,
-        financeToken: order.financeHandoff?.token,
-      })
-      if (!session.url) throw new Error('Stripe did not return a checkout URL.')
-      window.location.assign(session.url)
-    } catch (error) {
-      showNotice(error instanceof Error ? error.message : 'Unable to start Stripe Checkout.')
-      setCheckoutLoading(false)
-    }
   }
 
   return (
@@ -157,105 +94,69 @@ export function OrderView({ order, now, onChange, onOpenAddress }: { order: Orde
       <div className="order-layout full-order-layout">
         <div className="order-main">
           <section className="order-block product-order-block">
-            <div className="package-selection-label"><span>Package</span><strong>{order.package.name}</strong></div>
+            <button ref={addressEntryRef} className={`address-entry ${hasShippingAddress ? 'has-address' : ''} ${addressRequired ? 'is-invalid' : ''}`} type="button" onClick={openAddress} aria-invalid={addressRequired || undefined}>
+              <span className="address-entry-copy"><small className="order-section-title">Delivery address</small><strong>{hasShippingAddress ? order.shippingAddress.recipientName : 'Add delivery address'}</strong>{hasShippingAddress && <span>{`${shippingAddressText}, ${order.shippingAddress.country}`}</span>}</span>{!hasShippingAddress && <b aria-hidden="true">+</b>}
+            </button>
+            <div className="package-selection-label"><span className="order-section-title">Package</span><strong>{order.package.name}</strong></div>
             <div className="product-order-grid">
               <figure className="product-thumbnail"><img src="/pics/DIsplayProcessPics/front_back.png" alt="Double-sided branded NFC fridge magnet sample" /></figure>
               <div className="product-order-copy">
-                <h2>Double-sided branded NFC fridge magnet</h2><p>{order.package.description}</p>
+                <h2>Double-sided branded NFC fridge magnet</h2>
+                <p className="product-unit-price"><span>{money.format(order.unitPrice)}</span> per magnet / year</p>
+                <div className="product-services-preview">
+                  <button className="product-services-link" type="button" onClick={() => setServicesExpanded(true)} aria-expanded={servicesExpanded} aria-controls="included-services-sheet"><span>Included Services</span><b className="row-chevron" aria-hidden="true">›</b></button>
+                  <ul>{servicePreview.map((service) => <li key={service}><span aria-hidden="true">✓</span>{service}</li>)}</ul>
+                </div>
                 <div className="quantity-order-row">
-                  <label>
-                    <span>Magnet quantity</span>
-                    <div className="quantity-control">
-                      <button type="button" disabled={isLocked || order.quantity <= minQuantity} onClick={() => setQuantity(order.quantity - 100)} aria-label="Decrease quantity">−</button>
-                      <input type="number" min={minQuantity} step="100" disabled={isLocked} value={order.quantity} onChange={(event) => setQuantity(Number(event.target.value) || minQuantity)} />
-                      <button type="button" disabled={isLocked} onClick={() => setQuantity(order.quantity + 100)} aria-label="Increase quantity">+</button>
-                    </div>
-                    <small>Minimum {number.format(minQuantity)} magnets · ${order.unitPrice.toFixed(2)} / magnet</small>
-                  </label>
+                  <label><span>Magnet quantity</span>{isPaymentComplete ? <div className="quantity-locked-display" aria-label={`${number.format(order.quantity)} pieces`}><strong>{number.format(order.quantity)}</strong><span>pieces</span></div> : <div className="quantity-control"><button type="button" disabled={isLocked || order.quantity <= 1000} onClick={() => onChange({ ...order, quantity: Math.max(1000, order.quantity - 100) })} aria-label="Decrease quantity">−</button><input type="number" min="1000" step="100" disabled={isLocked} value={order.quantity} onChange={(event) => onChange({ ...order, quantity: Math.max(1000, Number(event.target.value) || 1000) })} /><button type="button" disabled={isLocked} onClick={() => onChange({ ...order, quantity: order.quantity + 100 })} aria-label="Increase quantity">+</button></div>}{!isPaymentComplete && <small>Minimum 1,000 magnets</small>}</label>
                 </div>
               </div>
             </div>
-            <div className={`included-services ${servicesExpanded ? 'is-expanded' : ''}`}><button className="included-services-toggle" type="button" onClick={() => setServicesExpanded(!servicesExpanded)} aria-expanded={servicesExpanded} aria-controls="package-included-services"><span>Included Services · {includedServiceCount}</span><b aria-hidden="true">{servicesExpanded ? '−' : '+'}</b></button>{servicesExpanded && <div className="package-service-groups" id="package-included-services">{order.package.includedServices.map((group) => <section className="package-service-group" key={group.title}><strong>{group.title}</strong><ul className="scope-grid">{group.items.map((item) => <li key={item}><span>✓</span>{item}</li>)}</ul></section>)}</div>}</div>
-            <button className={`address-entry ${hasShippingAddress ? 'has-address' : ''}`} type="button" onClick={onOpenAddress}>
-              <span className="address-entry-copy"><small>Delivery Address</small><strong>{hasShippingAddress ? order.shippingAddress.recipientName : 'Required before order'}</strong><span>{hasShippingAddress ? `${shippingAddressText}, ${order.shippingAddress.country}` : 'Add delivery address'}</span></span>{!hasShippingAddress && <b aria-hidden="true">+</b>}
-            </button>
             <section className="price-breakdown" aria-labelledby="price-breakdown-title">
-              <h3 id="price-breakdown-title">Price breakdown</h3>
+              <h3 className="order-section-title" id="price-breakdown-title">Price details</h3>
               <div className="line-items" role="table" aria-label="Order amount breakdown">
-                {resolvedLineItems(order, now).map((item) => (
-                  <div role="row" key={item.id}>
-                    <div role="cell">
-                      <strong>{item.kind === 'discount' ? <>Pilot discount · <span className="discount-rate">{discountPercent}% OFF</span></> : item.label}</strong>
-                      {item.detail && <small>{item.detail}</small>}
-                    </div>
-                    <b role="cell" className={item.kind === 'discount' ? 'discount' : ''}>{item.amount < 0 ? `−${money.format(Math.abs(item.amount))}` : money.format(item.amount)}</b>
-                  </div>
-                ))}
-                <div role="row">
-                  <div role="cell"><strong>Tax</strong><small>{taxLabel}</small></div>
-                  <b role="cell">{order.pricing?.taxCollected ? money.format(order.tax) : 'Not collected'}</b>
-                </div>
-                <div className="line-total" role="row"><div role="cell"><strong>Total</strong><small>Estimated order total</small></div><b role="cell">{money.format(total)}</b></div>
+                {resolvedLineItems(order, now).map((item) => <div role="row" key={item.id}><div role="cell"><strong>{item.kind === 'discount' ? <>Pilot discount · <span className="discount-rate">20% OFF</span></> : item.label}</strong>{item.id !== 'magnets' && item.detail && <small>{item.detail}</small>}</div><b role="cell" className={item.kind === 'discount' ? 'discount' : ''}>{item.amount < 0 ? `−${money.format(Math.abs(item.amount))}` : money.format(item.amount)}</b></div>)}
+                <div role="row"><div role="cell"><strong>Tax</strong></div><b role="cell">{money.format(order.tax)}</b></div>
+                <div className="line-total" role="row"><div role="cell"><strong className="order-section-title">Total</strong></div><b role="cell">{money.format(total)}</b></div>
               </div>
             </section>
-            {isApproved && <div className="order-placed-message"><span>✓</span><div><strong>Order placed by {order.approval?.name}</strong><small>{order.orderNumber ? `Order ${order.orderNumber}. ` : ''}Send to finance or pay securely online.</small></div></div>}
-            {order.financeHandoff && <div className={`finance-handoff-status is-${order.financeHandoff.status}`}><div><small>FINANCE HANDOFF</small><strong>{order.financeHandoff.status === 'viewed' ? 'Viewed by finance' : order.financeHandoff.status === 'payment_pending' ? 'Payment pending' : order.financeHandoff.status === 'paid' ? 'Payment complete' : order.financeHandoff.status === 'preview' ? 'Email preview ready' : 'Sent to finance'}</strong><span>{order.financeHandoff.email}</span>{order.financeHandoff.status === 'preview' && <em>Email delivery is not configured. Copy and send the secure link manually.</em>}</div><div><button type="button" onClick={copyPaymentLink}>Copy link</button><button type="button" onClick={() => setShowFinance(true)}>Change</button></div></div>}
+            {isSignedIn && <div className="signed-in-identity"><div><small>SIGNED IN</small><strong>{order.viewer?.name}</strong><span>{order.viewer?.email}</span></div><button type="button" onClick={onOpenLogin}>Change</button></div>}
+            {order.financeHandoff && <div className={`finance-handoff-status is-${order.financeHandoff.status}`}><div><small>FINANCE HANDOFF</small><strong>{order.financeHandoff.status === 'paid' ? 'Payment complete' : 'Payment pending'}</strong><span>{order.financeHandoff.email}</span></div><div><button type="button" onClick={copyPaymentLink}>Copy link</button><button type="button" onClick={() => setShowFinance(true)}>Edit</button></div></div>}
           </section>
 
           <section className="after-order-info collaboration-timeline">
-            <button className="timeline-section-toggle" type="button" onClick={() => setTimelineExpanded(!timelineExpanded)} aria-expanded={timelineExpanded} aria-controls="collaboration-phases"><span><strong>Collaboration Timeline</strong><small>{order.timeline.length} stages · Ordered to results review</small></span><b aria-hidden="true">{timelineExpanded ? '−' : '+'}</b></button>
-            {timelineExpanded && <div className="collaboration-phases" id="collaboration-phases">{order.timeline.map((phase, index) => <div className="collaboration-phase-wrap" key={phase.title}><details className="collaboration-phase"><summary><span className="phase-index">{String(index + 1).padStart(2, '0')}</span><span className="phase-summary"><small>{phase.duration}</small><strong>{phase.title}</strong></span><span className="phase-toggle" aria-hidden="true">+</span></summary><div className="phase-detail">{phase.detail && <p>{phase.detail}</p>}<p><span>Output</span>{phase.output}</p></div></details>{index < order.timeline.length - 1 && <span className="phase-arrow" aria-hidden="true">↓</span>}</div>)}</div>}
+            <button className="timeline-section-toggle" type="button" onClick={() => setTimelineExpanded(true)} aria-expanded={timelineExpanded} aria-controls="collaboration-timeline-sheet"><span><strong>Timeline</strong></span><b className="row-chevron" aria-hidden="true">›</b></button>
           </section>
 
         </div>
 
       </div>
 
-      <div className={`checkout-dock ${isApproved ? 'is-placed' : ''}`} role="region" aria-label="Order checkout">
-        <div className="dock-total"><span>{isApproved ? 'Order total' : `${number.format(order.quantity)} magnets`}</span><strong>{money.format(total)}</strong><small>{isApproved ? 'Order placed' : 'Estimated total'}</small></div>
+      <div className={`checkout-dock ${isSignedIn ? 'is-placed' : ''}`} role="region" aria-label="Order checkout">
+        {!isSignedIn && <div className="dock-total"><span>{number.format(order.quantity)} magnets</span><strong>{money.format(total)}</strong><small>Estimated total</small></div>}
         <div className="dock-actions">
-          {!isApproved && <button className="primary-action" type="button" onClick={openApproval}>Place Order <span>→</span></button>}
-          {isApproved && order.status === 'approved' && (
-            <>
-              <button className="primary-action" type="button" disabled={checkoutLoading || !order.dbOrderId} onClick={payWithStripe}>
-                {checkoutLoading ? 'Starting Checkout…' : 'Pay Securely Online'} <span>→</span>
-              </button>
-              <button className="secondary-action" type="button" onClick={() => setShowFinance(true)}>Send to Finance <span>→</span></button>
-            </>
-          )}
-          {(order.status === 'sent_to_finance' || order.status === 'viewed_by_finance' || order.status === 'payment_pending') && (
-            <>
-              <button className="primary-action" type="button" disabled={checkoutLoading || !order.dbOrderId} onClick={payWithStripe}>
-                {checkoutLoading ? 'Starting Checkout…' : 'Pay Securely Online'} <span>→</span>
-              </button>
-              <button className="secondary-action" type="button" onClick={() => setShowFinance(true)}>Finance Contact <span>→</span></button>
-            </>
-          )}
+          {!isSignedIn && <button className="primary-action" type="button" onClick={() => { if (requireShippingAddress()) onOpenLogin() }}>Place order <span>→</span></button>}
+          {isSignedIn && (order.status === 'draft' || order.status === 'ready_for_approval' || order.status === 'approved' || order.status === 'ready_for_checkout') && <><button className="primary-action" type="button" onClick={openFinanceHandoff}>Send to Finance <span>→</span></button><button className="secondary-action" type="button" onClick={openPayment}>Pay Now <span>→</span></button></>}
+          {(order.status === 'sent_to_finance' || order.status === 'payment_pending') && <><button className="primary-action" type="button" onClick={onOpenFinance}>Place order <span>→</span></button><button className="secondary-action" type="button" onClick={() => setShowFinance(true)}>Finance Contact <span>→</span></button></>}
           {order.status === 'paid' && <div className="dock-complete"><span>✓</span><strong>Payment Complete</strong></div>}
         </div>
       </div>
 
-      {showApproval && (
-        <Modal title="Place Order" description={`Confirm ${number.format(order.quantity)} magnets for ${money.format(total)}.`} onClose={() => !placing && setShowApproval(false)}>
-          <form onSubmit={approve} noValidate>
-            <label className={`confirmation-box ${approvalErrors.confirmed ? 'has-error' : ''}`}>
-              <input type="checkbox" checked={approval.confirmed} onChange={(e) => setApproval({ ...approval, confirmed: e.target.checked })} />
-              <span>I confirm that the package, included services, quantity, pricing, and payment terms match what was agreed with FC.</span>
-            </label>
-            {approvalErrors.confirmed && <small className="field-error">{approvalErrors.confirmed}</small>}
-            <div className="form-grid approval-fields">
-              <label><span>Name *</span><input value={approval.name} onChange={(e) => setApproval({ ...approval, name: e.target.value })} aria-invalid={!!approvalErrors.name} />{approvalErrors.name && <small>{approvalErrors.name}</small>}</label>
-              <label><span>Work email *</span><input type="email" value={approval.email} onChange={(e) => setApproval({ ...approval, email: e.target.value })} aria-invalid={!!approvalErrors.email} />{approvalErrors.email && <small>{approvalErrors.email}</small>}</label>
-              <label><span>Job title</span><input value={approval.jobTitle} onChange={(e) => setApproval({ ...approval, jobTitle: e.target.value })} /></label>
-            </div>
-            <button type="submit" className="primary-action wide-action" disabled={placing}>
-              {placing ? 'Saving order…' : 'Confirm & Place Order'} <span>→</span>
-            </button>
-            <p className="backend-note">This creates a durable order in Supabase. Payment amounts are calculated on the server.</p>
-          </form>
-        </Modal>
-      )}
-      {showFinance && <SendFinanceModal initial={order.financeContact} approverEmail={order.approval?.email || ''} onClose={() => setShowFinance(false)} onSend={sendToFinance} />}
+      {timelineExpanded && <div className="timeline-sheet-backdrop" onMouseDown={(event) => { if (event.currentTarget === event.target) setTimelineExpanded(false) }}>
+        <section className="timeline-sheet" id="collaboration-timeline-sheet" role="dialog" aria-modal="true" aria-labelledby="timeline-sheet-title">
+          <header><strong id="timeline-sheet-title">Timeline</strong><button type="button" onClick={() => setTimelineExpanded(false)} aria-label="Close timeline">×</button></header>
+          <div className="collaboration-phases">{order.timeline.map((phase, index) => <div className="collaboration-phase-wrap" key={phase.title}><details className="collaboration-phase"><summary><span className="phase-index">{String(index + 1).padStart(2, '0')}</span><span className="phase-summary"><small>{phase.duration}</small><strong>{phase.title}</strong></span><span className="phase-toggle" aria-hidden="true">+</span></summary>{phase.detail && <div className="phase-detail"><p>{phase.detail}</p></div>}</details><div className="phase-transition"><span className={`phase-arrow${index === order.timeline.length - 1 ? ' is-placeholder' : ''}`} aria-hidden="true">↓</span><span className="phase-output"><small>Output</small>{phase.output}</span></div></div>)}</div>
+        </section>
+      </div>}
+
+      {servicesExpanded && <div className="timeline-sheet-backdrop" onMouseDown={(event) => { if (event.currentTarget === event.target) setServicesExpanded(false) }}>
+        <section className="timeline-sheet services-sheet" id="included-services-sheet" role="dialog" aria-modal="true" aria-labelledby="services-sheet-title">
+          <header><strong id="services-sheet-title">Included Services</strong><button type="button" onClick={() => setServicesExpanded(false)} aria-label="Close included services">×</button></header>
+          <div className="package-service-groups">{order.package.includedServices.map((group) => <section className="package-service-group" key={group.title}><strong>{group.title}</strong><ul className="scope-grid">{group.items.map((item) => <li key={item}><span>✓</span>{item}</li>)}</ul></section>)}</div>
+        </section>
+      </div>}
+
+      {showFinance && <SendFinanceModal initial={order.financeContact} onClose={() => setShowFinance(false)} onSend={sendToFinance} />}
       {notice && <div className="toast" role="status">{notice}</div>}
     </main>
   )

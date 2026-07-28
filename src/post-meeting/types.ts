@@ -1,11 +1,11 @@
-export type ViewKey = 'demo' | 'content' | 'order' | 'address' | 'finance'
+export type ViewKey = 'demo' | 'content' | 'order' | 'address' | 'finance' | 'login'
 
 export type OrderStatus =
   | 'draft'
   | 'ready_for_approval'
+  | 'ready_for_checkout'
   | 'approved'
   | 'sent_to_finance'
-  | 'viewed_by_finance'
   | 'payment_pending'
   | 'paid'
   | 'expired'
@@ -43,6 +43,13 @@ export type ApprovalRecord = {
   confirmedAmount: number
 }
 
+export type ViewerIdentity = {
+  name: string
+  email: string
+  provider: 'google' | 'email'
+  signedInAt: string
+}
+
 export type FinanceContact = {
   name: string
   email: string
@@ -56,7 +63,7 @@ export type FinanceContact = {
   taxExemptionInfo?: string
 }
 
-export type FinanceHandoffStatus = 'sending' | 'sent' | 'preview' | 'viewed' | 'payment_pending' | 'paid' | 'failed' | 'expired' | 'revoked'
+export type FinanceHandoffStatus = 'sending' | 'sent' | 'preview' | 'payment_pending' | 'paid' | 'failed' | 'expired' | 'revoked'
 
 export type FinanceHandoff = {
   token: string
@@ -65,7 +72,6 @@ export type FinanceHandoff = {
   status: FinanceHandoffStatus
   paymentUrl: string
   sentAt: string
-  viewedAt?: string
   expiresAt: string
 }
 
@@ -124,6 +130,7 @@ export type OrderState = {
   timeline: Array<{ title: string; duration: string; detail?: string; output: string }>
   estimatedLaunch: string
   paymentTerms: string
+  viewer?: ViewerIdentity
   approval?: ApprovalRecord
   financeContact?: FinanceContact
   financeHandoff?: FinanceHandoff

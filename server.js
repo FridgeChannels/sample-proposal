@@ -2,7 +2,6 @@ const http = require('http');
 const fs = require('fs/promises');
 const path = require('path');
 const crypto = require('crypto');
-const commerce = require('./pilot-commerce');
 
 const ROOT = __dirname;
 const DIST_ROOT = path.join(__dirname, 'dist');
@@ -11,6 +10,8 @@ const NOTION_VERSION = '2025-09-03';
 
 // Legacy Notion helpers remain for compatibility, but proposal routes no longer call them.
 let CACHED_DATA_SOURCE_ID = null;
+const FINANCE_HANDOFFS = new Map();
+const FINANCE_LINK_TTL_MS = 14 * 24 * 60 * 60 * 1000;
 
 async function readJsonBody(req) {
   const chunks = [];
@@ -18,17 +19,6 @@ async function readJsonBody(req) {
   const raw = Buffer.concat(chunks).toString('utf8');
   if (!raw || raw.length > 1_000_000) throw new Error('Invalid request body');
   return JSON.parse(raw);
-}
-
-async function readRawBody(req, { maxBytes = 1_000_000 } = {}) {
-  const chunks = [];
-  let size = 0;
-  for await (const chunk of req) {
-    size += chunk.length;
-    if (size > maxBytes) throw new Error('Request body too large');
-    chunks.push(chunk);
-  }
-  return Buffer.concat(chunks).toString('utf8');
 }
 
 const validEmail = value => /^\S+@\S+\.\S+$/.test(String(value || ''));
@@ -45,13 +35,26 @@ function normalizeBaseUrl(value) {
   return parsed.origin;
 }
 
+async function deliverFinanceEmail({ to, cc, financeName, requesterName, order, total, paymentUrl, message }) {
+  if (!process.env.RESEND_API_KEY) return { status: 'preview', providerId: null };
+  const formattedTotal = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(total);
+  const response = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      from: process.env.FINANCE_FROM_EMAIL || 'FridgeChannel <orders@fridgechannel.com>',
+      to: [to], cc: cc ? [cc] : undefined,
+      subject: `Payment requested for FridgeChannel order ${order.orderNumber}`,
+      html: `<div style="font-family:Arial,sans-serif;max-width:560px;margin:auto;color:#14281f"><p>Hi ${escapeHtml(financeName || 'Finance team')},</p><p><strong>${escapeHtml(requesterName)}</strong> asked you to review this FridgeChannel order and complete payment.</p><hr><p>Order: <strong>${escapeHtml(order.orderNumber)}</strong><br>Package: <strong>${escapeHtml(order.package.name)}</strong><br>Quantity: <strong>${order.quantity.toLocaleString()} NFC magnets</strong></p><p style="font-size:30px">${formattedTotal}</p>${message ? `<p>${escapeHtml(message)}</p>` : ''}<p><a href="${escapeHtml(paymentUrl)}" style="display:inline-block;padding:14px 20px;background:#0b3a28;color:white;text-decoration:none">Review &amp; Pay Invoice →</a></p><p style="color:#66736d;font-size:12px">This secure link expires in 14 days.</p></div>`
+    })
+  });
+  if (!response.ok) throw new Error(`Email provider returned ${response.status}`);
+  const result = await response.json();
+  return { status: 'sent', providerId: result.id || null };
+}
+
 async function loadDotEnv() {
-  // Prefer local .env; also accept sibling fc_lead_data/.env so admin + sample share Supabase keys locally.
-  const envPaths = [
-    path.join(ROOT, '.env'),
-    path.join(ROOT, '..', 'fc_lead_data', '.env'),
-    path.join(ROOT, '..', '.env'),
-  ];
+  const envPaths = [path.join(ROOT, '.env'), path.join(ROOT, '..', '.env')];
 
   for (const envPath of envPaths) {
     try {
@@ -571,414 +574,66 @@ async function serveStatic(req, res) {
 }
 
 /**
- * Customer sample links are served at short /p/{sn} (and legacy /gift-proposal/{sn}).
- * Status comes from Supabase magnet_brand_param:
- *   status 3 → live deal room (post-meeting.html)
- *   anything else / missing → sample deck (gift-challenge-react.html)
- * The browser URL never redirects; only the HTML body changes.
+ * Gift challenge decks are served from the built React page
+ * (dist/gift-challenge-react.html) via:
+ *   /  or  /gift-proposal/{id}  or short /p/{id}
+ * The front-end reads `id` from the URL and calls /api/proposal?id=... internally.
  */
 const GIFT_PROPOSAL_ROUTE_RE = /^\/(?:gift-proposal|p)(?:\/([^/?#]+))?\/?$/;
 
-const {
-  lookupSamplePhase,
-  loadPilotQuote,
-  savePilotAddress,
-  createPilotOrder,
-  loadOrderInvoice,
-  createFinanceHandoff,
-  getFinanceHandoff,
-  updateFinanceHandoffStatus,
-  createStripeCheckoutForOrder,
-  createStripeCheckoutFromQuote,
-  verifyStripeSignature,
-  markOrderPaidFromStripeSession,
-  deliverFinanceEmail,
-  stripeWebhookSecret,
-  moneyRound,
-} = commerce;
-
-async function serveDistHtml(res, fileName, missingMessage) {
+async function serveGiftChallenge(res) {
   try {
-    const body = await fs.readFile(path.join(DIST_ROOT, fileName));
-    res.writeHead(200, {
-      'Content-Type': MIME_TYPES['.html'],
-      'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
-    });
+    const body = await fs.readFile(path.join(DIST_ROOT, 'gift-challenge-react.html'));
+    res.writeHead(200, { 'Content-Type': MIME_TYPES['.html'] });
     res.end(body);
   } catch (error) {
     res.writeHead(500);
-    res.end(missingMessage);
+    res.end('Failed to load gift challenge proposal (run `npm run build` to generate dist/)');
   }
-}
-
-async function serveGiftChallenge(res) {
-  await serveDistHtml(
-    res,
-    'gift-challenge-react.html',
-    'Failed to load gift challenge proposal (run `npm run build` to generate dist/)'
-  );
-}
-
-async function servePostMeeting(res) {
-  await serveDistHtml(
-    res,
-    'post-meeting.html',
-    'Failed to load post-meeting deal room (run `npm run build` to generate dist/)'
-  );
-}
-
-/** Serve sample or live HTML for /p/{sn} without changing the request URL. */
-async function serveSampleOrLiveBySn(res, sn) {
-  const { phase } = await lookupSamplePhase(sn);
-  if (phase === 'live') {
-    await servePostMeeting(res);
-    return;
-  }
-  await serveGiftChallenge(res);
-}
-
-function apiErrorStatus(error) {
-  return error.status || (error.code === 'supabase_unconfigured' ? 503 : 500);
-}
-
-/** Map DB invoice into the OrderState shape FinanceView / App expect. */
-function invoiceToClientOrder(invoice, handoff) {
-  const lineItems = (invoice.items || []).map((item) => ({
-    id: String(item.id),
-    label: item.name,
-    amount: item.subtotal,
-    kind: item.type === 'discount' ? 'discount' : 'standard',
-  }));
-
-  const discountItem = (invoice.items || []).find((item) => item.type === 'discount');
-  const magnetsAmount = Number(invoice.amount) || 0;
-  const discountAbs = discountItem ? Math.abs(Number(discountItem.subtotal) || 0) : 0;
-  const percentOff = magnetsAmount > 0 && discountAbs > 0 ? Math.round((discountAbs / magnetsAmount) * 100) : 0;
-
-  const status =
-    invoice.uiStatus === 'paid'
-      ? 'paid'
-      : handoff?.status === 'paid'
-        ? 'paid'
-      : handoff?.status === 'payment_pending'
-        ? 'payment_pending'
-        : handoff?.status === 'viewed'
-          ? 'viewed_by_finance'
-          : handoff
-            ? 'sent_to_finance'
-            : invoice.uiStatus === 'approved'
-              ? 'approved'
-              : 'ready_for_approval';
-
-  return {
-    status,
-    orderNumber: invoice.orderNo,
-    invoiceNumber: invoice.invoiceNumber,
-    version: 1,
-    quantity: invoice.quantity,
-    currency: invoice.currency || 'USD',
-    unitPrice: invoice.unitPrice,
-    tax: invoice.taxFee || 0,
-    offerStartedAt: '',
-    offerExpiresAt: '',
-    package: {
-      id: invoice.packageCode || 'pilot',
-      code: invoice.packageCode || undefined,
-      name: invoice.packageName,
-      description: '',
-      campaignType: invoice.packageName,
-      serviceModel: 'Fully managed by FridgeChannel',
-      features: [],
-      integrations: [],
-      includedServices: [],
-    },
-    lineItems,
-    scopeIncluded: [],
-    scopeExcluded: [],
-    timeline: [],
-    estimatedLaunch: '',
-    paymentTerms: 'Due on receipt',
-    approval: invoice.approval || undefined,
-    financeHandoff: handoff
-      ? {
-          token: handoff.token,
-          email: handoff.email,
-          name: handoff.name,
-          status: handoff.status,
-          paymentUrl: handoff.paymentUrl || '',
-          sentAt: handoff.sentAt,
-          viewedAt: handoff.viewedAt,
-          expiresAt: handoff.expiresAt,
-        }
-      : undefined,
-    shippingAddress: invoice.shippingAddress
-      ? {
-          recipientName: invoice.shippingAddress.recipientName,
-          companyName: '',
-          addressLine1: invoice.shippingAddress.addressLine1,
-          addressLine2: invoice.shippingAddress.addressLine2 || '',
-          city: invoice.shippingAddress.city,
-          state: invoice.shippingAddress.state,
-          postalCode: invoice.shippingAddress.postalCode,
-          country: invoice.shippingAddress.country,
-          phone: invoice.shippingAddress.phone,
-        }
-      : {
-          recipientName: '',
-          companyName: '',
-          addressLine1: '',
-          addressLine2: '',
-          city: '',
-          state: '',
-          postalCode: '',
-          country: 'US',
-          phone: '',
-        },
-    billing: {
-      companyName: '',
-      contactName: invoice.approval?.name || '',
-      email: handoff?.email || invoice.approval?.email || '',
-      address: invoice.shippingAddress?.formattedAddress || '',
-      poNumber: '',
-    },
-    paymentMethod: 'card',
-    paidAt: invoice.paymentTime || undefined,
-    pricing: {
-      loaded: true,
-      magnetSn: invoice.magnetSn,
-      minQuantity: invoice.quantity,
-      discountRatio: percentOff > 0 ? moneyRound(1 - percentOff / 100) : 1,
-      discountPercentOff: percentOff,
-      discountActive: percentOff > 0,
-      discountId: invoice.discountId,
-      taxLabel: 'Not collected',
-      taxCollected: false,
-    },
-    dbOrderId: invoice.orderId,
-    shippingAddressId: invoice.shippingAddress?.id || null,
-  };
 }
 
 async function handleRequest(req, res) {
   const requestUrl = new URL(req.url, `http://${req.headers.host}`);
 
-  // Stripe webhook needs the raw body for signature verification.
-  if (requestUrl.pathname === '/api/stripe/webhook' && req.method === 'POST') {
-    try {
-      const rawBody = await readRawBody(req);
-      verifyStripeSignature(rawBody, req.headers['stripe-signature'], stripeWebhookSecret());
-      const event = JSON.parse(rawBody);
-      if (event.type === 'checkout.session.completed') {
-        const result = await markOrderPaidFromStripeSession(event.data.object);
-        await sendJson(res, 200, { received: true, result });
-        return;
-      }
-      await sendJson(res, 200, { received: true, ignored: event.type });
-    } catch (error) {
-      await sendJson(res, apiErrorStatus(error), { error: error.message || 'Webhook failed.', code: error.code });
-    }
-    return;
-  }
-
-  if (requestUrl.pathname === '/api/pilot-orders/address' && req.method === 'POST') {
-    try {
-      const body = await readJsonBody(req);
-      const sn = typeof body.sn === 'string' ? body.sn.trim() : '';
-      if (!sn) return sendJson(res, 400, { error: 'sn is required.' });
-      const address = await savePilotAddress({ sn, address: body.address || body });
-      await sendJson(res, 201, { address });
-    } catch (error) {
-      await sendJson(res, apiErrorStatus(error), { error: error.message || 'Unable to save address.', code: error.code });
-    }
-    return;
-  }
-
-  if (requestUrl.pathname === '/api/pilot-orders' && req.method === 'POST') {
-    try {
-      const body = await readJsonBody(req);
-      const sn = typeof body.sn === 'string' ? body.sn.trim() : '';
-      if (!sn) return sendJson(res, 400, { error: 'sn is required.' });
-      const result = await createPilotOrder({
-        sn,
-        quantity: body.quantity,
-        shippingAddressId: body.shippingAddressId,
-        approval: body.approval,
-      });
-      await sendJson(res, 201, {
-        orderId: result.orderId,
-        orderNo: result.orderNo,
-        totals: result.totals,
-      });
-    } catch (error) {
-      await sendJson(res, apiErrorStatus(error), { error: error.message || 'Unable to create order.', code: error.code });
-    }
-    return;
-  }
-
   if (requestUrl.pathname === '/api/finance-handoffs' && req.method === 'POST') {
     try {
       const body = await readJsonBody(req);
-      const orderId = body.orderId;
-      if (!orderId) return sendJson(res, 400, { error: 'orderId is required.' });
+      const requester = body.order?.viewer || (body.order?.approval ? { name: body.order.approval.name, email: body.order.approval.email } : null);
+      if (!body.order || !requester) return sendJson(res, 409, { error: 'Sign in before sending this order to finance.' });
       if (!validEmail(body.email)) return sendJson(res, 400, { error: 'Enter a valid finance email.' });
+      const total = Number(body.total);
+      if (!Number.isFinite(total) || total <= 0) return sendJson(res, 400, { error: 'Invalid order total.' });
+      const token = crypto.randomBytes(24).toString('hex');
       let baseUrl;
-      try {
-        baseUrl = normalizeBaseUrl(body.baseUrl || `${requestUrl.protocol}//${req.headers.host}`);
-      } catch {
-        return sendJson(res, 400, { error: 'Invalid proposal URL.' });
-      }
-
-      const { handoff, invoice } = await createFinanceHandoff({
-        orderId,
-        email: body.email,
-        name: body.name || '',
-        message: body.message || '',
-        ccEmail: body.ccEmail || '',
-        baseUrl,
-      });
-
-      const delivery = await deliverFinanceEmail({
-        to: handoff.email,
-        cc: body.ccEmail,
-        financeName: handoff.name,
-        approverName: invoice.approval?.name || 'Approver',
-        invoice,
-        paymentUrl: handoff.paymentUrl,
-        message: body.message || '',
-      });
-
-      if (delivery.status === 'preview') {
-        handoff.status = 'preview';
-      }
-
-      await sendJson(res, 201, { handoff });
-    } catch (error) {
-      await sendJson(res, apiErrorStatus(error), { error: error.message || 'Unable to send finance handoff.', code: error.code });
-    }
+      try { baseUrl = normalizeBaseUrl(body.baseUrl); }
+      catch { return sendJson(res, 400, { error: 'Invalid proposal URL.' }); }
+      const paymentUrl = `${baseUrl}/post-meeting.html?finance=${token}#finance`;
+      const createdAt = new Date().toISOString();
+      const record = { token, order: body.order, total, email: body.email, name: body.name || '', message: body.message || '', status: 'sending', paymentUrl, createdAt, expiresAt: new Date(Date.now() + FINANCE_LINK_TTL_MS).toISOString(), providerId: null };
+      FINANCE_HANDOFFS.set(token, record);
+      const delivery = await deliverFinanceEmail({ to: body.email, cc: body.ccEmail, financeName: body.name, requesterName: requester.name || requester.email, order: body.order, total, paymentUrl, message: body.message });
+      Object.assign(record, delivery);
+      record.status = 'payment_pending';
+      await sendJson(res, 201, { handoff: { token, email: record.email, name: record.name, status: record.status, paymentUrl, sentAt: createdAt, expiresAt: record.expiresAt } });
+    } catch (error) { await sendJson(res, 500, { error: error.message || 'Unable to send finance handoff.' }); }
     return;
   }
 
   const handoffMatch = requestUrl.pathname.match(/^\/api\/finance-handoffs\/([a-f0-9]{48})$/);
   if (handoffMatch) {
-    if (!['GET', 'PATCH'].includes(req.method)) {
-      await sendJson(res, 405, { error: 'Method not allowed.' });
-      return;
-    }
-    try {
-      if (req.method === 'PATCH') {
-        const body = await readJsonBody(req);
-        const updated = await updateFinanceHandoffStatus(handoffMatch[1], body.status);
-        await sendJson(res, 200, {
-          order: invoiceToClientOrder(updated.invoice, updated.handoff),
-          invoice: updated.invoice,
-          handoff: updated.handoff,
-        });
-        return;
-      }
-
-      const loaded = await getFinanceHandoff(handoffMatch[1]);
-      // Auto-mark viewed on first GET if still sent/preview.
-      if (loaded.handoff.status === 'sent' || loaded.handoff.status === 'preview') {
-        const updated = await updateFinanceHandoffStatus(handoffMatch[1], 'viewed');
-        await sendJson(res, 200, {
-          order: invoiceToClientOrder(updated.invoice, {
-            ...updated.handoff,
-            paymentUrl: `${requestUrl.protocol}//${req.headers.host}/p/${encodeURIComponent(updated.handoff.magnetSn || '')}?finance=${updated.handoff.token}#finance`,
-          }),
-          invoice: updated.invoice,
-          handoff: {
-            ...updated.handoff,
-            paymentUrl: `${requestUrl.protocol}//${req.headers.host}/p/${encodeURIComponent(updated.handoff.magnetSn || '')}?finance=${updated.handoff.token}#finance`,
-          },
-        });
-        return;
-      }
-
-      await sendJson(res, 200, {
-        order: invoiceToClientOrder(loaded.invoice, {
-          ...loaded.handoff,
-          paymentUrl: `${requestUrl.protocol}//${req.headers.host}/p/${encodeURIComponent(loaded.handoff.magnetSn || '')}?finance=${loaded.handoff.token}#finance`,
-        }),
-        invoice: loaded.invoice,
-        handoff: {
-          ...loaded.handoff,
-          paymentUrl: `${requestUrl.protocol}//${req.headers.host}/p/${encodeURIComponent(loaded.handoff.magnetSn || '')}?finance=${loaded.handoff.token}#finance`,
-        },
-      });
-    } catch (error) {
-      await sendJson(res, apiErrorStatus(error), { error: error.message || 'Finance handoff unavailable.', code: error.code });
-    }
-    return;
-  }
-
-  // Phase lookup for Vite middleware and debugging: GET /api/sample-phase?sn=
-  if (requestUrl.pathname === '/api/sample-phase') {
-    if (req.method !== 'GET') {
-      await sendJson(res, 405, { error: 'Method not allowed.' });
-      return;
-    }
-    const sn = requestUrl.searchParams.get('sn') || '';
-    const result = await lookupSamplePhase(sn);
-    await sendJson(res, 200, result);
-    return;
-  }
-
-  // Live deal-room pricing from DB. Display-only — never accept client-supplied prices.
-  if (requestUrl.pathname === '/api/pilot-quote') {
-    if (req.method !== 'GET') {
-      await sendJson(res, 405, { error: 'Method not allowed.' });
-      return;
-    }
-    try {
-      const sn = requestUrl.searchParams.get('sn') || '';
-      const quote = await loadPilotQuote(sn);
-      await sendJson(res, 200, { quote });
-    } catch (error) {
-      await sendJson(res, apiErrorStatus(error), { error: error.message || 'Unable to load pilot quote.', code: error.code });
-    }
-    return;
-  }
-
-  if (requestUrl.pathname === '/api/pilot-orders' && req.method === 'GET') {
-    try {
-      const orderId = requestUrl.searchParams.get('orderId');
-      if (!orderId) return sendJson(res, 400, { error: 'orderId is required.' });
-      const invoice = await loadOrderInvoice(orderId);
-      await sendJson(res, 200, { invoice, order: invoiceToClientOrder(invoice) });
-    } catch (error) {
-      await sendJson(res, apiErrorStatus(error), { error: error.message || 'Unable to load order.', code: error.code });
-    }
-    return;
-  }
-
-  // Stripe Checkout: prefer { orderId }; legacy { sn, quantity } still allowed.
-  if (requestUrl.pathname === '/api/stripe/checkout' && req.method === 'POST') {
-    try {
-      const body = await readJsonBody(req);
-      let baseUrl;
+    if (!['GET', 'PATCH'].includes(req.method)) { await sendJson(res, 405, { error: 'Method not allowed.' }); return; }
+    const record = FINANCE_HANDOFFS.get(handoffMatch[1]);
+    if (!record) { await sendJson(res, 404, { error: 'Finance link not found or no longer available.' }); return; }
+    if (Date.now() > Date.parse(record.expiresAt)) { record.status = 'expired'; await sendJson(res, 410, { error: 'This finance link has expired.' }); return; }
+    if (req.method === 'PATCH') {
       try {
-        baseUrl = normalizeBaseUrl(body.baseUrl || `${requestUrl.protocol}//${req.headers.host}`);
-      } catch {
-        return sendJson(res, 400, { error: 'Invalid base URL.' });
-      }
-
-      if (body.orderId) {
-        const session = await createStripeCheckoutForOrder({
-          orderId: body.orderId,
-          baseUrl,
-          handoffToken: body.financeToken || body.handoffToken || '',
-        });
-        await sendJson(res, 200, { url: session.url, id: session.id, invoice: session.invoice });
-        return;
-      }
-
-      const sn = typeof body.sn === 'string' ? body.sn.trim() : '';
-      if (!sn) return sendJson(res, 400, { error: 'orderId or sn is required.' });
-      const session = await createStripeCheckoutFromQuote({ sn, quantity: body.quantity, baseUrl });
-      await sendJson(res, 200, { url: session.url, id: session.id, totals: session.totals });
-    } catch (error) {
-      await sendJson(res, apiErrorStatus(error), { error: error.message || 'Unable to create checkout session.', code: error.code });
+        const body = await readJsonBody(req);
+        const allowed = ['payment_pending', 'paid', 'revoked'];
+        if (!allowed.includes(body.status)) return sendJson(res, 400, { error: 'Invalid handoff status.' });
+        record.status = body.status;
+      } catch (error) { await sendJson(res, 400, { error: 'Invalid status update.' }); return; }
     }
+    await sendJson(res, 200, { order: record.order, handoff: { token: record.token, email: record.email, name: record.name, status: record.status, paymentUrl: record.paymentUrl, sentAt: record.createdAt, expiresAt: record.expiresAt } });
     return;
   }
 
@@ -987,21 +642,8 @@ async function handleRequest(req, res) {
     return;
   }
 
-  // Explicit live entry still served directly (finance handoffs, bookmarks).
-  if (requestUrl.pathname === '/post-meeting.html') {
-    await servePostMeeting(res);
-    return;
-  }
-
-  const proposalRouteMatch = requestUrl.pathname.match(GIFT_PROPOSAL_ROUTE_RE);
-  if (proposalRouteMatch) {
-    const sn = proposalRouteMatch[1] ? decodeURIComponent(proposalRouteMatch[1]) : '';
-    // Bare /p or /gift-proposal → sample deck; /p/{sn} chooses sample vs live from Supabase.
-    if (!sn) {
-      await serveGiftChallenge(res);
-      return;
-    }
-    await serveSampleOrLiveBySn(res, sn);
+  if (GIFT_PROPOSAL_ROUTE_RE.test(requestUrl.pathname)) {
+    await serveGiftChallenge(res);
     return;
   }
 
