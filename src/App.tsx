@@ -18,7 +18,7 @@ export function App() {
 
     const scriptTags = template.scripts.map((scriptSource) => {
       const script = document.createElement('script')
-      script.text = scriptSource
+      script.text = `(() => {\n${scriptSource}\n})()`
       script.dataset.proposalBehavior = 'true'
       document.body.appendChild(script)
       return script

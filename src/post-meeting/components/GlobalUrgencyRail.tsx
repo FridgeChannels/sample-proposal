@@ -7,10 +7,10 @@ type RailState = 'active' | 'urgent' | 'critical' | 'expired' | 'paid'
 const countdownParts = (remainingMs: number) => {
   const totalSeconds = Math.max(0, Math.floor(remainingMs / 1000))
   return [
-    { value: Math.floor(totalSeconds / 86400), short: 'D', label: 'DAYS' },
-    { value: Math.floor((totalSeconds % 86400) / 3600), short: 'H', label: 'HRS' },
-    { value: Math.floor((totalSeconds % 3600) / 60), short: 'M', label: 'MIN' },
-    { value: totalSeconds % 60, short: 'S', label: 'SEC' },
+    { value: Math.floor(totalSeconds / 86400), short: 'd', label: 'Days' },
+    { value: Math.floor((totalSeconds % 86400) / 3600), short: 'h', label: 'Hours' },
+    { value: Math.floor((totalSeconds % 3600) / 60), short: 'm', label: 'Minutes' },
+    { value: totalSeconds % 60, short: 's', label: 'Seconds' },
   ]
 }
 
@@ -29,11 +29,11 @@ const resolveRailState = (order: OrderState, now: number): RailState => {
 }
 
 const copy: Record<RailState, { label: string; title: string; detail: string; action: string; destination: ViewKey }> = {
-  active: { label: '8-DAY PILOT OFFER', title: '20% OFF', detail: 'Pilot pricing ends automatically.', action: 'Review order', destination: 'order' },
-  urgent: { label: 'FINAL 24 HOURS', title: '20% OFF ENDS TODAY', detail: 'Secure the pilot price before zero.', action: 'Review order', destination: 'order' },
-  critical: { label: 'ENDING SOON', title: 'LAST CHANCE · 20% OFF', detail: 'Standard pricing returns at zero.', action: 'Review order', destination: 'order' },
-  expired: { label: 'OFFER ENDED', title: 'STANDARD PRICING RESTORED', detail: 'Contact FC if you need a revised offer.', action: 'Review order', destination: 'order' },
-  paid: { label: 'PAYMENT COMPLETE', title: 'PILOT READY TO START', detail: 'The order is ready for implementation.', action: 'View receipt', destination: 'finance' },
+  active: { label: '8-day pilot offer', title: '20% off', detail: 'Pilot pricing ends automatically.', action: 'See pilot plan', destination: 'plan' },
+  urgent: { label: 'Final 24 hours', title: '20% off ends today', detail: 'Secure the pilot price before zero.', action: 'See pilot plan', destination: 'plan' },
+  critical: { label: 'Ending soon', title: 'Last chance · 20% off', detail: 'Standard pricing returns at zero.', action: 'See pilot plan', destination: 'plan' },
+  expired: { label: 'Offer ended', title: 'Standard pricing restored', detail: 'Contact FC if you need a revised offer.', action: 'See pilot plan', destination: 'plan' },
+  paid: { label: 'Payment complete', title: 'Pilot ready to start', detail: 'The order is ready for implementation.', action: 'View receipt', destination: 'finance' },
 }
 
 export function GlobalUrgencyRail({ order, now, onNavigate }: { order: OrderState; now: number; onNavigate: (view: ViewKey) => void }) {

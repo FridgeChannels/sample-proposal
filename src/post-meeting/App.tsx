@@ -1,19 +1,18 @@
 import { useEffect, useState } from 'react'
-import { defaultOrder } from './config'
+import { defaultOrder, FIXED_MAGNET_QUANTITY } from './config'
 import type { OrderState, ViewKey } from './types'
-import { TopNav } from './components/TopNav'
 import { LiveDemoView } from './components/LiveDemoView'
 import { SampleContentView } from './components/SampleContentView'
-import { OrderView } from './components/OrderView'
+import { PilotPlanView } from './components/PilotPlanView'
 import { FinanceView } from './components/FinanceView'
 import { AddressView } from './components/AddressView'
 import { GlobalUrgencyRail } from './components/GlobalUrgencyRail'
-import { LoginView } from './components/LoginView'
 import './styles.css'
 
 const viewFromHash = (): ViewKey => {
   const value = window.location.hash.replace('#', '')
-  return value === 'content' || value === 'order' || value === 'address' || value === 'finance' || value === 'login' ? value : 'demo'
+  if (value === 'order') return 'plan'
+  return value === 'plan' || value === 'content' || value === 'address' || value === 'finance' ? value : 'demo'
 }
 
 const STORAGE_KEY = 'fc-order-preview-v1'
@@ -57,14 +56,8 @@ const loadOrder = (): OrderState => {
     const packageSelection = !storedPackage || storedPackage.name === 'Retention Moat'
       ? defaultOrder.package
       : { ...defaultOrder.package, ...storedPackage }
-    const legacyViewer = parsed.viewer || (parsed.approval ? {
-      name: parsed.approval.name,
-      email: parsed.approval.email,
-      provider: 'email' as const,
-      signedInAt: parsed.approval.approvedAt,
-    } : undefined)
     const migratedStatus = parsed.status === 'ready_for_approval' || parsed.status === 'approved' ? 'ready_for_checkout' : parsed.status
-    return applyStatusPreview(ensureOfferWindow({ ...defaultOrder, ...parsed, status: migratedStatus || defaultOrder.status, viewer: legacyViewer, approval: undefined, package: packageSelection, timeline: defaultOrder.timeline }))
+    return applyStatusPreview(ensureOfferWindow({ ...defaultOrder, ...parsed, quantity: FIXED_MAGNET_QUANTITY, status: migratedStatus || defaultOrder.status, approval: undefined, package: packageSelection, timeline: defaultOrder.timeline }))
   } catch {
     return applyStatusPreview(ensureOfferWindow(defaultOrder))
   }
@@ -79,7 +72,7 @@ export function App() {
   const [handoffLoading, setHandoffLoading] = useState(Boolean(financeToken))
   const offerNow = previewOfferNow(order, now)
   const paymentComplete = order.status === 'paid' || order.financeHandoff?.status === 'paid'
-  const showGlobalUrgency = !financeToken && !paymentComplete && view !== 'login'
+  const showGlobalUrgency = !financeToken && !paymentComplete
 
   useEffect(() => {
     const syncView = () => setView(viewFromHash())
@@ -105,7 +98,7 @@ export function App() {
         const data = await response.json()
         if (!response.ok) throw new Error(data.error || 'Unable to open finance link.')
         const handoffOrderStatus = data.handoff.status === 'paid' ? 'paid' : 'payment_pending'
-        setOrder({ ...data.order, status: handoffOrderStatus, financeHandoff: data.handoff })
+        setOrder({ ...data.order, quantity: FIXED_MAGNET_QUANTITY, status: handoffOrderStatus, financeHandoff: data.handoff })
         openView('finance')
       })
       .catch(error => {
@@ -158,24 +151,17 @@ export function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const completeSignIn = (viewer: NonNullable<OrderState['viewer']>) => {
-    setOrder(current => ({ ...current, viewer, approval: undefined, status: current.status === 'draft' || current.status === 'ready_for_approval' || current.status === 'approved' ? 'ready_for_checkout' : current.status }))
-    openView('order')
-  }
-
   return (
-    <div className={`post-meeting-app${view === 'order' ? ' has-order-dock' : ''}${financeToken ? ' is-finance-handoff' : showGlobalUrgency ? ' has-global-urgency' : ''}`}>
+    <div className={`post-meeting-app${view === 'demo' ? ' is-live-demo' : ''}${view === 'plan' ? ' has-plan-dock' : ''}${financeToken ? ' is-finance-handoff' : showGlobalUrgency ? ' has-global-urgency' : ''}`}>
       {handoffLoading && <main className="finance-empty"><p className="eyebrow">SECURE FINANCE LINK</p><h1>Loading payment request…</h1></main>}
       {handoffError && <main className="finance-empty"><h1>Finance link unavailable.</h1><p>{handoffError}</p></main>}
       {!handoffLoading && !handoffError && <>
       {showGlobalUrgency && <GlobalUrgencyRail order={order} now={offerNow} onNavigate={openView} />}
-      {!financeToken && view !== 'login' && <TopNav active={view} onChange={openView} />}
-      {view === 'demo' && <LiveDemoView />}
-      {view === 'content' && <SampleContentView />}
-      {view === 'order' && <OrderView order={order} now={offerNow} onChange={setOrder} onOpenAddress={() => openView('address')} onOpenFinance={() => openView('finance')} onOpenLogin={() => openView('login')} />}
-      {view === 'address' && <AddressView order={order} onChange={setOrder} onBack={() => openView('order')} />}
-      {view === 'finance' && <FinanceView order={order} now={offerNow} onBack={() => openView('order')} externalHandoff={Boolean(financeToken)} />}
-      {view === 'login' && <LoginView onSuccess={completeSignIn} onBack={() => openView('demo')} />}
+      {view === 'demo' && <LiveDemoView onSeePlan={() => openView('plan')} />}
+      {view === 'content' && <SampleContentView onBack={() => openView('plan')} />}
+      {view === 'plan' && <PilotPlanView order={order} now={offerNow} onOpenContent={() => openView('content')} onHandoffCreated={(financeHandoff) => setOrder(current => ({ ...current, financeHandoff, status: 'payment_pending' }))} />}
+      {view === 'address' && <AddressView order={order} onChange={setOrder} onBack={() => openView('plan')} />}
+      {view === 'finance' && <FinanceView order={order} now={offerNow} onChange={setOrder} onBack={() => openView('plan')} externalHandoff={Boolean(financeToken)} />}
       </>}
     </div>
   )

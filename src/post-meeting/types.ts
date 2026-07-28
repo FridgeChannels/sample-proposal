@@ -1,4 +1,4 @@
-export type ViewKey = 'demo' | 'content' | 'order' | 'address' | 'finance' | 'login'
+export type ViewKey = 'demo' | 'plan' | 'content' | 'order' | 'address' | 'finance'
 
 export type OrderStatus =
   | 'draft'
@@ -43,32 +43,10 @@ export type ApprovalRecord = {
   confirmedAmount: number
 }
 
-export type ViewerIdentity = {
-  name: string
-  email: string
-  provider: 'google' | 'email'
-  signedInAt: string
-}
-
-export type FinanceContact = {
-  name: string
-  email: string
-  companyName: string
-  billingEmail: string
-  ccCurrentContact: boolean
-  poNumber?: string
-  billingAddress?: string
-  message?: string
-  accountsPayableEmail?: string
-  taxExemptionInfo?: string
-}
-
 export type FinanceHandoffStatus = 'sending' | 'sent' | 'preview' | 'payment_pending' | 'paid' | 'failed' | 'expired' | 'revoked'
 
 export type FinanceHandoff = {
   token: string
-  email: string
-  name?: string
   status: FinanceHandoffStatus
   paymentUrl: string
   sentAt: string
@@ -78,7 +56,6 @@ export type FinanceHandoff = {
 export type BillingDetails = {
   companyName: string
   contactName: string
-  email: string
   address: string
   poNumber: string
 }
@@ -130,9 +107,7 @@ export type OrderState = {
   timeline: Array<{ title: string; duration: string; detail?: string; output: string }>
   estimatedLaunch: string
   paymentTerms: string
-  viewer?: ViewerIdentity
   approval?: ApprovalRecord
-  financeContact?: FinanceContact
   financeHandoff?: FinanceHandoff
   shippingAddress: ShippingAddress
   billing: BillingDetails

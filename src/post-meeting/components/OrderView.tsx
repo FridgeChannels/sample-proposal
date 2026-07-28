@@ -1,22 +1,17 @@
 import { useEffect, useRef, useState } from 'react'
 import { orderTotal, resolvedLineItems } from '../config'
-import type { FinanceContact, FinanceHandoff, OrderState } from '../types'
-import { SendFinanceModal } from './SendFinanceModal'
+import type { OrderState } from '../types'
 
 const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 })
 const number = new Intl.NumberFormat('en-US')
 
-export function OrderView({ order, now, onChange, onOpenAddress, onOpenFinance, onOpenLogin }: { order: OrderState; now: number; onChange: (order: OrderState) => void; onOpenAddress: () => void; onOpenFinance: () => void; onOpenLogin: () => void }) {
-  const [showFinance, setShowFinance] = useState(false)
+export function OrderView({ order, now, onChange, onOpenAddress, onOpenFinance }: { order: OrderState; now: number; onChange: (order: OrderState) => void; onOpenAddress: () => void; onOpenFinance: () => void }) {
   const [servicesExpanded, setServicesExpanded] = useState(false)
   const [timelineExpanded, setTimelineExpanded] = useState(false)
   const [notice, setNotice] = useState('')
   const [addressRequired, setAddressRequired] = useState(false)
   const addressEntryRef = useRef<HTMLButtonElement>(null)
   const total = orderTotal(order, now)
-  const isSignedIn = !!order.viewer
-  const isPaymentComplete = order.status === 'paid' || order.financeHandoff?.status === 'paid'
-  const isLocked = ['sent_to_finance', 'payment_pending', 'paid'].includes(order.status)
   const shippingAddressText = [order.shippingAddress.addressLine1, order.shippingAddress.addressLine2, order.shippingAddress.city, order.shippingAddress.state, order.shippingAddress.postalCode].filter(Boolean).join(', ')
   const hasShippingAddress = Boolean(order.shippingAddress.recipientName && order.shippingAddress.addressLine1 && order.shippingAddress.city && order.shippingAddress.state && order.shippingAddress.postalCode)
   const servicePreview = order.package.includedServices.map((group) => group.items[0]).filter(Boolean).slice(0, 4)
@@ -62,16 +57,9 @@ export function OrderView({ order, now, onChange, onOpenAddress, onOpenFinance, 
     if (hasShippingAddress) setAddressRequired(false)
   }, [hasShippingAddress])
 
-  const openFinanceHandoff = () => {
-    if (!isSignedIn) return onOpenLogin()
-    if (!requireShippingAddress()) return
-    setShowFinance(true)
-  }
-
   const openPayment = () => {
-    if (!isSignedIn) return onOpenLogin()
     if (!requireShippingAddress()) return
-    onChange({ ...order, billing: { ...order.billing, companyName: order.billing.companyName || order.shippingAddress.companyName, contactName: order.billing.contactName || order.viewer?.name || '', email: order.billing.email || order.viewer?.email || '', address: order.billing.address || shippingAddressText }, status: 'payment_pending', paidAt: undefined })
+    onChange({ ...order, billing: { ...order.billing, companyName: order.billing.companyName || order.shippingAddress.companyName, address: order.billing.address || shippingAddressText }, status: 'payment_pending', paidAt: undefined })
     onOpenFinance()
   }
 
@@ -79,14 +67,6 @@ export function OrderView({ order, now, onChange, onOpenAddress, onOpenFinance, 
     const link = order.financeHandoff?.paymentUrl || `${window.location.origin}${window.location.pathname}#finance`
     try { await navigator.clipboard.writeText(link); showNotice('Payment link copied.') }
     catch { showNotice(link) }
-  }
-
-  const sendToFinance = async (contact: FinanceContact): Promise<FinanceHandoff> => {
-    const response = await fetch('/api/finance-handoffs', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ order, total, email: contact.email, name: contact.name, message: contact.message, ccEmail: contact.ccCurrentContact ? order.viewer?.email : '', baseUrl: window.location.origin }) })
-    const data = await response.json()
-    if (!response.ok) throw new Error(data.error || 'Unable to send finance handoff.')
-    onChange({ ...order, financeContact: contact, financeHandoff: data.handoff, billing: { ...order.billing, email: contact.email }, status: 'payment_pending', sentAt: data.handoff.sentAt })
-    return data.handoff
   }
 
   return (
@@ -108,7 +88,7 @@ export function OrderView({ order, now, onChange, onOpenAddress, onOpenFinance, 
                   <ul>{servicePreview.map((service) => <li key={service}><span aria-hidden="true">✓</span>{service}</li>)}</ul>
                 </div>
                 <div className="quantity-order-row">
-                  <label><span>Magnet quantity</span>{isPaymentComplete ? <div className="quantity-locked-display" aria-label={`${number.format(order.quantity)} pieces`}><strong>{number.format(order.quantity)}</strong><span>pieces</span></div> : <div className="quantity-control"><button type="button" disabled={isLocked || order.quantity <= 1000} onClick={() => onChange({ ...order, quantity: Math.max(1000, order.quantity - 100) })} aria-label="Decrease quantity">−</button><input type="number" min="1000" step="100" disabled={isLocked} value={order.quantity} onChange={(event) => onChange({ ...order, quantity: Math.max(1000, Number(event.target.value) || 1000) })} /><button type="button" disabled={isLocked} onClick={() => onChange({ ...order, quantity: order.quantity + 100 })} aria-label="Increase quantity">+</button></div>}{!isPaymentComplete && <small>Minimum 1,000 magnets</small>}</label>
+                  <div className="quantity-fixed"><span>Magnet quantity</span><div className="quantity-locked-display" aria-label={`${number.format(order.quantity)} pieces`}><strong>{number.format(order.quantity)}</strong><span>pieces</span></div></div>
                 </div>
               </div>
             </div>
@@ -120,8 +100,7 @@ export function OrderView({ order, now, onChange, onOpenAddress, onOpenFinance, 
                 <div className="line-total" role="row"><div role="cell"><strong className="order-section-title">Total</strong></div><b role="cell">{money.format(total)}</b></div>
               </div>
             </section>
-            {isSignedIn && <div className="signed-in-identity"><div><small>SIGNED IN</small><strong>{order.viewer?.name}</strong><span>{order.viewer?.email}</span></div><button type="button" onClick={onOpenLogin}>Change</button></div>}
-            {order.financeHandoff && <div className={`finance-handoff-status is-${order.financeHandoff.status}`}><div><small>FINANCE HANDOFF</small><strong>{order.financeHandoff.status === 'paid' ? 'Payment complete' : 'Payment pending'}</strong><span>{order.financeHandoff.email}</span></div><div><button type="button" onClick={copyPaymentLink}>Copy link</button><button type="button" onClick={() => setShowFinance(true)}>Edit</button></div></div>}
+            {order.financeHandoff && <div className={`finance-handoff-status is-${order.financeHandoff.status}`}><div><small>PAYMENT LINK</small><strong>{order.financeHandoff.status === 'paid' ? 'Payment complete' : 'Payment pending'}</strong></div><div><button type="button" onClick={copyPaymentLink}>Copy link</button></div></div>}
           </section>
 
           <section className="after-order-info collaboration-timeline">
@@ -132,12 +111,11 @@ export function OrderView({ order, now, onChange, onOpenAddress, onOpenFinance, 
 
       </div>
 
-      <div className={`checkout-dock ${isSignedIn ? 'is-placed' : ''}`} role="region" aria-label="Order checkout">
-        {!isSignedIn && <div className="dock-total"><span>{number.format(order.quantity)} magnets</span><strong>{money.format(total)}</strong><small>Estimated total</small></div>}
+      <div className="checkout-dock" role="region" aria-label="Order checkout">
+        <div className="dock-total"><span>{number.format(order.quantity)} magnets</span><strong>{money.format(total)}</strong><small>Estimated total</small></div>
         <div className="dock-actions">
-          {!isSignedIn && <button className="primary-action" type="button" onClick={() => { if (requireShippingAddress()) onOpenLogin() }}>Place order <span>→</span></button>}
-          {isSignedIn && (order.status === 'draft' || order.status === 'ready_for_approval' || order.status === 'approved' || order.status === 'ready_for_checkout') && <><button className="primary-action" type="button" onClick={openFinanceHandoff}>Send to Finance <span>→</span></button><button className="secondary-action" type="button" onClick={openPayment}>Pay Now <span>→</span></button></>}
-          {(order.status === 'sent_to_finance' || order.status === 'payment_pending') && <><button className="primary-action" type="button" onClick={onOpenFinance}>Place order <span>→</span></button><button className="secondary-action" type="button" onClick={() => setShowFinance(true)}>Finance Contact <span>→</span></button></>}
+          {(order.status === 'draft' || order.status === 'ready_for_approval' || order.status === 'approved' || order.status === 'ready_for_checkout') && <button className="primary-action" type="button" onClick={openPayment}>Place order <span>→</span></button>}
+          {(order.status === 'sent_to_finance' || order.status === 'payment_pending') && <button className="primary-action" type="button" onClick={onOpenFinance}>Continue to payment <span>→</span></button>}
           {order.status === 'paid' && <div className="dock-complete"><span>✓</span><strong>Payment Complete</strong></div>}
         </div>
       </div>
@@ -156,7 +134,6 @@ export function OrderView({ order, now, onChange, onOpenAddress, onOpenFinance, 
         </section>
       </div>}
 
-      {showFinance && <SendFinanceModal initial={order.financeContact} onClose={() => setShowFinance(false)} onSend={sendToFinance} />}
       {notice && <div className="toast" role="status">{notice}</div>}
     </main>
   )

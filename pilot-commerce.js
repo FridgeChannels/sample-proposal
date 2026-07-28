@@ -504,49 +504,6 @@ async function loadOrderInvoice(orderId) {
   };
 }
 
-async function createFinanceHandoff({ orderId, email, name, message, ccEmail, baseUrl }) {
-  if (!/^\S+@\S+\.\S+$/.test(String(email || ''))) throw httpError('Enter a valid finance email.', 400);
-  const invoice = await loadOrderInvoice(orderId);
-  if (!invoice.approval) throw httpError('The order must be approved before sending to finance.', 409);
-  if (Number(invoice.dbStatus) === ORDER_STATUS_PAID) throw httpError('This order is already paid.', 409);
-
-  const token = crypto.randomBytes(24).toString('hex');
-  const createdAt = new Date().toISOString();
-  const expiresAt = new Date(Date.now() + FINANCE_LINK_TTL_MS).toISOString();
-  const sn = invoice.magnetSn || '';
-  const paymentUrl = sn
-    ? `${baseUrl}/p/${encodeURIComponent(sn)}?finance=${token}#finance`
-    : `${baseUrl}/post-meeting.html?finance=${token}#finance`;
-
-  const row = await supabaseInsert('finance_handoff', {
-    token,
-    order_id: invoice.orderId,
-    magnet_sn: sn || `order-${invoice.orderId}`,
-    to_email: String(email).trim(),
-    to_name: name || null,
-    cc_email: ccEmail || null,
-    message: message || null,
-    status: 'sent',
-    expires_at: expiresAt,
-  });
-
-  return {
-    handoff: {
-      id: row.id,
-      token,
-      email: row.to_email,
-      name: row.to_name || '',
-      status: row.status,
-      paymentUrl,
-      sentAt: createdAt,
-      expiresAt,
-      orderId: invoice.orderId,
-      magnetSn: sn,
-    },
-    invoice,
-  };
-}
-
 async function getFinanceHandoff(token) {
   const rows = await supabaseSelect('finance_handoff', {
     select: '*',
@@ -566,8 +523,6 @@ async function getFinanceHandoff(token) {
   return {
     handoff: {
       token: handoff.token,
-      email: handoff.to_email,
-      name: handoff.to_name || '',
       status: handoff.status,
       // Absolute URL is filled by the HTTP layer using the request host.
       paymentUrl: '',
@@ -803,33 +758,6 @@ async function markOrderPaidFromStripeSession(session) {
   return { ok: true, orderId };
 }
 
-async function deliverFinanceEmail({ to, cc, financeName, approverName, invoice, paymentUrl, message }) {
-  if (!process.env.RESEND_API_KEY) return { status: 'preview', providerId: null };
-  const total = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(invoice.totalAmount);
-  const escapeHtml = (value) =>
-    String(value || '')
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
-
-  const response = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      from: process.env.FINANCE_FROM_EMAIL || 'FridgeChannel <orders@fridgechannel.com>',
-      to: [to],
-      cc: cc ? [cc] : undefined,
-      subject: `Payment requested for FridgeChannel order ${invoice.orderNo}`,
-      html: `<div style="font-family:Arial,sans-serif;max-width:560px;margin:auto;color:#14281f"><p>Hi ${escapeHtml(financeName || 'Finance team')},</p><p><strong>${escapeHtml(approverName)}</strong> approved this FridgeChannel order and asked you to complete payment.</p><hr><p>Order: <strong>${escapeHtml(invoice.orderNo)}</strong><br>Package: <strong>${escapeHtml(invoice.packageName)}</strong><br>Quantity: <strong>${invoice.quantity.toLocaleString()} NFC magnets</strong></p><p style="font-size:30px">${total}</p>${message ? `<p>${escapeHtml(message)}</p>` : ''}<p><a href="${escapeHtml(paymentUrl)}" style="display:inline-block;padding:14px 20px;background:#0b3a28;color:white;text-decoration:none">Review &amp; Pay Invoice →</a></p><p style="color:#66736d;font-size:12px">This secure link expires in 14 days.</p></div>`,
-    }),
-  });
-  if (!response.ok) throw httpError(`Email provider returned ${response.status}`, 502);
-  const result = await response.json();
-  return { status: 'sent', providerId: result.id || null };
-}
-
 module.exports = {
   FINANCE_LINK_TTL_MS,
   lookupSamplePhase,
@@ -838,7 +766,6 @@ module.exports = {
   savePilotAddress,
   createPilotOrder,
   loadOrderInvoice,
-  createFinanceHandoff,
   getFinanceHandoff,
   updateFinanceHandoffStatus,
   createStripeCheckoutForOrder,
@@ -846,7 +773,6 @@ module.exports = {
   stripeWebhookSecret,
   verifyStripeSignature,
   markOrderPaidFromStripeSession,
-  deliverFinanceEmail,
   moneyRound,
   toCents,
 };

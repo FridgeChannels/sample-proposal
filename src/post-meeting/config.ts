@@ -27,13 +27,14 @@ export const statusLabels: Record<OrderStatus, string> = {
 }
 
 export const PILOT_DISCOUNT_RATE = 0.2
+export const FIXED_MAGNET_QUANTITY = 1000
 
 export const defaultOrder: OrderState = {
   status: 'ready_for_checkout',
   orderNumber: 'FC-2026-001',
   invoiceNumber: 'INV-FC-2026-001',
   version: 1,
-  quantity: 1500,
+  quantity: FIXED_MAGNET_QUANTITY,
   currency: 'USD',
   unitPrice: 5.49,
   tax: 0,
@@ -118,9 +119,9 @@ export const defaultOrder: OrderState = {
     ],
   },
   lineItems: [
-    { id: 'magnets', label: '1,500 NFC magnets', detail: '$5.49 per magnet / year', amount: 8235 },
+    { id: 'magnets', label: '1,000 NFC magnets', detail: '$5.49 per magnet / year', amount: 5490 },
     { id: 'shipping', label: 'Estimated shipping', amount: 350 },
-    { id: 'discount', label: 'Pilot discount · 20% OFF', amount: -1717, kind: 'discount' },
+    { id: 'discount', label: 'Pilot discount · 20% off', amount: -1717, kind: 'discount' },
   ],
   scopeIncluded: [
     'Magnet visual design',
@@ -162,7 +163,6 @@ export const defaultOrder: OrderState = {
   billing: {
     companyName: 'Nike, Inc.',
     contactName: '',
-    email: '',
     address: '',
     poNumber: '',
   },
@@ -207,7 +207,7 @@ export const resolvedLineItems = (order: OrderState, now = Date.now()) => {
   return items
     .filter((item) => item.id !== 'discount' || isPilotDiscountApplied(order, now))
     .map((item) => item.id === 'discount'
-      ? { ...item, label: 'Pilot discount · 20% OFF', amount: discountAmount }
+      ? { ...item, label: 'Pilot discount · 20% off', amount: discountAmount }
       : item,
     )
 }
