@@ -108,18 +108,49 @@ export function App() {
         setOrder({ ...data.order, status: handoffOrderStatus, financeHandoff: data.handoff })
         openView('finance')
       })
-      .catch(error => setHandoffError(error.message))
+      .catch(error => {
+        setHandoffError(error.message)
+        // Drop stale handoff from local draft so the 5s poll does not keep 404ing.
+        setOrder((current) => {
+          if (current.financeHandoff?.token !== token) return current
+          const { financeHandoff: _removed, ...rest } = current
+          return { ...rest, financeHandoff: undefined }
+        })
+      })
       .finally(() => setHandoffLoading(false))
   }, [financeToken])
 
   useEffect(() => {
     const token = order.financeHandoff?.token
-    if (!token || view === 'finance') return
-    const poll = window.setInterval(() => fetch(`/api/finance-handoffs/${token}`).then(response => response.ok ? response.json() : null).then(data => {
-      if (data?.handoff && data.handoff.status !== order.financeHandoff?.status) setOrder(current => ({ ...current, financeHandoff: data.handoff, status: data.handoff.status === 'paid' ? 'paid' : current.status }))
-    }).catch(() => undefined), 5000)
+    if (!token || view === 'finance' || financeToken) return
+    let failed = false
+    const poll = window.setInterval(() => {
+      if (failed) return
+      fetch(`/api/finance-handoffs/${token}`)
+        .then(async (response) => {
+          if (response.status === 404 || response.status === 410) {
+            failed = true
+            setOrder((current) => {
+              if (current.financeHandoff?.token !== token) return current
+              return { ...current, financeHandoff: undefined }
+            })
+            return null
+          }
+          return response.ok ? response.json() : null
+        })
+        .then((data) => {
+          if (data?.handoff && data.handoff.status !== order.financeHandoff?.status) {
+            setOrder((current) => ({
+              ...current,
+              financeHandoff: data.handoff,
+              status: data.handoff.status === 'paid' ? 'paid' : current.status,
+            }))
+          }
+        })
+        .catch(() => undefined)
+    }, 5000)
     return () => window.clearInterval(poll)
-  }, [order.financeHandoff?.token, order.financeHandoff?.status, view])
+  }, [order.financeHandoff?.token, order.financeHandoff?.status, view, financeToken])
 
   const openView = (nextView: ViewKey) => {
     window.location.hash = nextView
