@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { defaultOrder } from './config'
+import { applyPilotQuoteToOrder, defaultOrder, snFromLocation } from './config'
 import type { OrderState, ViewKey } from './types'
 import { TopNav } from './components/TopNav'
 import { LiveDemoView } from './components/LiveDemoView'
@@ -46,7 +46,13 @@ const loadOrder = (): OrderState => {
     const packageSelection = !storedPackage || storedPackage.name === 'Retention Moat'
       ? defaultOrder.package
       : { ...defaultOrder.package, ...storedPackage }
-    return ensureOfferWindow({ ...defaultOrder, ...parsed, package: packageSelection, timeline: defaultOrder.timeline })
+    return ensureOfferWindow({
+      ...defaultOrder,
+      ...parsed,
+      package: packageSelection,
+      timeline: defaultOrder.timeline,
+      pricing: { ...defaultOrder.pricing, ...(parsed.pricing || {}) },
+    })
   } catch {
     return ensureOfferWindow(defaultOrder)
   }
@@ -59,6 +65,7 @@ export function App() {
   const [now, setNow] = useState(Date.now)
   const [handoffError, setHandoffError] = useState('')
   const [handoffLoading, setHandoffLoading] = useState(Boolean(financeToken))
+  const [quoteError, setQuoteError] = useState('')
   const offerNow = previewOfferNow(order, now)
 
   useEffect(() => {
@@ -77,6 +84,30 @@ export function App() {
     return () => window.clearInterval(timer)
   }, [])
 
+  // Load package / discount / min qty from Supabase via server (never trust client prices).
+  useEffect(() => {
+    if (financeToken) return
+    const sn = snFromLocation()
+    if (!sn) return
+
+    let cancelled = false
+    fetch(`/api/pilot-quote?sn=${encodeURIComponent(sn)}`)
+      .then(async (response) => {
+        const data = await response.json()
+        if (!response.ok) throw new Error(data.error || 'Unable to load pilot pricing.')
+        if (cancelled) return
+        setQuoteError('')
+        setOrder((current) => applyPilotQuoteToOrder(current, data.quote))
+      })
+      .catch((error) => {
+        if (!cancelled) setQuoteError(error.message || 'Unable to load pilot pricing.')
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [financeToken])
+
   useEffect(() => {
     const token = financeToken
     if (!token) return
@@ -84,18 +115,13 @@ export function App() {
       .then(async response => {
         const data = await response.json()
         if (!response.ok) throw new Error(data.error || 'Unable to open finance link.')
-        const handoffOrderStatus = data.handoff.status === 'paid'
-          ? 'paid'
-          : data.handoff.status === 'payment_pending'
-            ? 'payment_pending'
-            : data.handoff.status === 'viewed'
-              ? 'viewed_by_finance'
-              : 'sent_to_finance'
-        setOrder({ ...data.order, status: handoffOrderStatus, financeHandoff: data.handoff })
+        setOrder({
+          ...defaultOrder,
+          ...data.order,
+          timeline: defaultOrder.timeline,
+          pricing: { ...defaultOrder.pricing, ...(data.order?.pricing || {}) },
+        })
         openView('finance')
-        if (data.handoff.status === 'sent' || data.handoff.status === 'preview' || data.handoff.status === 'sending') {
-          return fetch(`/api/finance-handoffs/${token}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'viewed' }) })
-        }
         return undefined
       })
       .catch(error => setHandoffError(error.message))
@@ -106,7 +132,19 @@ export function App() {
     const token = order.financeHandoff?.token
     if (!token || view === 'finance') return
     const poll = window.setInterval(() => fetch(`/api/finance-handoffs/${token}`).then(response => response.ok ? response.json() : null).then(data => {
-      if (data?.handoff && data.handoff.status !== order.financeHandoff?.status) setOrder(current => ({ ...current, financeHandoff: data.handoff, status: data.handoff.status === 'paid' ? 'paid' : current.status }))
+      if (!data?.handoff) return
+      if (data.handoff.status === order.financeHandoff?.status && !data.order?.dbOrderId) return
+      setOrder(current => ({
+        ...current,
+        ...(data.order || {}),
+        timeline: current.timeline,
+        financeHandoff: {
+          ...data.handoff,
+          paymentUrl: data.handoff.paymentUrl || current.financeHandoff?.paymentUrl || '',
+        },
+        status: data.handoff.status === 'paid' ? 'paid' : data.handoff.status === 'payment_pending' ? 'payment_pending' : current.status,
+        dbOrderId: data.order?.dbOrderId ?? current.dbOrderId,
+      }))
     }).catch(() => undefined), 5000)
     return () => window.clearInterval(poll)
   }, [order.financeHandoff?.token, order.financeHandoff?.status, view])
@@ -117,13 +155,16 @@ export function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
+  const showUrgency = !financeToken && pilotOfferPhaseHasDiscount(order)
+
   return (
-    <div className={`post-meeting-app${view === 'demo' || view === 'content' ? ' has-preview-dock' : ''}${view === 'order' ? ' has-order-dock' : ''}${financeToken ? ' is-finance-handoff' : ' has-global-urgency'}`}>
+    <div className={`post-meeting-app${view === 'demo' || view === 'content' ? ' has-preview-dock' : ''}${view === 'order' ? ' has-order-dock' : ''}${financeToken ? ' is-finance-handoff' : showUrgency ? ' has-global-urgency' : ''}`}>
       {handoffLoading && <main className="finance-empty"><p className="eyebrow">SECURE FINANCE LINK</p><h1>Loading approved order…</h1></main>}
       {handoffError && <main className="finance-empty"><h1>Finance link unavailable.</h1><p>{handoffError}</p></main>}
       {!handoffLoading && !handoffError && <>
-      {!financeToken && <GlobalUrgencyRail order={order} now={offerNow} onNavigate={openView} />}
+      {showUrgency && <GlobalUrgencyRail order={order} now={offerNow} onNavigate={openView} />}
       {!financeToken && <TopNav active={view} onChange={openView} />}
+      {quoteError && <div className="toast" role="status">{quoteError}</div>}
       {view === 'demo' && <LiveDemoView />}
       {view === 'content' && <SampleContentView />}
       {view === 'order' && <OrderView order={order} now={offerNow} onChange={setOrder} onOpenAddress={() => openView('address')} onOpenFinance={() => openView('finance')} />}
@@ -133,4 +174,10 @@ export function App() {
       </>}
     </div>
   )
+}
+
+function pilotOfferPhaseHasDiscount(order: OrderState) {
+  if (order.pricing?.loaded && !order.pricing.discountActive) return false
+  if (order.pricing?.loaded && order.pricing.discountPercentOff <= 0) return false
+  return true
 }

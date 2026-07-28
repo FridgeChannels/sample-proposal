@@ -15,7 +15,8 @@ export type OrderStatus =
 export type PaymentMethod = 'ach' | 'bank_transfer' | 'card'
 
 export type SelectedPackage = {
-  id: 'presence' | 'in-home-retention-asset' | 'post-purchase-moat'
+  id: string
+  code?: string
   name: string
   description: string
   campaignType: string
@@ -85,6 +86,24 @@ export type ShippingAddress = {
   state: string
   postalCode: string
   country: string
+  phone?: string
+  email?: string
+}
+
+/** Server-backed pilot pricing snapshot for the live deal room. */
+export type PilotPricing = {
+  loaded: boolean
+  magnetSn: string | null
+  minQuantity: number
+  /** Pay multiplier from DB (1 = no discount, 0.8 = 20% off). */
+  discountRatio: number
+  /** Display percent off, e.g. 20 for "20% OFF". */
+  discountPercentOff: number
+  discountActive: boolean
+  discountId: string | null
+  taxLabel: string
+  taxCollected: boolean
+  error?: string
 }
 
 export type OrderState = {
@@ -113,4 +132,9 @@ export type OrderState = {
   paymentMethod: PaymentMethod
   paidAt?: string
   sentAt?: string
+  pricing: PilotPricing
+  /** Persisted Supabase order.id after Place Order */
+  dbOrderId?: number | null
+  /** Persisted shipping_address.id */
+  shippingAddressId?: number | null
 }

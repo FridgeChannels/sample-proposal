@@ -4,6 +4,28 @@ import { fileURLToPath } from 'node:url'
 import { resolve } from 'node:path'
 
 const projectRoot = fileURLToPath(new URL('.', import.meta.url))
+const API_ORIGIN = 'http://127.0.0.1:4173'
+const SAMPLE_PATH_RE = /^\/(?:gift-proposal|p)\/([^/?#]+)\/?/
+
+/**
+ * In Vite dev, rewrite /p/{sn} to sample or live HTML based on Supabase status
+ * from the API server — same URL, no redirect (mirrors production server.js).
+ */
+async function resolveSamplePhaseHtml(pathname: string): Promise<string | null> {
+  const match = SAMPLE_PATH_RE.exec(pathname)
+  if (!match) return null
+
+  const sn = decodeURIComponent(match[1])
+  try {
+    const response = await fetch(`${API_ORIGIN}/api/sample-phase?sn=${encodeURIComponent(sn)}`)
+    if (!response.ok) return '/gift-challenge-react.html'
+    const data = (await response.json()) as { phase?: string }
+    return data.phase === 'live' ? '/post-meeting.html' : '/gift-challenge-react.html'
+  } catch {
+    // API server may not be up yet; default to sample deck.
+    return '/gift-challenge-react.html'
+  }
+}
 
 export default defineConfig({
   plugins: [
@@ -12,9 +34,24 @@ export default defineConfig({
       // Homepage is the React gift-challenge page, matching server.js's `/` route
       name: 'serve-gift-challenge-as-index',
       configureServer(server) {
-        server.middlewares.use((req, _res, next) => {
-          if (req.url === '/') {
-            req.url = '/gift-challenge-react.html'
+        server.middlewares.use(async (req, _res, next) => {
+          if (!req.url) {
+            next()
+            return
+          }
+
+          const url = new URL(req.url, 'http://localhost')
+          if (url.pathname === '/') {
+            req.url = `/gift-challenge-react.html${url.search}`
+            next()
+            return
+          }
+
+          const rewritten = await resolveSamplePhaseHtml(url.pathname)
+          if (rewritten) {
+            // Keep path semantics for the client (sn still comes from the browser URL);
+            // only the Vite internal file mapping changes.
+            req.url = `${rewritten}${url.search}`
           }
           next()
         })
@@ -31,9 +68,9 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      '/api': 'http://127.0.0.1:4173',
-      '/pics': 'http://127.0.0.1:4173',
-      '/dashboard2': 'http://127.0.0.1:4173',
+      '/api': API_ORIGIN,
+      '/pics': API_ORIGIN,
+      '/dashboard2': API_ORIGIN,
     },
   },
 })

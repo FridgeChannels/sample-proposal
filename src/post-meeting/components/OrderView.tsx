@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { orderTotal, resolvedLineItems } from '../config'
+import { clampQuantity, createStripeCheckout, orderTotal, resolvedLineItems, snFromLocation } from '../config'
 import type { FinanceContact, FinanceHandoff, OrderState } from '../types'
 import { Modal } from './Modal'
 import { SendFinanceModal } from './SendFinanceModal'
@@ -7,19 +7,24 @@ import { SendFinanceModal } from './SendFinanceModal'
 const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 })
 const number = new Intl.NumberFormat('en-US')
 
-export function OrderView({ order, now, onChange, onOpenAddress, onOpenFinance }: { order: OrderState; now: number; onChange: (order: OrderState) => void; onOpenAddress: () => void; onOpenFinance: () => void }) {
+export function OrderView({ order, now, onChange, onOpenAddress }: { order: OrderState; now: number; onChange: (order: OrderState) => void; onOpenAddress: () => void; onOpenFinance?: () => void }) {
   const [showFinance, setShowFinance] = useState(false)
   const [showApproval, setShowApproval] = useState(false)
   const [servicesExpanded, setServicesExpanded] = useState(false)
   const [timelineExpanded, setTimelineExpanded] = useState(false)
   const [notice, setNotice] = useState('')
+  const [checkoutLoading, setCheckoutLoading] = useState(false)
+  const [placing, setPlacing] = useState(false)
   const [approval, setApproval] = useState({ confirmed: false, name: '', email: '', jobTitle: '' })
   const [approvalErrors, setApprovalErrors] = useState<Record<string, string>>({})
   const total = orderTotal(order, now)
   const isApproved = !!order.approval
   const isLocked = isApproved || order.status !== 'ready_for_approval'
+  const minQuantity = order.pricing?.minQuantity || 1000
+  const discountPercent = Math.round(order.pricing?.discountPercentOff ?? 20)
+  const taxLabel = order.pricing?.taxLabel || 'Not collected'
   const shippingAddressText = [order.shippingAddress.addressLine1, order.shippingAddress.addressLine2, order.shippingAddress.city, order.shippingAddress.state, order.shippingAddress.postalCode].filter(Boolean).join(', ')
-  const hasShippingAddress = Boolean(order.shippingAddress.recipientName && order.shippingAddress.addressLine1 && order.shippingAddress.city && order.shippingAddress.state && order.shippingAddress.postalCode)
+  const hasShippingAddress = Boolean(order.shippingAddressId && order.shippingAddress.recipientName && order.shippingAddress.addressLine1 && order.shippingAddress.city && order.shippingAddress.state && order.shippingAddress.postalCode && order.shippingAddress.phone)
   const includedServiceCount = order.package.includedServices.reduce((count, group) => count + group.items.length, 0)
 
   const showNotice = (message: string) => {
@@ -27,7 +32,11 @@ export function OrderView({ order, now, onChange, onOpenAddress, onOpenFinance }
     window.setTimeout(() => setNotice(''), 3600)
   }
 
-  const approve = (event: FormEvent) => {
+  const setQuantity = (next: number) => {
+    onChange({ ...order, quantity: clampQuantity(next, minQuantity) })
+  }
+
+  const approve = async (event: FormEvent) => {
     event.preventDefault()
     const errors: Record<string, string> = {}
     if (!approval.confirmed) errors.confirmed = 'Confirm the order terms before approval.'
@@ -35,20 +44,56 @@ export function OrderView({ order, now, onChange, onOpenAddress, onOpenFinance }
     if (!/^\S+@\S+\.\S+$/.test(approval.email)) errors.email = 'Enter a valid work email.'
     setApprovalErrors(errors)
     if (Object.keys(errors).length) return
-    onChange({
-      ...order,
-      status: 'approved',
-      billing: {
-        ...order.billing,
-        companyName: order.billing.companyName || order.shippingAddress.companyName,
-        address: order.billing.address || shippingAddressText,
-      },
-      approval: {
-        name: approval.name.trim(), email: approval.email.trim(), jobTitle: approval.jobTitle.trim(),
-        approvedAt: new Date().toISOString(), orderVersion: order.version, confirmedAmount: total,
-      },
-    })
-    showNotice('Order approved in this front-end preview.')
+
+    const sn = order.pricing.magnetSn || snFromLocation()
+    if (!sn) return showNotice('Missing sample SN — open this page via /p/{sn}.')
+    if (!order.shippingAddressId) return onOpenAddress()
+
+    setPlacing(true)
+    try {
+      const approvalPayload = {
+        name: approval.name.trim(),
+        email: approval.email.trim(),
+        jobTitle: approval.jobTitle.trim(),
+        approvedAt: new Date().toISOString(),
+        orderVersion: order.version,
+        confirmedAmount: total,
+      }
+      const response = await fetch('/api/pilot-orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sn,
+          quantity: order.quantity,
+          shippingAddressId: order.shippingAddressId,
+          approval: approvalPayload,
+        }),
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || 'Unable to place order.')
+
+      onChange({
+        ...order,
+        status: 'approved',
+        orderNumber: data.orderNo,
+        invoiceNumber: `INV-${data.orderNo}`,
+        dbOrderId: data.orderId,
+        billing: {
+          ...order.billing,
+          companyName: order.billing.companyName || order.shippingAddress.companyName,
+          address: order.billing.address || shippingAddressText,
+          email: approval.email.trim(),
+          contactName: approval.name.trim(),
+        },
+        approval: approvalPayload,
+      })
+      setShowApproval(false)
+      showNotice('Order placed and saved.')
+    } catch (error) {
+      showNotice(error instanceof Error ? error.message : 'Unable to place order.')
+    } finally {
+      setPlacing(false)
+    }
   }
 
   const openApproval = () => {
@@ -63,11 +108,48 @@ export function OrderView({ order, now, onChange, onOpenAddress, onOpenFinance }
   }
 
   const sendToFinance = async (contact: FinanceContact): Promise<FinanceHandoff> => {
-    const response = await fetch('/api/finance-handoffs', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ order, email: contact.email, name: contact.name, message: contact.message, ccEmail: contact.ccCurrentContact ? order.approval?.email : '', baseUrl: window.location.origin }) })
+    if (!order.dbOrderId) throw new Error('Place the order before sending to finance.')
+    const response = await fetch('/api/finance-handoffs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        orderId: order.dbOrderId,
+        email: contact.email,
+        name: contact.name,
+        message: contact.message,
+        ccEmail: contact.ccCurrentContact ? order.approval?.email : '',
+        baseUrl: window.location.origin,
+      }),
+    })
     const data = await response.json()
     if (!response.ok) throw new Error(data.error || 'Unable to send finance handoff.')
-    onChange({ ...order, financeContact: contact, financeHandoff: data.handoff, billing: { ...order.billing, email: contact.email }, status: 'sent_to_finance', sentAt: data.handoff.sentAt })
+    onChange({
+      ...order,
+      financeContact: contact,
+      financeHandoff: data.handoff,
+      billing: { ...order.billing, email: contact.email },
+      status: 'sent_to_finance',
+      sentAt: data.handoff.sentAt,
+    })
     return data.handoff
+  }
+
+  const payWithStripe = async () => {
+    const sn = order.pricing.magnetSn || snFromLocation()
+    setCheckoutLoading(true)
+    try {
+      const session = await createStripeCheckout({
+        orderId: order.dbOrderId,
+        sn,
+        quantity: order.quantity,
+        financeToken: order.financeHandoff?.token,
+      })
+      if (!session.url) throw new Error('Stripe did not return a checkout URL.')
+      window.location.assign(session.url)
+    } catch (error) {
+      showNotice(error instanceof Error ? error.message : 'Unable to start Stripe Checkout.')
+      setCheckoutLoading(false)
+    }
   }
 
   return (
@@ -81,7 +163,15 @@ export function OrderView({ order, now, onChange, onOpenAddress, onOpenFinance }
               <div className="product-order-copy">
                 <h2>Double-sided branded NFC fridge magnet</h2><p>{order.package.description}</p>
                 <div className="quantity-order-row">
-                  <label><span>Magnet quantity</span><div className="quantity-control"><button type="button" disabled={isLocked || order.quantity <= 1000} onClick={() => onChange({ ...order, quantity: Math.max(1000, order.quantity - 100) })} aria-label="Decrease quantity">−</button><input type="number" min="1000" step="100" disabled={isLocked} value={order.quantity} onChange={(event) => onChange({ ...order, quantity: Math.max(1000, Number(event.target.value) || 1000) })} /><button type="button" disabled={isLocked} onClick={() => onChange({ ...order, quantity: order.quantity + 100 })} aria-label="Increase quantity">+</button></div><small>Minimum 1,000 magnets</small></label>
+                  <label>
+                    <span>Magnet quantity</span>
+                    <div className="quantity-control">
+                      <button type="button" disabled={isLocked || order.quantity <= minQuantity} onClick={() => setQuantity(order.quantity - 100)} aria-label="Decrease quantity">−</button>
+                      <input type="number" min={minQuantity} step="100" disabled={isLocked} value={order.quantity} onChange={(event) => setQuantity(Number(event.target.value) || minQuantity)} />
+                      <button type="button" disabled={isLocked} onClick={() => setQuantity(order.quantity + 100)} aria-label="Increase quantity">+</button>
+                    </div>
+                    <small>Minimum {number.format(minQuantity)} magnets · ${order.unitPrice.toFixed(2)} / magnet</small>
+                  </label>
                 </div>
               </div>
             </div>
@@ -92,12 +182,23 @@ export function OrderView({ order, now, onChange, onOpenAddress, onOpenFinance }
             <section className="price-breakdown" aria-labelledby="price-breakdown-title">
               <h3 id="price-breakdown-title">Price breakdown</h3>
               <div className="line-items" role="table" aria-label="Order amount breakdown">
-                {resolvedLineItems(order, now).map((item) => <div role="row" key={item.id}><div role="cell"><strong>{item.kind === 'discount' ? <>Pilot discount · <span className="discount-rate">20% OFF</span></> : item.label}</strong>{item.detail && <small>{item.detail}</small>}</div><b role="cell" className={item.kind === 'discount' ? 'discount' : ''}>{item.amount < 0 ? `−${money.format(Math.abs(item.amount))}` : money.format(item.amount)}</b></div>)}
-                <div role="row"><div role="cell"><strong>Tax</strong><small>Calculated when applicable</small></div><b role="cell">{money.format(order.tax)}</b></div>
+                {resolvedLineItems(order, now).map((item) => (
+                  <div role="row" key={item.id}>
+                    <div role="cell">
+                      <strong>{item.kind === 'discount' ? <>Pilot discount · <span className="discount-rate">{discountPercent}% OFF</span></> : item.label}</strong>
+                      {item.detail && <small>{item.detail}</small>}
+                    </div>
+                    <b role="cell" className={item.kind === 'discount' ? 'discount' : ''}>{item.amount < 0 ? `−${money.format(Math.abs(item.amount))}` : money.format(item.amount)}</b>
+                  </div>
+                ))}
+                <div role="row">
+                  <div role="cell"><strong>Tax</strong><small>{taxLabel}</small></div>
+                  <b role="cell">{order.pricing?.taxCollected ? money.format(order.tax) : 'Not collected'}</b>
+                </div>
                 <div className="line-total" role="row"><div role="cell"><strong>Total</strong><small>Estimated order total</small></div><b role="cell">{money.format(total)}</b></div>
               </div>
             </section>
-            {isApproved && <div className="order-placed-message"><span>✓</span><div><strong>Order placed by {order.approval?.name}</strong><small>You can now send it to finance or continue to payment.</small></div></div>}
+            {isApproved && <div className="order-placed-message"><span>✓</span><div><strong>Order placed by {order.approval?.name}</strong><small>{order.orderNumber ? `Order ${order.orderNumber}. ` : ''}Send to finance or pay securely online.</small></div></div>}
             {order.financeHandoff && <div className={`finance-handoff-status is-${order.financeHandoff.status}`}><div><small>FINANCE HANDOFF</small><strong>{order.financeHandoff.status === 'viewed' ? 'Viewed by finance' : order.financeHandoff.status === 'payment_pending' ? 'Payment pending' : order.financeHandoff.status === 'paid' ? 'Payment complete' : order.financeHandoff.status === 'preview' ? 'Email preview ready' : 'Sent to finance'}</strong><span>{order.financeHandoff.email}</span>{order.financeHandoff.status === 'preview' && <em>Email delivery is not configured. Copy and send the secure link manually.</em>}</div><div><button type="button" onClick={copyPaymentLink}>Copy link</button><button type="button" onClick={() => setShowFinance(true)}>Change</button></div></div>}
           </section>
 
@@ -114,13 +215,46 @@ export function OrderView({ order, now, onChange, onOpenAddress, onOpenFinance }
         <div className="dock-total"><span>{isApproved ? 'Order total' : `${number.format(order.quantity)} magnets`}</span><strong>{money.format(total)}</strong><small>{isApproved ? 'Order placed' : 'Estimated total'}</small></div>
         <div className="dock-actions">
           {!isApproved && <button className="primary-action" type="button" onClick={openApproval}>Place Order <span>→</span></button>}
-          {isApproved && order.status === 'approved' && <><button className="primary-action" type="button" onClick={() => setShowFinance(true)}>Send to Finance <span>→</span></button><button className="secondary-action" type="button" onClick={onOpenFinance}>Pay Now <span>→</span></button></>}
-          {(order.status === 'sent_to_finance' || order.status === 'viewed_by_finance' || order.status === 'payment_pending') && <><button className="primary-action" type="button" onClick={onOpenFinance}>Review Payment <span>→</span></button><button className="secondary-action" type="button" onClick={() => setShowFinance(true)}>Finance Contact <span>→</span></button></>}
+          {isApproved && order.status === 'approved' && (
+            <>
+              <button className="primary-action" type="button" disabled={checkoutLoading || !order.dbOrderId} onClick={payWithStripe}>
+                {checkoutLoading ? 'Starting Checkout…' : 'Pay Securely Online'} <span>→</span>
+              </button>
+              <button className="secondary-action" type="button" onClick={() => setShowFinance(true)}>Send to Finance <span>→</span></button>
+            </>
+          )}
+          {(order.status === 'sent_to_finance' || order.status === 'viewed_by_finance' || order.status === 'payment_pending') && (
+            <>
+              <button className="primary-action" type="button" disabled={checkoutLoading || !order.dbOrderId} onClick={payWithStripe}>
+                {checkoutLoading ? 'Starting Checkout…' : 'Pay Securely Online'} <span>→</span>
+              </button>
+              <button className="secondary-action" type="button" onClick={() => setShowFinance(true)}>Finance Contact <span>→</span></button>
+            </>
+          )}
           {order.status === 'paid' && <div className="dock-complete"><span>✓</span><strong>Payment Complete</strong></div>}
         </div>
       </div>
 
-      {showApproval && <Modal title="Place Order" description={`Confirm ${number.format(order.quantity)} magnets for ${money.format(total)}.`} onClose={() => setShowApproval(false)}><form onSubmit={(event) => { approve(event); if (approval.confirmed && approval.name.trim() && /^\S+@\S+\.\S+$/.test(approval.email)) setShowApproval(false) }} noValidate><label className={`confirmation-box ${approvalErrors.confirmed ? 'has-error' : ''}`}><input type="checkbox" checked={approval.confirmed} onChange={(e) => setApproval({ ...approval, confirmed: e.target.checked })} /><span>I confirm that the package, included services, quantity, pricing, and payment terms match what was agreed with FC.</span></label>{approvalErrors.confirmed && <small className="field-error">{approvalErrors.confirmed}</small>}<div className="form-grid approval-fields"><label><span>Name *</span><input value={approval.name} onChange={(e) => setApproval({ ...approval, name: e.target.value })} aria-invalid={!!approvalErrors.name} />{approvalErrors.name && <small>{approvalErrors.name}</small>}</label><label><span>Work email *</span><input type="email" value={approval.email} onChange={(e) => setApproval({ ...approval, email: e.target.value })} aria-invalid={!!approvalErrors.email} />{approvalErrors.email && <small>{approvalErrors.email}</small>}</label><label><span>Job title</span><input value={approval.jobTitle} onChange={(e) => setApproval({ ...approval, jobTitle: e.target.value })} /></label></div><button type="submit" className="primary-action wide-action">Confirm & Place Order <span>→</span></button><p className="backend-note">This preview stores the order locally. Server audit records will connect later.</p></form></Modal>}
+      {showApproval && (
+        <Modal title="Place Order" description={`Confirm ${number.format(order.quantity)} magnets for ${money.format(total)}.`} onClose={() => !placing && setShowApproval(false)}>
+          <form onSubmit={approve} noValidate>
+            <label className={`confirmation-box ${approvalErrors.confirmed ? 'has-error' : ''}`}>
+              <input type="checkbox" checked={approval.confirmed} onChange={(e) => setApproval({ ...approval, confirmed: e.target.checked })} />
+              <span>I confirm that the package, included services, quantity, pricing, and payment terms match what was agreed with FC.</span>
+            </label>
+            {approvalErrors.confirmed && <small className="field-error">{approvalErrors.confirmed}</small>}
+            <div className="form-grid approval-fields">
+              <label><span>Name *</span><input value={approval.name} onChange={(e) => setApproval({ ...approval, name: e.target.value })} aria-invalid={!!approvalErrors.name} />{approvalErrors.name && <small>{approvalErrors.name}</small>}</label>
+              <label><span>Work email *</span><input type="email" value={approval.email} onChange={(e) => setApproval({ ...approval, email: e.target.value })} aria-invalid={!!approvalErrors.email} />{approvalErrors.email && <small>{approvalErrors.email}</small>}</label>
+              <label><span>Job title</span><input value={approval.jobTitle} onChange={(e) => setApproval({ ...approval, jobTitle: e.target.value })} /></label>
+            </div>
+            <button type="submit" className="primary-action wide-action" disabled={placing}>
+              {placing ? 'Saving order…' : 'Confirm & Place Order'} <span>→</span>
+            </button>
+            <p className="backend-note">This creates a durable order in Supabase. Payment amounts are calculated on the server.</p>
+          </form>
+        </Modal>
+      )}
       {showFinance && <SendFinanceModal initial={order.financeContact} approverEmail={order.approval?.email || ''} onClose={() => setShowFinance(false)} onSend={sendToFinance} />}
       {notice && <div className="toast" role="status">{notice}</div>}
     </main>

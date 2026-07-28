@@ -14,7 +14,7 @@ const countdownParts = (remainingMs: number) => {
   ]
 }
 
-const resolveRailState = (order: OrderState, now: number): RailState => {
+const resolveRailState = (order: OrderState, now: number): RailState | null => {
   const handoffStatus = order.financeHandoff?.status
   if (order.status === 'paid' || handoffStatus === 'paid') return 'paid'
   if (order.status === 'payment_pending' || handoffStatus === 'payment_pending') return 'payment-pending'
@@ -22,7 +22,9 @@ const resolveRailState = (order: OrderState, now: number): RailState => {
   if (handoffStatus === 'preview') return 'link-ready'
   if (order.status === 'sent_to_finance' || handoffStatus === 'sent' || handoffStatus === 'sending') return 'sent'
   if (order.approval) return 'secured'
+
   const offerPhase = pilotOfferPhase(order, now)
+  if (offerPhase === 'none') return null
   if (offerPhase === 'expired') return 'expired'
   const remaining = pilotOfferRemainingMs(order, now)
   if (remaining <= 6 * 60 * 60 * 1000) return 'critical'
@@ -30,12 +32,18 @@ const resolveRailState = (order: OrderState, now: number): RailState => {
   return 'active'
 }
 
-const copy: Record<RailState, { label: string; title: string; detail: string; action: string; destination: ViewKey }> = {
-  active: { label: '8-DAY PILOT OFFER', title: '20% OFF', detail: 'Pilot pricing ends automatically.', action: 'Review order', destination: 'order' },
-  urgent: { label: 'FINAL 24 HOURS', title: '20% OFF ENDS TODAY', detail: 'Secure the pilot price before zero.', action: 'Review order', destination: 'order' },
-  critical: { label: 'ENDING SOON', title: 'LAST CHANCE · 20% OFF', detail: 'Standard pricing returns at zero.', action: 'Review order', destination: 'order' },
-  expired: { label: 'OFFER ENDED', title: 'STANDARD PRICING RESTORED', detail: 'Contact FC if you need a revised offer.', action: 'Review order', destination: 'order' },
-  secured: { label: 'OFFER SECURED', title: '20% OFF LOCKED IN', detail: 'Your approved order keeps the pilot price.', action: 'Continue', destination: 'order' },
+const offerCopy = (percentOff: number): Record<Extract<RailState, 'active' | 'urgent' | 'critical' | 'expired' | 'secured'>, { label: string; title: string; detail: string; action: string; destination: ViewKey }> => {
+  const off = `${Math.round(percentOff)}% OFF`
+  return {
+    active: { label: 'PILOT OFFER', title: off, detail: 'Pilot pricing ends automatically.', action: 'Review order', destination: 'order' },
+    urgent: { label: 'FINAL 24 HOURS', title: `${off} ENDS TODAY`, detail: 'Secure the pilot price before zero.', action: 'Review order', destination: 'order' },
+    critical: { label: 'ENDING SOON', title: `LAST CHANCE · ${off}`, detail: 'Standard pricing returns at zero.', action: 'Review order', destination: 'order' },
+    expired: { label: 'OFFER ENDED', title: 'STANDARD PRICING RESTORED', detail: 'Contact FC if you need a revised offer.', action: 'Review order', destination: 'order' },
+    secured: { label: 'OFFER SECURED', title: `${off} LOCKED IN`, detail: 'Your approved order keeps the pilot price.', action: 'Continue', destination: 'order' },
+  }
+}
+
+const statusCopy: Record<Exclude<RailState, 'active' | 'urgent' | 'critical' | 'expired' | 'secured'>, { label: string; title: string; detail: string; action: string; destination: ViewKey }> = {
   'link-ready': { label: 'FINANCE HANDOFF', title: 'SECURE LINK READY', detail: 'Copy and send the payment link to finance.', action: 'Review handoff', destination: 'order' },
   sent: { label: 'FINANCE HANDOFF', title: 'SENT TO FINANCE', detail: 'Waiting for finance to open the order.', action: 'View status', destination: 'order' },
   viewed: { label: 'FINANCE UPDATE', title: 'ORDER VIEWED', detail: 'Finance has opened the approved order.', action: 'View status', destination: 'order' },
@@ -46,7 +54,12 @@ const copy: Record<RailState, { label: string; title: string; detail: string; ac
 export function GlobalUrgencyRail({ order, now, onNavigate }: { order: OrderState; now: number; onNavigate: (view: ViewKey) => void }) {
   const [expanded, setExpanded] = useState(true)
   const state = resolveRailState(order, now)
-  const content = copy[state]
+  const percentOff = order.pricing?.discountPercentOff ?? 20
+  const content = state
+    ? (state in statusCopy
+      ? statusCopy[state as keyof typeof statusCopy]
+      : offerCopy(percentOff)[state as 'active' | 'urgent' | 'critical' | 'expired' | 'secured'])
+    : null
   const parts = useMemo(() => countdownParts(pilotOfferRemainingMs(order, now)), [order, now])
   const showCountdown = state === 'active' || state === 'urgent' || state === 'critical'
 
@@ -54,6 +67,8 @@ export function GlobalUrgencyRail({ order, now, onNavigate }: { order: OrderStat
     const timer = window.setTimeout(() => setExpanded(false), 1200)
     return () => window.clearTimeout(timer)
   }, [])
+
+  if (!state || !content) return null
 
   return (
     <aside className={`global-urgency-rail is-${state}${expanded ? ' is-entry-expanded' : ''}`} aria-label={`${content.label}: ${content.title}`}>
