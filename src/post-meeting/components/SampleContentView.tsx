@@ -4,8 +4,8 @@ export function SampleContentView({ onBack }: { onBack: () => void }) {
       <iframe src="/gift-challenge-react.html" title="FridgeChannel sample content" loading="eager" />
       <div className="flow-cta-bar is-secondary">
         <button type="button" className="flow-cta-button" onClick={onBack}>
-          <span><small>RETURN TO THE COMMERCIAL PLAN</small>Back to Pilot Plan</span>
           <b>←</b>
+          <span>Back to Pilot Plan</span>
         </button>
       </div>
     </main>
