@@ -133,7 +133,6 @@ export function PilotPlanView({
           <dl className="plan-meta">
             <div><dt>Brand</dt><dd>{company}</dd></div>
             <div><dt>Created date</dt><dd>{date.format(new Date())}</dd></div>
-            <div><dt>Pilot order no.</dt><dd>{order.orderNumber}</dd></div>
           </dl>
         </header>
 
