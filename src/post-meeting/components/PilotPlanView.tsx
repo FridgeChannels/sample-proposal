@@ -66,11 +66,13 @@ const copyToClipboard = async (value: string) => {
 export function PilotPlanView({
   order,
   now,
+  onBack,
   onOpenContent,
   onHandoffCreated,
 }: {
   order: OrderState
   now: number
+  onBack: () => void
   onOpenContent: () => void
   onHandoffCreated: (handoff: FinanceHandoff) => void
 }) {
@@ -128,6 +130,12 @@ export function PilotPlanView({
       <div className="pilot-plan-shell">
         <header className="pilot-plan-header">
           <div className="pilot-plan-titlebar">
+            <button type="button" className="plan-back-button" onClick={onBack} aria-label="Go back">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m15 18-6-6 6-6" />
+                <path d="M9 12h10" />
+              </svg>
+            </button>
             <h1>Pilot Plan</h1>
           </div>
           <dl className="plan-meta">

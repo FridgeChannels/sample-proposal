@@ -66,6 +66,7 @@ const loadOrder = (): OrderState => {
 export function App() {
   const financeToken = new URLSearchParams(window.location.search).get('finance')
   const [view, setView] = useState<ViewKey>(viewFromHash)
+  const [demoMounted, setDemoMounted] = useState(view === 'demo')
   const [order, setOrder] = useState<OrderState>(loadOrder)
   const [now, setNow] = useState(Date.now)
   const [handoffError, setHandoffError] = useState('')
@@ -79,6 +80,10 @@ export function App() {
     window.addEventListener('hashchange', syncView)
     return () => window.removeEventListener('hashchange', syncView)
   }, [])
+
+  useEffect(() => {
+    if (view === 'demo') setDemoMounted(true)
+  }, [view])
 
   useEffect(() => {
     if (financeToken) return
@@ -157,9 +162,9 @@ export function App() {
       {handoffError && <main className="finance-empty"><h1>Finance link unavailable.</h1><p>{handoffError}</p></main>}
       {!handoffLoading && !handoffError && <>
       {showGlobalUrgency && <GlobalUrgencyRail order={order} now={offerNow} onNavigate={openView} />}
-      {view === 'demo' && <LiveDemoView onSeePlan={() => openView('plan')} />}
+      {demoMounted && !financeToken && <LiveDemoView active={view === 'demo'} onSeePlan={() => openView('plan')} />}
       {view === 'content' && <SampleContentView onBack={() => openView('plan')} />}
-      {view === 'plan' && <PilotPlanView order={order} now={offerNow} onOpenContent={() => openView('content')} onHandoffCreated={(financeHandoff) => setOrder(current => ({ ...current, financeHandoff, status: 'payment_pending' }))} />}
+      {view === 'plan' && <PilotPlanView order={order} now={offerNow} onBack={() => window.history.back()} onOpenContent={() => openView('content')} onHandoffCreated={(financeHandoff) => setOrder(current => ({ ...current, financeHandoff, status: 'payment_pending' }))} />}
       {view === 'address' && <AddressView order={order} onChange={setOrder} onBack={() => openView('plan')} />}
       {view === 'finance' && <FinanceView order={order} now={offerNow} onChange={setOrder} onBack={() => openView('plan')} externalHandoff={Boolean(financeToken)} />}
       </>}
