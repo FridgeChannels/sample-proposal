@@ -18,33 +18,33 @@ function DetailsChevron() {
 const pilotPhases = [
   {
     stage: 'Pilot Plan, Live Demo & Payment',
-    timing: 'Meeting day through plan validity period',
-    fridgeChannel: 'Provide the Pilot Plan, Live Demo, Dashboard account, order link, and invoice.',
-    client: 'Confirm the plan; provide the data and permissions required for Dashboard configuration; enter email, shipping address, and payment information; accept the contract and terms; complete 100% payment.',
+    timing: 'From the meeting date until the proposal expires',
+    fridgeChannel: 'Provide the Pilot Plan, Live Demo, Dashboard access, order link, and invoice.',
+    client: 'Confirm the proposal; provide Dashboard data and permissions; enter email, shipping, and payment details; accept the terms; and pay 100%.',
   },
   {
-    stage: 'Assets & Design - Round 1',
-    timing: 'Day 1-5',
-    fridgeChannel: 'Submit the first Final Magnet design based on the client assets.',
-    client: 'Submit the logo, copy, offer, links, and other assets; provide consolidated feedback within two business days.',
+    stage: 'Brand Design & Design Lock',
+    timing: 'From Day 1 until written approval',
+    fridgeChannel: 'Provide Magnet dimensions, the design template, and specifications. After the 24-hour revision window, review the final files for production and confirm Design Lock.',
+    client: 'Provide print-ready CMYK files for both sides. Revisions are allowed within 24 hours of the first submission; the latest version becomes final.',
   },
   {
-    stage: 'Design - Round 2 & Lock',
-    timing: 'Day 6-9',
-    fridgeChannel: 'Complete the second revision and Final Proof.',
-    client: 'Provide the final round of consolidated feedback and confirm the final design in writing.',
+    stage: 'Final Sample — Round 1',
+    timing: 'After Design Lock',
+    fridgeChannel: 'Produce and ship the first Final Sample from the approved design.',
+    client: 'Inspect the product, color, dimensions, TAP, and content. Approve in writing for mass production, or submit one consolidated revision within 7 business days.',
   },
   {
-    stage: 'Final Sample',
-    timing: 'Target: Day 10-18',
-    fridgeChannel: 'Produce and mail the Final Sample.',
-    client: 'Inspect and confirm the Final Sample in writing within two business days of receipt.',
+    stage: 'Final Sample — Round 2 (if needed)',
+    timing: 'Only if Round 1 is not approved; within 7 business days of feedback',
+    fridgeChannel: 'Apply the consolidated Round 1 feedback and ship the second Final Sample.',
+    client: 'Provide final written sign-off within 7 business days of receipt. Further revisions require a separately agreed timeline and cost.',
   },
   {
     stage: 'Mass Production & Launch',
-    timing: '[Complete per production schedule]',
-    fridgeChannel: 'Complete mass production and delivery of all magnets.',
-    client: 'Confirm receiving and warehouse / 3PL arrangements, and place magnets into orders for the [pilot plan segment].',
+    timing: 'Production begins after written approval of the Final Sample',
+    fridgeChannel: 'Produce and deliver the full Magnet quantity.',
+    client: 'Confirm receipt and warehouse/3PL fulfillment, then add Magnets to orders for the Pilot Plan target segments.',
   },
 ]
 
@@ -212,7 +212,7 @@ export function PilotPlanView({
                 <span className="timeline-marker">0</span>
                 <div>
                   <strong>Day 0</strong>
-                  <p>FridgeChannel receives 100% payment. If client feedback is delayed, all subsequent dates move accordingly.</p>
+                  <p>FC receives 100% payment. The brand provides the design. Revision rounds determine the Design Lock date, which shifts all later milestones.</p>
                 </div>
               </div>
               {pilotPhases.map((phase, index) => (
@@ -228,7 +228,6 @@ export function PilotPlanView({
                 </article>
               ))}
             </div>
-            <p className="plan-design-rule"><strong>Design confirmation rule:</strong> Two revision rounds plus one Final Proof are included. The client appoints one Owner and submits one set of consolidated feedback per round. Mass production does not begin without written confirmation of the Final Sample.</p>
           </details>
         </section>
 

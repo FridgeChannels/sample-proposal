@@ -821,6 +821,14 @@ html{font-size:16.4px}
 }
 .pilot-plan-view .timeline-phase-content dl>div:first-child dt{color:color-mix(in oklch,var(--leg-brand) 65%,var(--leg-muted-foreground))}
 .pilot-plan-view .timeline-phase-content dl>div:nth-child(2) dt{color:color-mix(in oklch,#a45d23 65%,var(--leg-muted-foreground))}
+@media(max-width:700px){
+  .pilot-plan-view .timeline-phase-content>header>span,
+  .pilot-plan-view .timeline-phase-content>header>h3{
+    flex:1 1 100%;
+    min-width:0;
+    overflow-wrap:anywhere
+  }
+}
 .live-demo-view.has-flow-cta iframe{height:calc(100% - 64px)}
 .live-demo-view .flow-cta-bar{padding:0}
 .live-demo-view .flow-cta-button{position:relative;justify-content:center;text-align:center}
