@@ -97,7 +97,7 @@ export function FinanceView({ order, now, onChange, onBack, externalHandoff = fa
           </section>
           <div className="invoice-actions">
             <p className="eyebrow">Amount due</p><strong className="payment-total">{money.format(total)}</strong>
-            <button type="button" className="primary-action pay-invoice" onClick={() => setCheckoutRequested(true)}>Continue to Stripe <span>→</span></button>
+            <button type="button" className="primary-action pay-invoice" onClick={() => setCheckoutRequested(true)}>Continue to pay <span>→</span></button>
             {checkoutRequested && <p className="backend-note">Frontend preview only — the payment provider will be connected next.</p>}
             {!externalHandoff && <button type="button" className="text-button" onClick={onBack}>Back to order</button>}
           </div>

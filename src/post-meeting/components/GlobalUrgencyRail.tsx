@@ -1,8 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
-import { pilotOfferPhase, pilotOfferRemainingMs } from '../config'
+import { pilotOfferPhase, pilotOfferRemainingMs, resolvedLineItems } from '../config'
 import type { OrderState, ViewKey } from '../types'
 
 type RailState = 'active' | 'urgent' | 'critical' | 'expired' | 'paid'
+
+const savings = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  maximumFractionDigits: 0,
+})
 
 const countdownParts = (remainingMs: number) => {
   const totalSeconds = Math.max(0, Math.floor(remainingMs / 1000))
@@ -39,9 +45,13 @@ const copy: Record<RailState, { label: string; title: string; detail: string; ac
 export function GlobalUrgencyRail({ order, now, onNavigate }: { order: OrderState; now: number; onNavigate: (view: ViewKey) => void }) {
   const [expanded, setExpanded] = useState(true)
   const state = resolveRailState(order, now)
-  const content = copy[state]
-  const parts = useMemo(() => countdownParts(pilotOfferRemainingMs(order, now)), [order, now])
   const showCountdown = state === 'active' || state === 'urgent' || state === 'critical'
+  const discountAmount = resolvedLineItems(order, now).find((item) => item.kind === 'discount')?.amount
+  const baseContent = copy[state]
+  const content = showCountdown && discountAmount
+    ? { ...baseContent, title: `Save ${savings.format(Math.abs(discountAmount))}` }
+    : baseContent
+  const parts = useMemo(() => countdownParts(pilotOfferRemainingMs(order, now)), [order, now])
 
   useEffect(() => {
     const timer = window.setTimeout(() => setExpanded(false), 1200)

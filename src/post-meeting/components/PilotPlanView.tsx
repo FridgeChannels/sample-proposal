@@ -129,12 +129,6 @@ export function PilotPlanView({
         <header className="pilot-plan-header">
           <div className="pilot-plan-titlebar">
             <h1>Pilot Plan</h1>
-            <button type="button" className="plan-sample-icon" onClick={onOpenContent} aria-label="View sample content" title="View sample content">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <rect x="3" y="3" width="18" height="18" rx="4" />
-                <path d="m10 8 6 4-6 4Z" />
-              </svg>
-            </button>
           </div>
           <dl className="plan-meta">
             <div><dt>Brand</dt><dd>{company}</dd></div>
@@ -159,7 +153,21 @@ export function PilotPlanView({
               {order.package.includedServices.map((group) => (
                 <div key={group.title}>
                   <h3>{group.title}</h3>
-                  <ul>{group.items.map((item) => <li key={item}>{item}</li>)}</ul>
+                  <ul>
+                    {group.items.map((item) => (
+                      <li key={item}>
+                        {item}
+                        {item === 'Tap-to-open customer experience' && (
+                          <>
+                            {' '}
+                            <button type="button" className="plan-sample-link" onClick={onOpenContent}>
+                              View
+                            </button>
+                          </>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               ))}
             </div>
@@ -217,13 +225,6 @@ export function PilotPlanView({
           </details>
         </section>
 
-        <section className="plan-section plan-payment-terms">
-          <h2 className="plan-section-title">3. Payment terms</h2>
-          <ol className="plan-payment-rules">
-            <li>Payment is 100% upfront.</li>
-            <li>After full payment, FridgeChannel begins Final Design, Final Sample, and the subsequent production process.</li>
-          </ol>
-        </section>
       </div>
 
       <div className="flow-cta-bar">
