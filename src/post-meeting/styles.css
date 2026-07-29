@@ -549,7 +549,7 @@ html{font-size:16.4px}
 @media(max-width:620px){.bottom-nav{height:calc(56px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom)}.bottom-nav button{min-height:56px}.bottom-nav button svg{width:21px;height:21px}.has-order-dock .checkout-dock,.has-preview-dock .checkout-dock{bottom:calc(56px + env(safe-area-inset-bottom))}}
 
 /* Linear pilot flow: Live Demo → Pilot Plan → finance payment link. */
-.live-demo-view.has-flow-cta,.sample-content-view.has-flow-cta{height:calc(100dvh - 50px)}
+.live-demo-view.has-flow-cta{height:100dvh}.sample-content-view.has-flow-cta{height:calc(100dvh - 50px)}
 .live-demo-view.has-flow-cta iframe,.sample-content-view.has-flow-cta iframe{height:calc(100% - 88px)}
 .flow-cta-bar{position:fixed;z-index:70;right:0;bottom:0;left:0;padding:12px max(16px,calc((100% - 960px)/2)) calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--leg-border);background:color-mix(in oklch,var(--leg-background) 94%,transparent);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
 .flow-cta-button{display:flex;align-items:center;justify-content:space-between;gap:24px;width:100%;min-height:64px;padding:11px 20px;border:0;border-radius:0;background:var(--leg-brand);color:var(--leg-brand-foreground);text-align:left}
@@ -587,7 +587,7 @@ html{font-size:16.4px}
 .shipping-section .section-heading{align-items:flex-start;justify-content:space-between}.shipping-completion{flex:0 0 auto;padding:5px 8px;border-radius:999px;background:color-mix(in oklch,#b45309 9%,transparent);color:#92400e!important;font-size:9px!important;font-weight:600;letter-spacing:.06em;text-transform:uppercase}.shipping-completion.is-complete{background:color-mix(in oklch,var(--leg-brand) 9%,transparent);color:var(--leg-brand)!important}.finance-shipping-form input::placeholder{color:var(--leg-muted-foreground);opacity:.72}
 
 @media(max-width:700px){
-  .live-demo-view.has-flow-cta,.sample-content-view.has-flow-cta{height:calc(100dvh - 50px)}.live-demo-view.has-flow-cta iframe,.sample-content-view.has-flow-cta iframe{height:calc(100% - 78px)}
+  .live-demo-view.has-flow-cta{height:100dvh}.sample-content-view.has-flow-cta{height:calc(100dvh - 50px)}.live-demo-view.has-flow-cta iframe,.sample-content-view.has-flow-cta iframe{height:calc(100% - 78px)}
   .flow-cta-bar{padding:9px 10px calc(9px + env(safe-area-inset-bottom))}.flow-cta-button{min-height:60px;padding:9px 16px}.flow-cta-button>span{font-size:16px}
   .pilot-plan-shell{width:calc(100% - 32px)}.pilot-plan-header{grid-template-columns:1fr;gap:28px;padding:42px 0 30px}.pilot-plan-header h1{font-size:3.15rem}.pilot-plan-header>div>p:last-child{font-size:14px}.plan-sample-icon{margin-top:-1px}.plan-meta{width:100%}
   .plan-section{padding:32px 0}.plan-section>.eyebrow{margin-bottom:18px}.plan-section h2{font-size:1.8rem}.plan-title-row{display:grid;gap:12px}.plan-title-row>strong{font-size:16px}.plan-facts{grid-template-columns:1fr;margin-top:24px}.plan-facts>div,.plan-facts>div+div{padding:15px 0;border-left:0;border-bottom:1px solid var(--leg-border)}.plan-facts>div:last-child{border-bottom:0}
@@ -809,19 +809,25 @@ html{font-size:16.4px}
 .pilot-plan-view .timeline-phase-content dl>div:nth-child(2) dt{color:color-mix(in oklch,#a45d23 65%,var(--leg-muted-foreground))}
 .pilot-plan-view .plan-payment-rules{display:grid;gap:12px;margin:0;padding-left:24px}
 .pilot-plan-view .plan-payment-rules li{padding-left:4px;color:var(--leg-foreground);font-size:var(--plan-value-size);font-weight:500;line-height:1.45}
+.live-demo-view.has-flow-cta iframe{height:calc(100% - 64px)}
+.live-demo-view .flow-cta-bar{padding:0}
 .live-demo-view .flow-cta-button{position:relative;justify-content:center;text-align:center}
 .live-demo-view .flow-cta-button>span{display:block}
 .live-demo-view .flow-cta-button>b{position:absolute;right:20px}
+@media(max-width:700px){.live-demo-view.has-flow-cta iframe{height:calc(100% - 60px)}}
 .pilot-plan-view .flow-cta-button{position:relative;justify-content:center;text-align:center}
 .pilot-plan-view .flow-cta-button>span{display:block}
 .pilot-plan-view .flow-cta-button>b{position:absolute;right:20px}
 .global-urgency-rail :is(.urgency-kicker small,.urgency-message strong,.global-countdown small){text-transform:none}
 .post-meeting-app.is-live-demo.has-global-urgency{animation:demo-urgency-space .34s 3s cubic-bezier(.4,0,.2,1) forwards}
+.post-meeting-app.is-live-demo.has-global-urgency .live-demo-view.has-flow-cta{height:calc(100dvh - 50px);animation:demo-live-height .34s 3s cubic-bezier(.4,0,.2,1) forwards}
 .post-meeting-app.is-live-demo .global-urgency-rail{animation:demo-urgency-hide .34s 3s cubic-bezier(.4,0,.2,1) forwards}
 @keyframes demo-urgency-hide{to{visibility:hidden;transform:translateY(-100%)}}
 @keyframes demo-urgency-space{to{padding-top:0}}
+@keyframes demo-live-height{to{height:100dvh}}
 @media(prefers-reduced-motion:reduce){
   .post-meeting-app.is-live-demo.has-global-urgency{animation-duration:1ms}
+  .post-meeting-app.is-live-demo.has-global-urgency .live-demo-view.has-flow-cta{animation-duration:1ms}
   .post-meeting-app.is-live-demo .global-urgency-rail{animation-duration:1ms}
 }
 
