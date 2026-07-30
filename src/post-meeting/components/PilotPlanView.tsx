@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { orderTotal, resolvedLineItems } from '../config'
+import { orderTotal, readApiJson, resolvedLineItems } from '../config'
 import type { FinanceHandoff, OrderState } from '../types'
 import { PaymentLinkModal } from './PaymentLinkModal'
 
@@ -48,6 +48,11 @@ const pilotPhases = [
   },
 ]
 
+const formatDate = (value?: string) => {
+  const parsed = value ? Date.parse(value) : Number.NaN
+  return Number.isFinite(parsed) ? date.format(new Date(parsed)) : '—'
+}
+
 const copyToClipboard = async (value: string) => {
   if (navigator.clipboard?.writeText) {
     await navigator.clipboard.writeText(value)
@@ -65,25 +70,32 @@ const copyToClipboard = async (value: string) => {
 
 export function PilotPlanView({
   order,
+  magnetSn,
   now,
   onBack,
   onOpenContent,
   onHandoffCreated,
 }: {
   order: OrderState
+  magnetSn: string
   now: number
   onBack: () => void
   onOpenContent: () => void
-  onHandoffCreated: (handoff: FinanceHandoff) => void
+  onHandoffCreated: (handoff: FinanceHandoff, dbOrderId: number) => void
 }) {
   const [creatingLink, setCreatingLink] = useState(false)
   const [paymentUrl, setPaymentUrl] = useState('')
   const [linkError, setLinkError] = useState('')
   const [copied, setCopied] = useState(false)
   const total = orderTotal(order, now)
-  const company = order.shippingAddress.companyName || order.billing.companyName || 'Client'
+  const brand = order.brandName || order.shippingAddress.companyName || 'Client'
+  const createdDate = formatDate(order.createdAt)
 
   const createPaymentLink = async () => {
+    if (!magnetSn) {
+      setLinkError('Missing magnet serial number.')
+      return
+    }
     setCreatingLink(true)
     setLinkError('')
     setCopied(false)
@@ -92,17 +104,19 @@ export function PilotPlanView({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          order,
-          total,
+          sn: magnetSn,
+          quantity: order.quantity,
           baseUrl: window.location.origin,
           proposalPath: window.location.pathname,
         }),
       })
-      const data = await response.json()
-      if (!response.ok) throw new Error(data.error || 'Unable to create the finance payment link.')
-      const handoff = data.handoff as FinanceHandoff
+      const data = await readApiJson<{ handoff: FinanceHandoff; orderId: number }>(
+        response,
+        'Unable to create the finance payment link.',
+      )
+      const handoff = data.handoff
       setPaymentUrl(handoff.paymentUrl)
-      onHandoffCreated(handoff)
+      onHandoffCreated(handoff, data.orderId)
       try {
         await copyToClipboard(handoff.paymentUrl)
         setCopied(true)
@@ -139,8 +153,8 @@ export function PilotPlanView({
             <h1>Pilot Plan</h1>
           </div>
           <dl className="plan-meta">
-            <div><dt>Brand</dt><dd>{company}</dd></div>
-            <div><dt>Created date</dt><dd>{date.format(new Date())}</dd></div>
+            <div><dt>Brand</dt><dd>{brand}</dd></div>
+            <div><dt>Created date</dt><dd>{createdDate}</dd></div>
           </dl>
         </header>
 
@@ -179,7 +193,7 @@ export function PilotPlanView({
               ))}
             </div>
           </details>
-          <div className="section-title-with-note plan-price-heading"><h3>Price</h3><span>Valid until {date.format(new Date(order.offerExpiresAt))}</span></div>
+          <div className="section-title-with-note plan-price-heading"><h3>Price</h3><span>Valid until {formatDate(order.offerExpiresAt)}</span></div>
           <div className="plan-line-items">
             {resolvedLineItems(order, now).map((item) => (
               <div key={item.id}>
@@ -234,7 +248,7 @@ export function PilotPlanView({
       </div>
 
       <div className="flow-cta-bar">
-        <button type="button" className="flow-cta-button" onClick={createPaymentLink} disabled={creatingLink}>
+        <button type="button" className="flow-cta-button" onClick={createPaymentLink} disabled={creatingLink || !order.pricing.loaded}>
           <span>{creatingLink ? 'Creating secure link…' : 'Place Order'}</span>
           <b>→</b>
         </button>

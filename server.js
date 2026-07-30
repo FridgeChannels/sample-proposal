@@ -1,20 +1,23 @@
 const http = require('http');
 const fs = require('fs/promises');
 const path = require('path');
-const crypto = require('crypto');
 const {
   lookupSamplePhase,
+  loadPilotQuote,
+  computePilotTotals,
+  savePilotAddress,
+  createPilotOrder,
+  updateOrderShipping,
+  createFinanceHandoff,
   getFinanceHandoff,
   updateFinanceHandoffStatus,
+  createStripeInvoiceForOrder,
   moneyRound,
 } = require('./pilot-commerce');
 
 const ROOT = __dirname;
 const DIST_ROOT = path.join(__dirname, 'dist');
 const DASHBOARD2_ROOT = path.join(require('os').homedir(), 'Downloads', 'DTC-dashboard-2');
-
-const FINANCE_HANDOFFS = new Map();
-const FINANCE_LINK_TTL_MS = 14 * 24 * 60 * 60 * 1000;
 
 async function readJsonBody(req) {
   const chunks = [];
@@ -31,7 +34,6 @@ function normalizeBaseUrl(value) {
 }
 
 async function loadDotEnv() {
-  // Prefer local .env; also accept sibling fc_lead_data/.env so admin + sample share Supabase keys locally.
   const envPaths = [
     path.join(ROOT, '.env'),
     path.join(ROOT, '..', 'fc_lead_data', '.env'),
@@ -53,7 +55,7 @@ async function loadDotEnv() {
         }
       });
     } catch (error) {
-      // .env is optional; production hosts usually inject environment variables directly.
+      // .env is optional
     }
   }
 }
@@ -82,9 +84,7 @@ async function loadFallbackProposal(brand) {
 
 async function loadFallbackProposalById(proposalId) {
   const target = String(proposalId || '').trim();
-  if (!target) {
-    throw new Error('Missing proposal id');
-  }
+  if (!target) throw new Error('Missing proposal id');
   const dir = path.join(ROOT, 'data', 'proposals');
   const files = await fs.readdir(dir);
   for (const file of files) {
@@ -108,7 +108,6 @@ async function serveStatic(req, res) {
   const requestUrl = new URL(req.url, `http://${req.headers.host}`);
   const pathname = decodeURIComponent(requestUrl.pathname);
 
-  // Serve /dashboard2/* directly from DTC-dashboard-2 folder (no copy needed)
   if (pathname.startsWith('/dashboard2')) {
     let subPath = pathname === '/dashboard2' || pathname === '/dashboard2/' || pathname === '/dashboard2/index.html'
       ? '/FC Brand Dashboard.html'
@@ -125,7 +124,6 @@ async function serveStatic(req, res) {
   }
 
   const filePath = path.normalize(path.join(ROOT, pathname));
-
   if (!filePath.startsWith(ROOT)) {
     res.writeHead(403);
     res.end('Forbidden');
@@ -133,7 +131,6 @@ async function serveStatic(req, res) {
   }
 
   const ext = path.extname(filePath);
-  // Vite-built bundles (e.g. /assets/*.js) live in dist/, project files in ROOT
   for (const candidate of [filePath, path.normalize(path.join(DIST_ROOT, pathname))]) {
     try {
       const body = await fs.readFile(candidate);
@@ -141,20 +138,13 @@ async function serveStatic(req, res) {
       res.end(body);
       return;
     } catch (error) {
-      // try next candidate
+      // try next
     }
   }
   res.writeHead(404);
   res.end('Not found');
 }
 
-/**
- * Customer sample links are served at short /p/{sn} (and legacy /gift-proposal/{sn}).
- * Status comes from Supabase magnet_brand_param:
- *   status 3 → live deal room (post-meeting.html)
- *   anything else / missing → sample deck (gift-challenge-react.html)
- * The browser URL never redirects; only the HTML body changes.
- */
 const GIFT_PROPOSAL_ROUTE_RE = /^\/(?:gift-proposal|p)(?:\/([^/?#]+))?\/?$/;
 
 async function serveDistHtml(res, fileName, missingMessage) {
@@ -172,22 +162,13 @@ async function serveDistHtml(res, fileName, missingMessage) {
 }
 
 async function serveGiftChallenge(res) {
-  await serveDistHtml(
-    res,
-    'gift-challenge-react.html',
-    'Failed to load gift challenge proposal (run `npm run build` to generate dist/)'
-  );
+  await serveDistHtml(res, 'gift-challenge-react.html', 'Failed to load gift challenge proposal (run `npm run build` to generate dist/)');
 }
 
 async function servePostMeeting(res) {
-  await serveDistHtml(
-    res,
-    'post-meeting.html',
-    'Failed to load post-meeting deal room (run `npm run build` to generate dist/)'
-  );
+  await serveDistHtml(res, 'post-meeting.html', 'Failed to load post-meeting deal room (run `npm run build` to generate dist/)');
 }
 
-/** Serve sample or live HTML for /p/{sn} without changing the request URL. */
 async function serveSampleOrLiveBySn(res, sn) {
   const { phase } = await lookupSamplePhase(sn);
   if (phase === 'live') {
@@ -197,8 +178,7 @@ async function serveSampleOrLiveBySn(res, sn) {
   await serveGiftChallenge(res);
 }
 
-/** Map DB invoice into the OrderState shape FinanceView / App expect. */
-function invoiceToClientOrder(invoice, handoff) {
+function invoiceToClientOrder(invoice, handoff, quoteExtras = {}) {
   const lineItems = (invoice.items || []).map((item) => ({
     id: String(item.id),
     label: item.name,
@@ -233,18 +213,20 @@ function invoiceToClientOrder(invoice, handoff) {
     currency: invoice.currency || 'USD',
     unitPrice: invoice.unitPrice,
     tax: invoice.taxFee || 0,
-    offerStartedAt: '',
-    offerExpiresAt: '',
+    offerStartedAt: quoteExtras.offerStartedAt || '',
+    offerExpiresAt: quoteExtras.offerExpiresAt || '',
+    brandName: quoteExtras.brandName || '',
+    createdAt: quoteExtras.customerCreatedAt || '',
     package: {
-      id: invoice.packageCode || 'pilot',
-      code: invoice.packageCode || undefined,
+      id: invoice.packageCode || quoteExtras.packageId || 'pilot',
+      code: invoice.packageCode || quoteExtras.packageCode || undefined,
       name: invoice.packageName,
-      description: '',
+      description: quoteExtras.packageDescription || '',
       campaignType: invoice.packageName,
       serviceModel: 'Fully managed by FridgeChannel',
       features: [],
       integrations: [],
-      includedServices: [],
+      includedServices: quoteExtras.includedServices || [],
     },
     lineItems,
     scopeIncluded: [],
@@ -266,7 +248,7 @@ function invoiceToClientOrder(invoice, handoff) {
     shippingAddress: invoice.shippingAddress
       ? {
           recipientName: invoice.shippingAddress.recipientName,
-          companyName: '',
+          companyName: quoteExtras.brandName || '',
           addressLine1: invoice.shippingAddress.addressLine1,
           addressLine2: invoice.shippingAddress.addressLine2 || '',
           city: invoice.shippingAddress.city,
@@ -274,10 +256,11 @@ function invoiceToClientOrder(invoice, handoff) {
           postalCode: invoice.shippingAddress.postalCode,
           country: invoice.shippingAddress.country,
           phone: invoice.shippingAddress.phone,
+          email: invoice.shippingAddress.email || '',
         }
       : {
           recipientName: '',
-          companyName: '',
+          companyName: quoteExtras.brandName || '',
           addressLine1: '',
           addressLine2: '',
           city: '',
@@ -285,9 +268,10 @@ function invoiceToClientOrder(invoice, handoff) {
           postalCode: '',
           country: 'US',
           phone: '',
+          email: '',
         },
     billing: {
-      companyName: '',
+      companyName: quoteExtras.brandName || '',
       contactName: invoice.approval?.name || '',
       address: invoice.shippingAddress?.formattedAddress || '',
       poNumber: '',
@@ -310,9 +294,20 @@ function invoiceToClientOrder(invoice, handoff) {
   };
 }
 
-function paymentUrlForHandoff(req, requestUrl, handoff) {
+/**
+ * Public origin of the request. Behind the Vite dev proxy (and any reverse
+ * proxy) req.headers.host is the internal target, so forwarded headers win.
+ */
+function publicOrigin(req, requestUrl) {
+  const forwardedHost = String(req.headers['x-forwarded-host'] || '').split(',')[0].trim();
+  const forwardedProto = String(req.headers['x-forwarded-proto'] || '').split(',')[0].trim();
+  const host = forwardedHost || req.headers.host;
+  const protocol = forwardedProto ? `${forwardedProto}:` : requestUrl.protocol;
+  return `${protocol}//${host}`;
+}
+
+function paymentUrlForHandoff(hostBase, handoff) {
   const sn = handoff.magnetSn || '';
-  const hostBase = `${requestUrl.protocol}//${req.headers.host}`;
   return sn
     ? `${hostBase}/p/${encodeURIComponent(sn)}?finance=${handoff.token}#finance`
     : `${hostBase}/post-meeting.html?finance=${handoff.token}#finance`;
@@ -321,32 +316,106 @@ function paymentUrlForHandoff(req, requestUrl, handoff) {
 async function handleRequest(req, res) {
   const requestUrl = new URL(req.url, `http://${req.headers.host}`);
 
+  if (requestUrl.pathname === '/api/pilot-quote' && req.method === 'GET') {
+    try {
+      const sn = requestUrl.searchParams.get('sn') || '';
+      const quote = await loadPilotQuote(sn);
+      const totals = computePilotTotals(quote);
+      await sendJson(res, 200, { quote, totals });
+    } catch (error) {
+      await sendJson(res, error.status || 500, { error: error.message || 'Unable to load pilot quote.', code: error.code });
+    }
+    return;
+  }
+
+  if (requestUrl.pathname === '/api/pilot-orders/address' && req.method === 'POST') {
+    try {
+      const body = await readJsonBody(req);
+      const sn = String(body.sn || '').trim();
+      if (!sn) return sendJson(res, 400, { error: 'Magnet SN is required.' });
+      if (!body.address) return sendJson(res, 400, { error: 'Address is required.' });
+      const saved = await savePilotAddress({ sn, address: body.address });
+      await sendJson(res, 201, { address: saved });
+    } catch (error) {
+      await sendJson(res, error.status || 500, { error: error.message || 'Unable to save address.', code: error.code });
+    }
+    return;
+  }
+
+  if (requestUrl.pathname === '/api/pilot-orders/shipping' && req.method === 'PATCH') {
+    try {
+      const body = await readJsonBody(req);
+      const orderId = Number(body.orderId);
+      const shippingAddressId = Number(body.shippingAddressId);
+      const result = await updateOrderShipping({ orderId, shippingAddressId });
+      await sendJson(res, 200, result);
+    } catch (error) {
+      await sendJson(res, error.status || 500, { error: error.message || 'Unable to update shipping.', code: error.code });
+    }
+    return;
+  }
+
+  if (requestUrl.pathname === '/api/stripe/invoices' && req.method === 'POST') {
+    try {
+      const body = await readJsonBody(req);
+      const orderId = Number(body.orderId);
+      const paymentEmail = String(body.paymentEmail || '').trim();
+      const handoffToken = body.handoffToken ? String(body.handoffToken).trim() : undefined;
+      if (!Number.isFinite(orderId)) return sendJson(res, 400, { error: 'orderId is required.' });
+      if (!paymentEmail.includes('@')) return sendJson(res, 400, { error: 'A valid payment email is required.' });
+
+      const result = await createStripeInvoiceForOrder({
+        orderId,
+        paymentEmail,
+        handoffToken,
+        payerName: body.payerName ? String(body.payerName).trim() : undefined,
+      });
+      await sendJson(res, 200, {
+        invoiceId: result.id,
+        hostedInvoiceUrl: result.hostedInvoiceUrl,
+        reused: result.reused,
+      });
+    } catch (error) {
+      await sendJson(res, error.status || 500, { error: error.message || 'Unable to create Stripe invoice.', code: error.code });
+    }
+    return;
+  }
+
   if (requestUrl.pathname === '/api/finance-handoffs' && req.method === 'POST') {
     try {
       const body = await readJsonBody(req);
-      if (!body.order) return sendJson(res, 400, { error: 'Missing order details.' });
-      const total = Number(body.total);
-      if (!Number.isFinite(total) || total <= 0) return sendJson(res, 400, { error: 'Invalid order total.' });
-      const token = crypto.randomBytes(24).toString('hex');
-      let baseUrl;
-      try { baseUrl = normalizeBaseUrl(body.baseUrl); }
-      catch { return sendJson(res, 400, { error: 'Invalid proposal URL.' }); }
-      let paymentLocation;
-      try {
-        paymentLocation = new URL(body.proposalPath || '/post-meeting.html', baseUrl);
-        if (paymentLocation.origin !== baseUrl) throw new Error('Invalid proposal path.');
-      } catch {
-        return sendJson(res, 400, { error: 'Invalid proposal path.' });
+      const sn = String(body.sn || '').trim();
+      if (!sn) return sendJson(res, 400, { error: 'Magnet SN is required.' });
+
+      const quote = await loadPilotQuote(sn);
+      const created = await createPilotOrder({ sn, quantity: body.quantity });
+      const toEmail = String(body.toEmail || quote.customerEmail || '').trim();
+      if (!toEmail.includes('@')) {
+        return sendJson(res, 400, { error: 'Customer email is missing; configure customer.email before creating a finance link.' });
       }
-      paymentLocation.search = '';
-      paymentLocation.searchParams.set('finance', token);
-      paymentLocation.hash = 'finance';
-      const paymentUrl = paymentLocation.toString();
-      const createdAt = new Date().toISOString();
-      const record = { token, order: body.order, total, status: 'payment_pending', paymentUrl, createdAt, expiresAt: new Date(Date.now() + FINANCE_LINK_TTL_MS).toISOString() };
-      FINANCE_HANDOFFS.set(token, record);
-      await sendJson(res, 201, { handoff: { token, status: record.status, paymentUrl, sentAt: createdAt, expiresAt: record.expiresAt } });
-    } catch (error) { await sendJson(res, 500, { error: error.message || 'Unable to send finance handoff.' }); }
+
+      const handoff = await createFinanceHandoff({
+        orderId: created.orderId,
+        magnetSn: sn,
+        toEmail,
+        toName: quote.brandName || undefined,
+      });
+
+      let baseUrl;
+      try { baseUrl = normalizeBaseUrl(body.baseUrl || publicOrigin(req, requestUrl)); }
+      catch { return sendJson(res, 400, { error: 'Invalid proposal URL.' }); }
+
+      const paymentUrl = paymentUrlForHandoff(baseUrl, { token: handoff.token, magnetSn: sn });
+
+      await sendJson(res, 201, {
+        handoff: { ...handoff, paymentUrl },
+        orderId: created.orderId,
+        orderNo: created.orderNo,
+        totals: created.totals,
+      });
+    } catch (error) {
+      await sendJson(res, error.status || 500, { error: error.message || 'Unable to create finance handoff.', code: error.code });
+    }
     return;
   }
 
@@ -354,43 +423,11 @@ async function handleRequest(req, res) {
   if (handoffMatch) {
     if (!['GET', 'PATCH'].includes(req.method)) { await sendJson(res, 405, { error: 'Method not allowed.' }); return; }
 
-    // Prefer in-memory (current session), then Supabase finance_handoff (survives restarts).
-    const memory = FINANCE_HANDOFFS.get(handoffMatch[1]);
-    if (memory) {
-      if (Date.now() > Date.parse(memory.expiresAt)) {
-        memory.status = 'expired';
-        await sendJson(res, 410, { error: 'This finance link has expired.' });
-        return;
-      }
-      if (req.method === 'PATCH') {
-        try {
-          const body = await readJsonBody(req);
-          const allowed = ['payment_pending', 'paid', 'revoked'];
-          if (!allowed.includes(body.status)) return sendJson(res, 400, { error: 'Invalid handoff status.' });
-          memory.status = body.status;
-        } catch (error) {
-          await sendJson(res, 400, { error: 'Invalid status update.' });
-          return;
-        }
-      }
-      await sendJson(res, 200, {
-        order: memory.order,
-        handoff: {
-          token: memory.token,
-          status: memory.status,
-          paymentUrl: memory.paymentUrl,
-          sentAt: memory.createdAt,
-          expiresAt: memory.expiresAt,
-        },
-      });
-      return;
-    }
-
     try {
       if (req.method === 'PATCH') {
         const body = await readJsonBody(req);
         const updated = await updateFinanceHandoffStatus(handoffMatch[1], body.status);
-        const paymentUrl = paymentUrlForHandoff(req, requestUrl, updated.handoff);
+        const paymentUrl = paymentUrlForHandoff(publicOrigin(req, requestUrl), updated.handoff);
         await sendJson(res, 200, {
           order: invoiceToClientOrder(updated.invoice, { ...updated.handoff, paymentUrl }),
           invoice: updated.invoice,
@@ -403,9 +440,28 @@ async function handleRequest(req, res) {
       if (loaded.handoff.status === 'sent' || loaded.handoff.status === 'preview') {
         loaded = await updateFinanceHandoffStatus(handoffMatch[1], 'viewed');
       }
-      const paymentUrl = paymentUrlForHandoff(req, requestUrl, loaded.handoff);
+      const paymentUrl = paymentUrlForHandoff(publicOrigin(req, requestUrl), loaded.handoff);
+
+      let quoteExtras = {};
+      if (loaded.invoice.magnetSn) {
+        try {
+          const quote = await loadPilotQuote(loaded.invoice.magnetSn);
+          quoteExtras = {
+            brandName: quote.brandName,
+            customerCreatedAt: quote.customerCreatedAt,
+            packageDescription: quote.package.description,
+            packageId: quote.package.id,
+            packageCode: quote.package.code,
+            includedServices: quote.includedServices,
+            offerExpiresAt: quote.discount.expiresAt || '',
+          };
+        } catch (error) {
+          console.warn('[finance-handoff] quote enrich failed:', error.message);
+        }
+      }
+
       await sendJson(res, 200, {
-        order: invoiceToClientOrder(loaded.invoice, { ...loaded.handoff, paymentUrl }),
+        order: invoiceToClientOrder(loaded.invoice, { ...loaded.handoff, paymentUrl }, quoteExtras),
         invoice: loaded.invoice,
         handoff: { ...loaded.handoff, paymentUrl },
       });
@@ -416,7 +472,6 @@ async function handleRequest(req, res) {
     return;
   }
 
-  // Phase lookup for Vite middleware and debugging: GET /api/sample-phase?sn=
   if (requestUrl.pathname === '/api/sample-phase') {
     if (req.method !== 'GET') {
       await sendJson(res, 405, { error: 'Method not allowed.' });
@@ -433,7 +488,6 @@ async function handleRequest(req, res) {
     return;
   }
 
-  // Explicit live entry still served directly (finance handoffs, bookmarks).
   if (requestUrl.pathname === '/post-meeting.html') {
     await servePostMeeting(res);
     return;
@@ -442,7 +496,6 @@ async function handleRequest(req, res) {
   const proposalRouteMatch = requestUrl.pathname.match(GIFT_PROPOSAL_ROUTE_RE);
   if (proposalRouteMatch) {
     const sn = proposalRouteMatch[1] ? decodeURIComponent(proposalRouteMatch[1]) : '';
-    // Bare /p or /gift-proposal → sample deck; /p/{sn} chooses sample vs live from Supabase.
     if (!sn) {
       await serveGiftChallenge(res);
       return;
@@ -504,9 +557,8 @@ async function handleRequest(req, res) {
 
 if (require.main === module) {
   loadDotEnv().then(() => {
-  const port = Number(process.env.PORT || 4173);
+    const port = Number(process.env.PORT || 4173);
     const server = http.createServer(handleRequest);
-
     server.listen(port, () => {
       console.log(`Proposal server running at http://localhost:${port}`);
     });

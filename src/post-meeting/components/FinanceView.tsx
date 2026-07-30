@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { orderTotal, resolvedLineItems } from '../config'
+import { orderTotal, readApiJson, resolvedLineItems } from '../config'
 import type { OrderState, PaymentMethod, ShippingAddress } from '../types'
 
 const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 })
@@ -12,15 +12,30 @@ const paymentMethodLabels: Record<PaymentMethod, string> = {
   card: 'Credit card',
 }
 
-export function FinanceView({ order, now, onChange, onBack, externalHandoff = false }: { order: OrderState; now: number; onChange?: (order: OrderState) => void; onBack: () => void; externalHandoff?: boolean }) {
+export function FinanceView({
+  order,
+  magnetSn,
+  now,
+  onChange,
+  onBack,
+  externalHandoff = false,
+}: {
+  order: OrderState
+  magnetSn: string
+  now: number
+  onChange?: (order: OrderState) => void
+  onBack: () => void
+  externalHandoff?: boolean
+}) {
   const total = orderTotal(order, now)
   const isPaid = order.status === 'paid' || order.financeHandoff?.status === 'paid'
   const previewEmptyShipping = import.meta.env.DEV && new URLSearchParams(window.location.search).get('previewAddress') === 'empty'
   const displayedShipping = previewEmptyShipping
-    ? { recipientName: '', companyName: '', addressLine1: '', addressLine2: '', city: '', state: '', postalCode: '', country: '', phone: '' }
+    ? { recipientName: '', companyName: '', addressLine1: '', addressLine2: '', city: '', state: '', postalCode: '', country: '', phone: '', email: '' }
     : order.shippingAddress
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card')
-  const [checkoutRequested, setCheckoutRequested] = useState(false)
+  const [paymentEmail, setPaymentEmail] = useState(displayedShipping.email || '')
+  const [paying, setPaying] = useState(false)
+  const [payError, setPayError] = useState('')
   const shippingComplete = [
     displayedShipping.recipientName,
     displayedShipping.addressLine1,
@@ -28,14 +43,85 @@ export function FinanceView({ order, now, onChange, onBack, externalHandoff = fa
     displayedShipping.state,
     displayedShipping.postalCode,
     displayedShipping.country,
-  ].every((value) => value.trim())
+    displayedShipping.phone,
+  ].every((value) => Boolean(value?.trim()))
+  const emailValid = paymentEmail.trim().includes('@')
+
   const updateShipping = (field: keyof ShippingAddress, value: string) => {
     onChange?.({ ...order, shippingAddress: { ...order.shippingAddress, [field]: value } })
   }
-  const selectPaymentMethod = (method: PaymentMethod) => {
-    setPaymentMethod(method)
-    setCheckoutRequested(false)
-    onChange?.({ ...order, paymentMethod: method })
+
+  const payWithStripeInvoice = async () => {
+    if (!magnetSn || !order.dbOrderId) {
+      setPayError('Order is not ready for payment.')
+      return
+    }
+    if (!shippingComplete) {
+      setPayError('Complete the shipping address before paying.')
+      return
+    }
+    if (!emailValid) {
+      setPayError('Enter a valid payment email.')
+      return
+    }
+
+    setPaying(true)
+    setPayError('')
+    try {
+      const addressResponse = await fetch('/api/pilot-orders/address', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sn: magnetSn,
+          address: { ...displayedShipping, email: paymentEmail.trim() },
+        }),
+      })
+      const addressData = await readApiJson<{ address: { id: number } }>(
+        addressResponse,
+        'Unable to save shipping address.',
+      )
+
+      const shippingResponse = await fetch('/api/pilot-orders/shipping', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderId: order.dbOrderId,
+          shippingAddressId: addressData.address.id,
+        }),
+      })
+      await readApiJson(shippingResponse, 'Unable to link shipping address.')
+
+      onChange?.({
+        ...order,
+        shippingAddress: { ...displayedShipping, email: paymentEmail.trim() },
+        shippingAddressId: addressData.address.id,
+      })
+
+      const invoiceResponse = await fetch('/api/stripe/invoices', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderId: order.dbOrderId,
+          paymentEmail: paymentEmail.trim(),
+          handoffToken: order.financeHandoff?.token,
+          payerName: displayedShipping.recipientName,
+        }),
+      })
+      const invoiceData = await readApiJson<{ hostedInvoiceUrl?: string }>(
+        invoiceResponse,
+        'Unable to create Stripe invoice.',
+      )
+
+      if (invoiceData.hostedInvoiceUrl) {
+        window.location.assign(invoiceData.hostedInvoiceUrl)
+        return
+      }
+      throw new Error('Stripe invoice URL was not returned.')
+    } catch (error) {
+      setPayError(error instanceof Error ? error.message : 'Unable to start payment.')
+    } finally {
+      setPaying(false)
+    }
   }
 
   if (!isPaid) return (
@@ -72,7 +158,7 @@ export function FinanceView({ order, now, onChange, onBack, externalHandoff = fa
           </section>
           <section className="finance-section shipping-section">
             <div className="section-heading">
-              <div><h2>Shipping address</h2><p>Enter the delivery location for the 1,000 pilot magnets.</p></div>
+              <div><h2>Shipping address</h2><p>Enter the delivery location for the {number.format(order.quantity)} pilot magnets.</p></div>
               <span className={`shipping-completion${shippingComplete ? ' is-complete' : ''}`}>{shippingComplete ? 'Complete' : 'To be completed'}</span>
             </div>
             <div className="finance-shipping-form form-grid">
@@ -84,21 +170,26 @@ export function FinanceView({ order, now, onChange, onBack, externalHandoff = fa
               <label className="shipping-state"><span>State</span><input autoComplete="shipping address-level1" placeholder="To be completed" value={displayedShipping.state} onChange={(event) => updateShipping('state', event.target.value)} /></label>
               <label className="shipping-zip"><span>ZIP code</span><input autoComplete="shipping postal-code" placeholder="To be completed" value={displayedShipping.postalCode} onChange={(event) => updateShipping('postalCode', event.target.value)} /></label>
               <label className="shipping-country"><span>Country</span><input autoComplete="shipping country-name" placeholder="To be completed" value={displayedShipping.country} onChange={(event) => updateShipping('country', event.target.value)} /></label>
+              <label className="shipping-phone"><span>Phone</span><input autoComplete="tel" placeholder="Required for delivery" value={displayedShipping.phone || ''} onChange={(event) => updateShipping('phone', event.target.value)} /></label>
             </div>
           </section>
         </div>
         <aside className="finance-side">
           <section className="finance-section payment-section">
-            <div className="section-heading"><h2>Payment method</h2></div>
-            <div className="payment-methods">
-              <label className={paymentMethod === 'card' ? 'is-selected' : ''}><input type="radio" name="payment-method" value="card" checked={paymentMethod === 'card'} onChange={() => selectPaymentMethod('card')} /><span><strong>Credit or debit card</strong><small>Secure card payment via Stripe</small></span><b>✓</b></label>
-            </div>
-            <div className="secure-fields"><div className="secure-head"><strong>Card payment</strong><small>Secured by Stripe</small></div><div className="form-grid"><label><span>Card number</span><input inputMode="numeric" placeholder="4242 4242 4242 4242" /></label><label><span>Expiry</span><input inputMode="numeric" placeholder="MM / YY" /></label><label><span>CVC</span><input inputMode="numeric" placeholder="CVC" /></label></div></div>
+            <div className="section-heading"><h2>Payment</h2></div>
+            <p className="invoice-package-description">Pay securely via Stripe Invoice. The amount is calculated on the server from your order — it cannot be changed from this page.</p>
+            <label className="full-field">
+              <span>Payment email</span>
+              <input type="email" autoComplete="email" placeholder="finance@company.com" value={paymentEmail} onChange={(event) => setPaymentEmail(event.target.value)} />
+              <small>Stripe will email the invoice and open the hosted payment page (due in 7 days).</small>
+            </label>
           </section>
           <div className="invoice-actions">
             <p className="eyebrow">Amount due</p><strong className="payment-total">{money.format(total)}</strong>
-            <button type="button" className="primary-action pay-invoice" onClick={() => setCheckoutRequested(true)}>Continue to pay <span>→</span></button>
-            {checkoutRequested && <p className="backend-note">Frontend preview only — the payment provider will be connected next.</p>}
+            <button type="button" className="primary-action pay-invoice" disabled={paying} onClick={payWithStripeInvoice}>
+              {paying ? 'Preparing invoice…' : 'Pay with Stripe Invoice'} <span>→</span>
+            </button>
+            {payError && <p className="backend-note">{payError}</p>}
             {!externalHandoff && <button type="button" className="text-button" onClick={onBack}>Back to order</button>}
           </div>
         </aside>
@@ -131,7 +222,7 @@ export function FinanceView({ order, now, onChange, onBack, externalHandoff = fa
             <div className="section-heading"><h2>Payment information</h2></div>
             <dl className="receipt-details">
               <div><dt>Status</dt><dd>Paid</dd></div>
-              <div><dt>Payment method</dt><dd>{paymentMethodLabels[order.paymentMethod]}</dd></div>
+              <div><dt>Payment method</dt><dd>Stripe Invoice</dd></div>
               {order.paidAt && <div><dt>Paid on</dt><dd>{date.format(new Date(order.paidAt))}</dd></div>}
               <div><dt>Payment reference</dt><dd>{order.orderNumber}</dd></div>
             </dl>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { defaultOrder, FIXED_MAGNET_QUANTITY } from './config'
+import { applyQuoteToOrder, defaultOrder, FIXED_MAGNET_QUANTITY, PILOT_OFFER_DURATION_MS, readApiJson, snFromLocation, type PilotQuoteApiResponse } from './config'
 import type { OrderState, ViewKey } from './types'
 import { LiveDemoView } from './components/LiveDemoView'
 import { SampleContentView } from './components/SampleContentView'
@@ -16,7 +16,6 @@ const viewFromHash = (): ViewKey => {
 }
 
 const STORAGE_KEY = 'fc-order-preview-v1'
-const PILOT_OFFER_DURATION_MS = 8 * 24 * 60 * 60 * 1000
 
 const ensureOfferWindow = (order: OrderState): OrderState => {
   const parsedStart = Date.parse(order.offerStartedAt)
@@ -57,7 +56,15 @@ const loadOrder = (): OrderState => {
       ? defaultOrder.package
       : { ...defaultOrder.package, ...storedPackage }
     const migratedStatus = parsed.status === 'ready_for_approval' || parsed.status === 'approved' ? 'ready_for_checkout' : parsed.status
-    return applyStatusPreview(ensureOfferWindow({ ...defaultOrder, ...parsed, quantity: FIXED_MAGNET_QUANTITY, status: migratedStatus || defaultOrder.status, approval: undefined, package: packageSelection, timeline: defaultOrder.timeline }))
+    return applyStatusPreview(ensureOfferWindow({
+      ...defaultOrder,
+      ...parsed,
+      quantity: FIXED_MAGNET_QUANTITY,
+      status: migratedStatus || defaultOrder.status,
+      approval: undefined,
+      package: packageSelection,
+      timeline: defaultOrder.timeline,
+    }))
   } catch {
     return applyStatusPreview(ensureOfferWindow(defaultOrder))
   }
@@ -65,15 +72,18 @@ const loadOrder = (): OrderState => {
 
 export function App() {
   const financeToken = new URLSearchParams(window.location.search).get('finance')
+  const magnetSn = snFromLocation()
   const [view, setView] = useState<ViewKey>(viewFromHash)
   const [demoMounted, setDemoMounted] = useState(view === 'demo')
   const [order, setOrder] = useState<OrderState>(loadOrder)
   const [now, setNow] = useState(Date.now)
   const [handoffError, setHandoffError] = useState('')
   const [handoffLoading, setHandoffLoading] = useState(Boolean(financeToken))
+  const [quoteLoading, setQuoteLoading] = useState(Boolean(magnetSn && !financeToken))
+  const [quoteError, setQuoteError] = useState('')
   const offerNow = previewOfferNow(order, now)
   const paymentComplete = order.status === 'paid' || order.financeHandoff?.status === 'paid'
-  const showGlobalUrgency = !financeToken && !paymentComplete
+  const showGlobalUrgency = !financeToken && !paymentComplete && order.pricing.loaded
 
   useEffect(() => {
     const syncView = () => setView(viewFromHash())
@@ -96,19 +106,35 @@ export function App() {
   }, [])
 
   useEffect(() => {
+    if (!magnetSn || financeToken) {
+      setQuoteLoading(false)
+      return
+    }
+    setQuoteLoading(true)
+    setQuoteError('')
+    fetch(`/api/pilot-quote?sn=${encodeURIComponent(magnetSn)}`)
+      .then((response) => readApiJson<PilotQuoteApiResponse>(response, 'Unable to load pilot pricing.'))
+      .then((payload) => {
+        setOrder((current) => applyQuoteToOrder({ ...current, pricing: { ...current.pricing, loaded: false } }, payload))
+      })
+      .catch((error) => {
+        setQuoteError(error instanceof Error ? error.message : 'Unable to load pilot pricing.')
+      })
+      .finally(() => setQuoteLoading(false))
+  }, [financeToken, magnetSn])
+
+  useEffect(() => {
     const token = financeToken
     if (!token) return
     fetch(`/api/finance-handoffs/${token}`)
       .then(async response => {
-        const data = await response.json()
-        if (!response.ok) throw new Error(data.error || 'Unable to open finance link.')
+        const data = await readApiJson<{ order: OrderState; handoff: NonNullable<OrderState['financeHandoff']> }>(response, 'Unable to open finance link.')
         const handoffOrderStatus = data.handoff.status === 'paid' ? 'paid' : 'payment_pending'
-        setOrder({ ...data.order, quantity: FIXED_MAGNET_QUANTITY, status: handoffOrderStatus, financeHandoff: data.handoff })
+        setOrder({ ...data.order, quantity: data.order.quantity || FIXED_MAGNET_QUANTITY, status: handoffOrderStatus, financeHandoff: data.handoff })
         openView('finance')
       })
       .catch(error => {
         setHandoffError(error.message)
-        // Drop stale handoff from local draft so the 5s poll does not keep 404ing.
         setOrder((current) => {
           if (current.financeHandoff?.token !== token) return current
           const { financeHandoff: _removed, ...rest } = current
@@ -137,11 +163,14 @@ export function App() {
           return response.ok ? response.json() : null
         })
         .then((data) => {
+          // Track handoff progress only; the quote already owns pricing and the
+          // offer window, which the handoff payload does not carry.
           if (data?.handoff && data.handoff.status !== order.financeHandoff?.status) {
             setOrder((current) => ({
               ...current,
               financeHandoff: data.handoff,
               status: data.handoff.status === 'paid' ? 'paid' : current.status,
+              paidAt: data.handoff.status === 'paid' ? current.paidAt || new Date().toISOString() : current.paidAt,
             }))
           }
         })
@@ -156,17 +185,38 @@ export function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
+  const blockingError = handoffError || quoteError
+  const blockingLoading = handoffLoading || (quoteLoading && !financeToken)
+
   return (
     <div className={`post-meeting-app${view === 'demo' ? ' is-live-demo' : ''}${view === 'plan' ? ' has-plan-dock' : ''}${financeToken ? ' is-finance-handoff' : showGlobalUrgency ? ' has-global-urgency' : ''}`}>
-      {handoffLoading && <main className="finance-empty"><p className="eyebrow">SECURE FINANCE LINK</p><h1>Loading payment request…</h1></main>}
-      {handoffError && <main className="finance-empty"><h1>Finance link unavailable.</h1><p>{handoffError}</p></main>}
-      {!handoffLoading && !handoffError && <>
+      {blockingLoading && <main className="finance-empty"><p className="eyebrow">LIVE PILOT</p><h1>Loading proposal data…</h1></main>}
+      {blockingError && <main className="finance-empty"><h1>Proposal unavailable.</h1><p>{blockingError}</p></main>}
+      {!blockingLoading && !blockingError && <>
       {showGlobalUrgency && <GlobalUrgencyRail order={order} now={offerNow} onNavigate={openView} />}
       {demoMounted && !financeToken && <LiveDemoView active={view === 'demo'} onSeePlan={() => openView('plan')} />}
       {view === 'content' && <SampleContentView onBack={() => openView('plan')} />}
-      {view === 'plan' && <PilotPlanView order={order} now={offerNow} onBack={() => window.history.back()} onOpenContent={() => openView('content')} onHandoffCreated={(financeHandoff) => setOrder(current => ({ ...current, financeHandoff, status: 'payment_pending' }))} />}
+      {view === 'plan' && order.pricing.loaded && (
+        <PilotPlanView
+          order={order}
+          magnetSn={magnetSn || order.pricing.magnetSn || ''}
+          now={offerNow}
+          onBack={() => window.history.back()}
+          onOpenContent={() => openView('content')}
+          onHandoffCreated={(financeHandoff, dbOrderId) => setOrder(current => ({ ...current, financeHandoff, dbOrderId, status: 'payment_pending' }))}
+        />
+      )}
       {view === 'address' && <AddressView order={order} onChange={setOrder} onBack={() => openView('plan')} />}
-      {view === 'finance' && <FinanceView order={order} now={offerNow} onChange={setOrder} onBack={() => openView('plan')} externalHandoff={Boolean(financeToken)} />}
+      {view === 'finance' && (
+        <FinanceView
+          order={order}
+          magnetSn={magnetSn || order.pricing.magnetSn || ''}
+          now={offerNow}
+          onChange={setOrder}
+          onBack={() => openView('plan')}
+          externalHandoff={Boolean(financeToken)}
+        />
+      )}
       </>}
     </div>
   )

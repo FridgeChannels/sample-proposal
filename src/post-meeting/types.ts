@@ -43,7 +43,7 @@ export type ApprovalRecord = {
   confirmedAmount: number
 }
 
-export type FinanceHandoffStatus = 'sending' | 'sent' | 'preview' | 'payment_pending' | 'paid' | 'failed' | 'expired' | 'revoked'
+export type FinanceHandoffStatus = 'sending' | 'sent' | 'preview' | 'viewed' | 'payment_pending' | 'paid' | 'failed' | 'expired' | 'revoked'
 
 export type FinanceHandoff = {
   token: string
@@ -91,6 +91,10 @@ export type PilotPricing = {
 
 export type OrderState = {
   status: OrderStatus
+  /** From magnet_brand_param.brand_name */
+  brandName?: string
+  /** From customer.created_at via magnet_brand_param.customer_id */
+  createdAt?: string
   orderNumber: string
   invoiceNumber: string
   version: number

@@ -35,9 +35,9 @@ const resolveRailState = (order: OrderState, now: number): RailState => {
 }
 
 const copy: Record<RailState, { label: string; title: string; detail: string; action: string; destination: ViewKey }> = {
-  active: { label: '8-day pilot offer', title: '20% off', detail: 'Pilot pricing ends automatically.', action: 'See pilot plan', destination: 'plan' },
-  urgent: { label: 'Final 24 hours', title: '20% off ends today', detail: 'Secure the pilot price before zero.', action: 'See pilot plan', destination: 'plan' },
-  critical: { label: 'Ending soon', title: 'Last chance · 20% off', detail: 'Standard pricing returns at zero.', action: 'See pilot plan', destination: 'plan' },
+  active: { label: '8-day pilot offer', title: 'Pilot pricing', detail: 'Pilot pricing ends automatically.', action: 'See pilot plan', destination: 'plan' },
+  urgent: { label: 'Final 24 hours', title: 'Offer ends today', detail: 'Secure the pilot price before zero.', action: 'See pilot plan', destination: 'plan' },
+  critical: { label: 'Ending soon', title: 'Last chance', detail: 'Standard pricing returns at zero.', action: 'See pilot plan', destination: 'plan' },
   expired: { label: 'Offer ended', title: 'Standard pricing restored', detail: 'Contact FC if you need a revised offer.', action: 'See pilot plan', destination: 'plan' },
   paid: { label: 'Payment complete', title: 'Pilot ready to start', detail: 'The order is ready for implementation.', action: 'View receipt', destination: 'finance' },
 }
@@ -48,7 +48,7 @@ export function GlobalUrgencyRail({ order, now, onNavigate }: { order: OrderStat
   const showCountdown = state === 'active' || state === 'urgent' || state === 'critical'
   const discountAmount = resolvedLineItems(order, now).find((item) => item.kind === 'discount')?.amount
   const baseContent = copy[state]
-  const content = showCountdown && discountAmount
+  const content = showCountdown && discountAmount && order.pricing.discountActive
     ? { ...baseContent, title: `Save ${savings.format(Math.abs(discountAmount))}` }
     : baseContent
   const parts = useMemo(() => countdownParts(pilotOfferRemainingMs(order, now)), [order, now])
