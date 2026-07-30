@@ -33,7 +33,6 @@ export function FinanceView({
   const displayedShipping = previewEmptyShipping
     ? { recipientName: '', companyName: '', addressLine1: '', addressLine2: '', city: '', state: '', postalCode: '', country: '', phone: '', email: '' }
     : order.shippingAddress
-  const [paymentEmail, setPaymentEmail] = useState(displayedShipping.email || '')
   const [paying, setPaying] = useState(false)
   const [payError, setPayError] = useState('')
   const shippingComplete = [
@@ -45,7 +44,6 @@ export function FinanceView({
     displayedShipping.country,
     displayedShipping.phone,
   ].every((value) => Boolean(value?.trim()))
-  const emailValid = paymentEmail.trim().includes('@')
 
   const updateShipping = (field: keyof ShippingAddress, value: string) => {
     onChange?.({ ...order, shippingAddress: { ...order.shippingAddress, [field]: value } })
@@ -60,10 +58,6 @@ export function FinanceView({
       setPayError('Complete the shipping address before paying.')
       return
     }
-    if (!emailValid) {
-      setPayError('Enter a valid payment email.')
-      return
-    }
 
     setPaying(true)
     setPayError('')
@@ -73,7 +67,7 @@ export function FinanceView({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           sn: magnetSn,
-          address: { ...displayedShipping, email: paymentEmail.trim() },
+          address: displayedShipping,
         }),
       })
       const addressData = await readApiJson<{ address: { id: number } }>(
@@ -93,7 +87,7 @@ export function FinanceView({
 
       onChange?.({
         ...order,
-        shippingAddress: { ...displayedShipping, email: paymentEmail.trim() },
+        shippingAddress: displayedShipping,
         shippingAddressId: addressData.address.id,
       })
 
@@ -102,7 +96,6 @@ export function FinanceView({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           orderId: order.dbOrderId,
-          paymentEmail: paymentEmail.trim(),
           handoffToken: order.financeHandoff?.token,
           payerName: displayedShipping.recipientName,
         }),
@@ -177,17 +170,12 @@ export function FinanceView({
         <aside className="finance-side">
           <section className="finance-section payment-section">
             <div className="section-heading"><h2>Payment</h2></div>
-            <p className="invoice-package-description">Pay securely via Stripe Invoice. The amount is calculated on the server from your order — it cannot be changed from this page.</p>
-            <label className="full-field">
-              <span>Payment email</span>
-              <input type="email" autoComplete="email" placeholder="finance@company.com" value={paymentEmail} onChange={(event) => setPaymentEmail(event.target.value)} />
-              <small>Stripe will email the invoice and open the hosted payment page (due in 7 days).</small>
-            </label>
+            <p className="invoice-package-description">Continue to Stripe’s secure payment page to complete this order. Invoice email is sent by Stripe after payment is ready.</p>
           </section>
           <div className="invoice-actions">
             <p className="eyebrow">Amount due</p><strong className="payment-total">{money.format(total)}</strong>
-            <button type="button" className="primary-action pay-invoice" disabled={paying} onClick={payWithStripeInvoice}>
-              {paying ? 'Preparing invoice…' : 'Pay with Stripe Invoice'} <span>→</span>
+            <button type="button" className="primary-action pay-invoice" disabled={paying || !shippingComplete} onClick={payWithStripeInvoice}>
+              {paying ? 'Opening payment…' : 'Continue to payment'} <span>→</span>
             </button>
             {payError && <p className="backend-note">{payError}</p>}
             {!externalHandoff && <button type="button" className="text-button" onClick={onBack}>Back to order</button>}
@@ -202,7 +190,12 @@ export function FinanceView({
       <header className="finance-header"><div className="brand-mark"><span>FC</span><strong>FridgeChannel</strong></div><div className="approval-state is-approved"><span />Paid</div></header>
 
       <section className="invoice-hero receipt-hero">
-        <div><p className="eyebrow">RECEIPT</p><h1>Receipt #{order.invoiceNumber}</h1><p>Order #{order.orderNumber}</p></div>
+        <div>
+          <p className="eyebrow">RECEIPT</p>
+          <h1>Receipt #{order.invoiceNumber}</h1>
+          <p>Order #{order.orderNumber}</p>
+          <p className="invoice-package-description">This pilot order has already been paid. No further payment is needed.</p>
+        </div>
         <div className="amount-due"><span>Total paid</span><strong>{money.format(total)}</strong><small>USD</small></div>
       </section>
 

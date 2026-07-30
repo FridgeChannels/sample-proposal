@@ -95,6 +95,16 @@ export function App() {
     if (view === 'demo') setDemoMounted(true)
   }, [view])
 
+  // Paid orders stay on the receipt — do not reopen plan / address / content.
+  useEffect(() => {
+    if (!paymentComplete) return
+    if (view !== 'finance') {
+      window.location.hash = 'finance'
+      setView('finance')
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }, [paymentComplete, view])
+
   useEffect(() => {
     if (financeToken) return
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(order))
@@ -180,8 +190,9 @@ export function App() {
   }, [order.financeHandoff?.token, order.financeHandoff?.status, view, financeToken])
 
   const openView = (nextView: ViewKey) => {
-    window.location.hash = nextView
-    setView(nextView)
+    const target = paymentComplete && nextView !== 'finance' ? 'finance' : nextView
+    window.location.hash = target
+    setView(target)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
@@ -194,9 +205,9 @@ export function App() {
       {blockingError && <main className="finance-empty"><h1>Proposal unavailable.</h1><p>{blockingError}</p></main>}
       {!blockingLoading && !blockingError && <>
       {showGlobalUrgency && <GlobalUrgencyRail order={order} now={offerNow} onNavigate={openView} />}
-      {demoMounted && !financeToken && <LiveDemoView active={view === 'demo'} onSeePlan={() => openView('plan')} />}
-      {view === 'content' && <SampleContentView onBack={() => openView('plan')} />}
-      {view === 'plan' && order.pricing.loaded && (
+      {demoMounted && !financeToken && !paymentComplete && <LiveDemoView active={view === 'demo'} onSeePlan={() => openView('plan')} />}
+      {view === 'content' && !paymentComplete && <SampleContentView onBack={() => openView('plan')} />}
+      {view === 'plan' && !paymentComplete && order.pricing.loaded && (
         <PilotPlanView
           order={order}
           magnetSn={magnetSn || order.pricing.magnetSn || ''}
@@ -206,15 +217,15 @@ export function App() {
           onHandoffCreated={(financeHandoff, dbOrderId) => setOrder(current => ({ ...current, financeHandoff, dbOrderId, status: 'payment_pending' }))}
         />
       )}
-      {view === 'address' && <AddressView order={order} onChange={setOrder} onBack={() => openView('plan')} />}
-      {view === 'finance' && (
+      {view === 'address' && !paymentComplete && <AddressView order={order} onChange={setOrder} onBack={() => openView('plan')} />}
+      {(view === 'finance' || paymentComplete) && (
         <FinanceView
           order={order}
           magnetSn={magnetSn || order.pricing.magnetSn || ''}
           now={offerNow}
           onChange={setOrder}
           onBack={() => openView('plan')}
-          externalHandoff={Boolean(financeToken)}
+          externalHandoff={Boolean(financeToken) || paymentComplete}
         />
       )}
       </>}

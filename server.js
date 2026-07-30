@@ -359,14 +359,11 @@ async function handleRequest(req, res) {
     try {
       const body = await readJsonBody(req);
       const orderId = Number(body.orderId);
-      const paymentEmail = String(body.paymentEmail || '').trim();
       const handoffToken = body.handoffToken ? String(body.handoffToken).trim() : undefined;
       if (!Number.isFinite(orderId)) return sendJson(res, 400, { error: 'orderId is required.' });
-      if (!paymentEmail.includes('@')) return sendJson(res, 400, { error: 'A valid payment email is required.' });
 
       const result = await createStripeInvoiceForOrder({
         orderId,
-        paymentEmail,
         handoffToken,
         payerName: body.payerName ? String(body.payerName).trim() : undefined,
       });

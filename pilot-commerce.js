@@ -816,7 +816,39 @@ async function updateFinanceHandoff(query, patch) {
   await supabaseUpdate('finance_handoff', query, fallback);
 }
 
-async function createStripeInvoiceForOrder({ orderId, paymentEmail, handoffToken, payerName }) {
+/**
+ * Stripe Invoice email is Stripe's feature (customer + hosted invoice).
+ * Resolve the address from stored handoff / shipping / customer — never from
+ * a finance-page form field.
+ */
+async function resolveInvoiceEmail({ invoice, handoffRow }) {
+  const candidates = [
+    handoffRow?.to_email,
+    invoice.shippingAddress?.email,
+  ];
+  for (const value of candidates) {
+    const email = String(value || '').trim();
+    if (email.includes('@')) return email;
+  }
+
+  if (invoice.magnetSn) {
+    try {
+      const quote = await loadPilotQuote(invoice.magnetSn);
+      const email = String(quote.customerEmail || '').trim();
+      if (email.includes('@')) return email;
+    } catch {
+      // fall through to the missing-email error below
+    }
+  }
+
+  throw httpError(
+    'Customer email is missing. Set customer.email (or the finance handoff email) before invoicing.',
+    409,
+    'customer_email_missing',
+  );
+}
+
+async function createStripeInvoiceForOrder({ orderId, handoffToken, payerName }) {
   const invoice = await loadOrderInvoice(orderId);
   if (Number(invoice.dbStatus) === ORDER_STATUS_PAID) throw httpError('This order is already paid.', 409);
   if (!invoice.shippingAddress) throw httpError('Shipping address is required before invoicing.', 409, 'shipping_missing');
@@ -842,6 +874,8 @@ async function createStripeInvoiceForOrder({ orderId, paymentEmail, handoffToken
       }
     }
   }
+
+  const paymentEmail = await resolveInvoiceEmail({ invoice, handoffRow });
 
   const customer = await findOrCreateStripeCustomer({
     email: paymentEmail,
