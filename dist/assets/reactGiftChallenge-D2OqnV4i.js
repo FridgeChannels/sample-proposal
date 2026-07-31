@@ -612,23 +612,6 @@ import{n as e,r as t,t as n}from"./jsx-runtime-M5tw2uBi.js";var r=t(),i=e(),a=`<
     .closing-box--pilot{grid-template-columns:minmax(0,.82fr) minmax(460px,1.18fr)!important}
     .closing-copy-text{max-width:38ch;margin-top:24px;color:color-mix(in oklch,var(--leg-brand-foreground) 76%,transparent);font-size:clamp(16.4px,1.35vw,1.15rem);line-height:1.55}
     .closing-copy-text+.closing-copy-text{margin-top:14px}
-    .pilot-priority{margin:0}
-    .pilot-priority-label{display:block;width:100%;margin:0 0 12px;font-family:var(--leg-font);font-size:1.15rem;font-weight:500;color:var(--leg-brand-foreground)}
-    .pilot-priority-menu{width:100%}
-    .pilot-priority-menu summary{display:flex;min-height:56px;align-items:center;justify-content:space-between;gap:16px;padding:0 10px 0 20px;list-style:none;border:1px solid color-mix(in oklch,var(--leg-brand-foreground) 36%,transparent);border-radius:var(--leg-pill);background:var(--leg-brand-foreground);color:var(--leg-brand-dark);font:500 16.4px/1.3 var(--leg-font);cursor:pointer;box-shadow:0 12px 30px rgba(0,0,0,.1);transition:border-color .2s ease,box-shadow .2s ease}
-    .pilot-priority-menu summary::-webkit-details-marker{display:none}
-    .pilot-priority-menu summary:focus-visible{outline:2px solid var(--leg-brand-foreground);outline-offset:4px}
-    .pilot-priority-chevron{display:grid;width:36px;height:36px;flex:0 0 auto;place-items:center;border-radius:50%;background:var(--leg-brand-dark);color:var(--leg-brand-foreground);transition:transform .25s cubic-bezier(.16,1,.3,1),background-color .2s ease}
-    .pilot-priority-chevron:before{content:"⌄";font-size:1.1rem;line-height:1;transform:translateY(-2px)}
-    .pilot-priority-menu[open] summary{border-color:var(--rust);box-shadow:0 16px 36px rgba(0,0,0,.16)}
-    .pilot-priority-menu[open] .pilot-priority-chevron{background:var(--rust);transform:rotate(180deg)}
-    .pilot-priority-options{margin-top:8px;padding:8px 20px;border-radius:28px;background:var(--leg-brand-foreground);box-shadow:0 18px 42px rgba(0,0,0,.18)}
-    .pilot-priority-option{display:flex;width:100%;min-height:48px;align-items:center;justify-content:space-between;gap:16px;padding:8px 0;border:0;border-bottom:1px solid var(--leg-border);background:transparent;color:color-mix(in oklch,var(--leg-brand-dark) 72%,transparent);font:500 16.4px/1.3 var(--leg-font);text-align:left;cursor:pointer}
-    .pilot-priority-option:last-child{border-bottom:0}
-    .pilot-priority-option:after{content:"";width:10px;height:10px;flex:0 0 auto;border:1px solid color-mix(in oklch,var(--leg-brand-dark) 35%,transparent);border-radius:50%}
-    .pilot-priority-option[aria-selected="true"]{color:var(--rust)}
-    .pilot-priority-option[aria-selected="true"]:after{border:3px solid var(--rust);background:var(--leg-brand-foreground)}
-    .pilot-priority-option:focus-visible{outline:2px solid var(--rust);outline-offset:2px}
     .pilot-design-copy{margin-top:24px;color:color-mix(in oklch,var(--leg-brand-foreground) 76%,transparent);font-size:16.4px;line-height:1.55}
     .pilot-design-copy em{color:var(--leg-brand-foreground)}
     @media(max-width:760px){
@@ -645,9 +628,6 @@ import{n as e,r as t,t as n}from"./jsx-runtime-M5tw2uBi.js";var r=t(),i=e(),a=`<
       .closing-box--pilot .closing-copy,.closing-box--pilot .closing-gains{width:100%}
       .closing-copy-text{max-width:34ch;margin:20px auto 0;font-size:16.4px}
       .closing-copy-text+.closing-copy-text{margin-top:14px}
-      .pilot-priority{width:100%;max-width:300px;margin-inline:auto}
-      .pilot-priority-label{font-size:1.08rem;text-align:center}
-      .pilot-priority-menu summary{padding-left:20px;text-align:left}
       .pilot-design-copy{margin-top:22px}
       .pilot-design-copy{max-width:34ch;margin-right:auto;margin-left:auto;text-align:center}
       .closing-gains .btn{width:max-content;max-width:100%;min-height:60px;margin-right:auto;margin-left:auto;padding:8px 12px 8px 24px;white-space:nowrap}
@@ -820,7 +800,7 @@ import{n as e,r as t,t as n}from"./jsx-runtime-M5tw2uBi.js";var r=t(),i=e(),a=`<
             <article class="effort-item"><strong aria-label="15 minutes"><span data-effort-count="15">0</span> min</strong><span>Guided campaign setup after audience, assets, and access are approved.</span></article>
             <article class="effort-item"><strong>&lt;2 hrs</strong><span>Weekly brand oversight while the pilot is live.</span></article>
             <article class="effort-item"><strong>0 engineers</strong><span>No custom build and no dedicated developer required.</span></article>
-            <article class="effort-item effort-item--price"><strong>$5.5+</strong><span>Per magnet, per year, with no hidden fees.</span></article>
+            <article class="effort-item effort-item--price"><strong>$5.49+</strong><span>Per magnet, per year, with no hidden fees.</span></article>
           </div>
         </section>
       </div>
@@ -868,23 +848,6 @@ import{n as e,r as t,t as n}from"./jsx-runtime-M5tw2uBi.js";var r=t(),i=e(),a=`<
             <p class="closing-copy-text">The magnet you’re holding can run any of these — same magnet, different mission.</p>
           </header>
           <div class="closing-gains package-gains">
-            <div class="pilot-priority" data-pilot-priority>
-              <span class="pilot-priority-label" id="pilot-priority-label">Pick the one you want solved first.</span>
-              <details class="pilot-priority-menu">
-                <summary aria-labelledby="pilot-priority-label pilot-priority-value">
-                  <span id="pilot-priority-value" data-pilot-priority-value>First order → second</span>
-                  <span class="pilot-priority-chevron" aria-hidden="true"></span>
-                </summary>
-                <div class="pilot-priority-options" role="listbox" aria-labelledby="pilot-priority-label">
-                  <button class="pilot-priority-option" type="button" role="option" aria-selected="true" data-pilot-priority-option="First order → second">First order → second</button>
-                  <button class="pilot-priority-option" type="button" role="option" aria-selected="false" data-pilot-priority-option="Subscriber → renewal">Subscriber → renewal</button>
-                  <button class="pilot-priority-option" type="button" role="option" aria-selected="false" data-pilot-priority-option="Cooling → warm">Cooling → warm</button>
-                  <button class="pilot-priority-option" type="button" role="option" aria-selected="false" data-pilot-priority-option="Gift recipient → repeat buyer">Gift recipient → repeat buyer</button>
-                  <button class="pilot-priority-option" type="button" role="option" aria-selected="false" data-pilot-priority-option="Another lifecycle segment">Another lifecycle segment</button>
-                  <button class="pilot-priority-option" type="button" role="option" aria-selected="false" data-pilot-priority-option="Others">Others</button>
-                </div>
-              </details>
-            </div>
             <p class="pilot-design-copy">Then one design session is all it takes: your magnet flips from sample to <em>your brand</em> — live before the first 20 minutes are up, built around the problem you picked. No reprint. Nothing to install.</p>
             <a class="btn" href="https://calendly.com/billy-fridgechannels/fridge-channel-pilot-meeting" data-link="footer_button_url" data-pilot-cta>Make it mine — live in 20 minutes</a>
           </div>
@@ -919,23 +882,6 @@ import{n as e,r as t,t as n}from"./jsx-runtime-M5tw2uBi.js";var r=t(),i=e(),a=`<
       const description = document.querySelector('meta[name="description"]');
       if (description) description.content = \`\${data.campaign_name || brandName} proposal\`;
     }
-
-    (function initPilotPriorityMenu() {
-      const menu = document.querySelector('.pilot-priority-menu');
-      const summary = menu?.querySelector('summary');
-      const value = menu?.querySelector('[data-pilot-priority-value]');
-      const options = menu ? [...menu.querySelectorAll('[data-pilot-priority-option]')] : [];
-      if (!menu || !summary || !value || !options.length) return;
-
-      options.forEach(option => {
-        option.addEventListener('click', () => {
-          value.textContent = option.dataset.pilotPriorityOption;
-          options.forEach(item => item.setAttribute('aria-selected', String(item === option)));
-          menu.open = false;
-          summary.focus();
-        });
-      });
-    })();
 
     fetch(\`/api/proposal?id=\${encodeURIComponent(fallbackId)}\`)
       .then(async response => { const data=await response.json(); if(!response.ok) throw new Error(data.error||'Proposal not found'); return data; })
