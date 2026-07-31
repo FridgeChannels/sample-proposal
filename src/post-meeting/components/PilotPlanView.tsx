@@ -1,11 +1,15 @@
 import { useState } from 'react'
-import { orderTotal, readApiJson, resolvedLineItems } from '../config'
-import type { FinanceHandoff, OrderState } from '../types'
+import { orderTotal, readApiJson, resolvedLineItems, SHIPPING_OPTIONS } from '../config'
+import type { FinanceHandoff, OrderState, ShippingMethod } from '../types'
 import { PaymentLinkModal } from './PaymentLinkModal'
 
 const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 })
 const number = new Intl.NumberFormat('en-US')
 const date = new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' })
+const shippingOptions: Array<{ method: ShippingMethod; label: string; eta: string; fee: number }> = [
+  { method: 'ocean', ...SHIPPING_OPTIONS.ocean },
+  { method: 'air', ...SHIPPING_OPTIONS.air },
+]
 
 function DetailsChevron() {
   return (
@@ -74,6 +78,8 @@ export function PilotPlanView({
   now,
   onBack,
   onOpenContent,
+  onViewReceipt,
+  onChange,
   onHandoffCreated,
 }: {
   order: OrderState
@@ -81,6 +87,8 @@ export function PilotPlanView({
   now: number
   onBack: () => void
   onOpenContent: () => void
+  onViewReceipt: () => void
+  onChange: (order: OrderState) => void
   onHandoffCreated: (handoff: FinanceHandoff, dbOrderId: number) => void
 }) {
   const [creatingLink, setCreatingLink] = useState(false)
@@ -90,8 +98,14 @@ export function PilotPlanView({
   const total = orderTotal(order, now)
   const brand = order.brandName || order.shippingAddress.companyName || 'Client'
   const createdDate = formatDate(order.createdAt)
+  const isPaid = order.status === 'paid' || order.financeHandoff?.status === 'paid'
+  const shippingLocked = isPaid || creatingLink || Boolean(order.financeHandoff?.token)
 
   const createPaymentLink = async () => {
+    if (isPaid) {
+      onViewReceipt()
+      return
+    }
     if (!magnetSn) {
       setLinkError('Missing magnet serial number.')
       return
@@ -108,6 +122,7 @@ export function PilotPlanView({
           quantity: order.quantity,
           baseUrl: window.location.origin,
           proposalPath: window.location.pathname,
+          shippingMethod: order.shippingMethod === 'air' ? 'air' : 'ocean',
         }),
       })
       const data = await readApiJson<{ handoff: FinanceHandoff; orderId: number }>(
@@ -155,6 +170,7 @@ export function PilotPlanView({
           <dl className="plan-meta">
             <div><dt>Brand</dt><dd>{brand}</dd></div>
             <div><dt>Created date</dt><dd>{createdDate}</dd></div>
+            {isPaid && <div><dt>Status</dt><dd className="plan-paid-status"><span aria-hidden="true" />Paid</dd></div>}
           </dl>
         </header>
 
@@ -201,7 +217,25 @@ export function PilotPlanView({
                 <strong className={item.kind === 'discount' ? 'discount' : ''}>{item.amount < 0 ? `−${money.format(Math.abs(item.amount))}` : money.format(item.amount)}</strong>
               </div>
             ))}
-            <div><span>Tax</span><strong>{money.format(order.tax)}</strong></div>
+            <fieldset className="plan-shipping-options" disabled={shippingLocked}>
+              <legend>Shipping</legend>
+              {shippingOptions.map((option) => (
+                <label className={order.shippingMethod === option.method ? 'is-selected' : ''} key={option.method}>
+                  <input
+                    type="radio"
+                    name="plan-shipping-method"
+                    value={option.method}
+                    checked={order.shippingMethod === option.method}
+                    onChange={() => onChange({ ...order, shippingMethod: option.method })}
+                  />
+                  <span>
+                    <strong>{option.label}</strong>
+                    <small>{option.eta}</small>
+                  </span>
+                  <b>{money.format(option.fee)}</b>
+                </label>
+              ))}
+            </fieldset>
             <div className="plan-total"><span>Total</span><strong>{money.format(total)}</strong></div>
           </div>
 
@@ -248,13 +282,13 @@ export function PilotPlanView({
       </div>
 
       <div className="flow-cta-bar">
-        <button type="button" className="flow-cta-button" onClick={createPaymentLink} disabled={creatingLink || !order.pricing.loaded}>
-          <span>{creatingLink ? 'Creating secure link…' : 'Place Order'}</span>
+        <button type="button" className={`flow-cta-button${isPaid ? ' is-paid' : ''}`} onClick={isPaid ? onViewReceipt : createPaymentLink} disabled={!isPaid && (creatingLink || !order.pricing.loaded)}>
+          <span>{isPaid ? 'View receipt' : creatingLink ? 'Creating secure link…' : 'Place Order'}</span>
           <b>→</b>
         </button>
       </div>
 
-      {(paymentUrl || linkError) && (
+      {!isPaid && (paymentUrl || linkError) && (
         <PaymentLinkModal
           paymentUrl={paymentUrl}
           error={linkError}

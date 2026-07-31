@@ -10,6 +10,7 @@ const {
   updateOrderShipping,
   createFinanceHandoff,
   getFinanceHandoff,
+  getFinanceReceiptPdf,
   updateFinanceHandoffStatus,
   createStripeInvoiceForOrder,
   moneyRound,
@@ -179,7 +180,7 @@ async function serveSampleOrLiveBySn(res, sn) {
 }
 
 function invoiceToClientOrder(invoice, handoff, quoteExtras = {}) {
-  const lineItems = (invoice.items || []).map((item) => ({
+  const lineItems = (invoice.items || []).filter((item) => item.type !== 'shipping').map((item) => ({
     id: String(item.id),
     label: item.name,
     amount: item.subtotal,
@@ -247,6 +248,8 @@ function invoiceToClientOrder(invoice, handoff, quoteExtras = {}) {
       : undefined,
     shippingAddress: invoice.shippingAddress
       ? {
+          firstName: invoice.shippingAddress.firstName || '',
+          lastName: invoice.shippingAddress.lastName || '',
           recipientName: invoice.shippingAddress.recipientName,
           companyName: quoteExtras.brandName || '',
           addressLine1: invoice.shippingAddress.addressLine1,
@@ -259,6 +262,8 @@ function invoiceToClientOrder(invoice, handoff, quoteExtras = {}) {
           email: invoice.shippingAddress.email || '',
         }
       : {
+          firstName: '',
+          lastName: '',
           recipientName: '',
           companyName: quoteExtras.brandName || '',
           addressLine1: '',
@@ -291,6 +296,7 @@ function invoiceToClientOrder(invoice, handoff, quoteExtras = {}) {
     },
     dbOrderId: invoice.orderId,
     shippingAddressId: invoice.shippingAddress?.id || null,
+    shippingMethod: invoice.shippingMethod === 'air' ? 'air' : 'ocean',
   };
 }
 
@@ -313,8 +319,178 @@ function paymentUrlForHandoff(hostBase, handoff) {
     : `${hostBase}/post-meeting.html?finance=${handoff.token}#finance`;
 }
 
+function placesHttpError(message, status = 500, code = 'places_error') {
+  const error = new Error(message);
+  error.status = status;
+  error.code = code;
+  return error;
+}
+
+function googlePlacesApiKey() {
+  const key = String(process.env.GOOGLE_MAPS_API_KEY || '').trim();
+  if (!key) throw placesHttpError('Address suggestions are not configured.', 503, 'places_not_configured');
+  return key;
+}
+
+function normalizedPlacesSessionToken(value) {
+  const token = String(value || '').trim();
+  if (!/^[A-Za-z0-9_-]{1,36}$/.test(token)) {
+    throw placesHttpError('A valid Places session token is required.', 400, 'invalid_session_token');
+  }
+  return token;
+}
+
+async function fetchGooglePlaces(url, options) {
+  let response;
+  try {
+    response = await fetch(url, {
+      ...options,
+      signal: AbortSignal.timeout(6000),
+    });
+  } catch (error) {
+    console.error('[google-places]', error?.message || 'Network request failed');
+    throw placesHttpError('Address suggestions are temporarily unavailable.', 502, 'places_upstream_error');
+  }
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    console.error('[google-places]', response.status, data?.error?.message || 'Request failed');
+    throw placesHttpError('Address suggestions are temporarily unavailable.', 502, 'places_upstream_error');
+  }
+  return data;
+}
+
+async function autocompleteAddresses({ input, sessionToken, country }) {
+  const query = String(input || '').trim().slice(0, 200);
+  if (query.length < 3) return [];
+
+  const body = {
+    input: query,
+    sessionToken: normalizedPlacesSessionToken(sessionToken),
+    languageCode: 'en',
+  };
+  const countryAliases = {
+    'united states': 'us',
+    'united states of america': 'us',
+    usa: 'us',
+    canada: 'ca',
+    'united kingdom': 'gb',
+    uk: 'gb',
+    china: 'cn',
+  };
+  const rawCountry = String(country || '').trim().toLowerCase();
+  const region = countryAliases[rawCountry] || rawCountry;
+  if (/^[a-z]{2}$/.test(region)) {
+    body.includedRegionCodes = [region];
+    body.regionCode = region;
+  }
+
+  const data = await fetchGooglePlaces('https://places.googleapis.com/v1/places:autocomplete', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Goog-Api-Key': googlePlacesApiKey(),
+      'X-Goog-FieldMask': [
+        'suggestions.placePrediction.placeId',
+        'suggestions.placePrediction.structuredFormat.mainText.text',
+        'suggestions.placePrediction.structuredFormat.secondaryText.text',
+      ].join(','),
+    },
+    body: JSON.stringify(body),
+  });
+
+  return (Array.isArray(data.suggestions) ? data.suggestions : [])
+    .map(item => item?.placePrediction)
+    .filter(Boolean)
+    .slice(0, 5)
+    .map(prediction => ({
+      placeId: prediction.placeId,
+      mainText: prediction.structuredFormat?.mainText?.text || '',
+      secondaryText: prediction.structuredFormat?.secondaryText?.text || '',
+    }))
+    .filter(prediction => prediction.placeId && prediction.mainText);
+}
+
+function placeComponent(components, type, preferShort = false) {
+  const component = components.find(item => Array.isArray(item.types) && item.types.includes(type));
+  return component ? String((preferShort ? component.shortText : component.longText) || component.longText || '') : '';
+}
+
+async function resolvePlaceAddress({ placeId, sessionToken }) {
+  const id = String(placeId || '').trim();
+  if (!/^[A-Za-z0-9_-]{3,500}$/.test(id)) {
+    throw placesHttpError('A valid place ID is required.', 400, 'invalid_place_id');
+  }
+  const token = normalizedPlacesSessionToken(sessionToken);
+  const url = new URL(`https://places.googleapis.com/v1/places/${encodeURIComponent(id)}`);
+  url.searchParams.set('sessionToken', token);
+  url.searchParams.set('languageCode', 'en');
+
+  const data = await fetchGooglePlaces(url, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Goog-Api-Key': googlePlacesApiKey(),
+      'X-Goog-FieldMask': 'addressComponents,formattedAddress',
+    },
+  });
+  const components = Array.isArray(data.addressComponents) ? data.addressComponents : [];
+  const streetNumber = placeComponent(components, 'street_number');
+  const route = placeComponent(components, 'route');
+  const premise = placeComponent(components, 'premise');
+  const subpremise = placeComponent(components, 'subpremise');
+  const city =
+    placeComponent(components, 'locality') ||
+    placeComponent(components, 'postal_town') ||
+    placeComponent(components, 'sublocality_level_1') ||
+    placeComponent(components, 'administrative_area_level_2');
+  const state = placeComponent(components, 'administrative_area_level_1', true);
+  const postalCode = [
+    placeComponent(components, 'postal_code'),
+    placeComponent(components, 'postal_code_suffix'),
+  ].filter(Boolean).join('-');
+  const country = placeComponent(components, 'country', true);
+  const addressLine1 = [streetNumber, route].filter(Boolean).join(' ') || premise || String(data.formattedAddress || '').split(',')[0];
+
+  return {
+    addressLine1,
+    addressLine2: subpremise,
+    city,
+    state,
+    postalCode,
+    country,
+    formattedAddress: data.formattedAddress || '',
+  };
+}
+
 async function handleRequest(req, res) {
   const requestUrl = new URL(req.url, `http://${req.headers.host}`);
+
+  if (requestUrl.pathname === '/api/places/autocomplete' && req.method === 'GET') {
+    try {
+      const suggestions = await autocompleteAddresses({
+        input: requestUrl.searchParams.get('input'),
+        sessionToken: requestUrl.searchParams.get('sessionToken'),
+        country: requestUrl.searchParams.get('country'),
+      });
+      await sendJson(res, 200, { suggestions });
+    } catch (error) {
+      await sendJson(res, error.status || 500, { error: error.message || 'Unable to suggest addresses.', code: error.code });
+    }
+    return;
+  }
+
+  if (requestUrl.pathname === '/api/places/details' && req.method === 'GET') {
+    try {
+      const address = await resolvePlaceAddress({
+        placeId: requestUrl.searchParams.get('placeId'),
+        sessionToken: requestUrl.searchParams.get('sessionToken'),
+      });
+      await sendJson(res, 200, { address });
+    } catch (error) {
+      await sendJson(res, error.status || 500, { error: error.message || 'Unable to resolve address.', code: error.code });
+    }
+    return;
+  }
 
   if (requestUrl.pathname === '/api/pilot-quote' && req.method === 'GET') {
     try {
@@ -385,7 +561,7 @@ async function handleRequest(req, res) {
       if (!sn) return sendJson(res, 400, { error: 'Magnet SN is required.' });
 
       const quote = await loadPilotQuote(sn);
-      const created = await createPilotOrder({ sn, quantity: body.quantity });
+      const created = await createPilotOrder({ sn, quantity: body.quantity, shippingMethod: body.shippingMethod });
       const toEmail = String(body.toEmail || quote.customerEmail || '').trim();
       if (!toEmail.includes('@')) {
         return sendJson(res, 400, { error: 'Customer email is missing; configure customer.email before creating a finance link.' });
@@ -417,6 +593,25 @@ async function handleRequest(req, res) {
   }
 
   const handoffMatch = requestUrl.pathname.match(/^\/api\/finance-handoffs\/([a-f0-9]{48})$/);
+  const receiptMatch = requestUrl.pathname.match(/^\/api\/finance-handoffs\/([a-f0-9]{48})\/receipt\.pdf$/);
+  if (receiptMatch) {
+    if (req.method !== 'GET') { await sendJson(res, 405, { error: 'Method not allowed.' }); return; }
+    try {
+      const receipt = await getFinanceReceiptPdf(receiptMatch[1]);
+      res.writeHead(200, {
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="${receipt.filename}"`,
+        'Content-Length': receipt.body.length,
+        'Cache-Control': 'private, no-store',
+        'X-Content-Type-Options': 'nosniff',
+      });
+      res.end(receipt.body);
+    } catch (error) {
+      await sendJson(res, error.status || 500, { error: error.message || 'Unable to download receipt.', code: error.code });
+    }
+    return;
+  }
+
   if (handoffMatch) {
     if (!['GET', 'PATCH'].includes(req.method)) { await sendJson(res, 405, { error: 'Method not allowed.' }); return; }
 

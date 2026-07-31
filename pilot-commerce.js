@@ -4,6 +4,7 @@
  */
 
 const crypto = require('crypto');
+const { PDFDocument, StandardFonts, rgb } = require('pdf-lib');
 
 const FINANCE_LINK_TTL_MS = 14 * 24 * 60 * 60 * 1000;
 const ORDER_STATUS_UNPAID = 0;
@@ -177,6 +178,19 @@ function splitRecipientName(recipientName) {
   if (!parts.length) return { firstName: 'Recipient', lastName: 'Unknown' };
   if (parts.length === 1) return { firstName: parts[0], lastName: '-' };
   return { firstName: parts[0], lastName: parts.slice(1).join(' ') };
+}
+
+const SHIPPING_OPTIONS = {
+  ocean: { label: 'Economy Shipping by Sea', fee: 200 },
+  air: { label: 'Express Air Shipping', fee: 800 },
+};
+
+function resolveShippingOption(value) {
+  const method = String(value || '').trim().toLowerCase();
+  return {
+    method: method === 'air' ? 'air' : 'ocean',
+    ...(method === 'air' ? SHIPPING_OPTIONS.air : SHIPPING_OPTIONS.ocean),
+  };
 }
 
 function formatAddress(address) {
@@ -442,13 +456,18 @@ async function savePilotAddress({ sn, address }) {
 
   const phone = String(address.phone || '').trim();
   if (!phone) throw httpError('Phone is required', 400);
-  if (!String(address.recipientName || '').trim()) throw httpError('Recipient name is required', 400);
+  const providedFirstName = String(address.firstName || '').trim();
+  const providedLastName = String(address.lastName || '').trim();
+  const providedRecipientName = String(address.recipientName || '').trim();
+  if ((!providedFirstName || !providedLastName) && !providedRecipientName) throw httpError('Recipient name is required', 400);
   if (!String(address.addressLine1 || '').trim()) throw httpError('Street address is required', 400);
   if (!String(address.city || '').trim()) throw httpError('City is required', 400);
   if (!String(address.state || '').trim()) throw httpError('State is required', 400);
   if (!String(address.postalCode || '').trim()) throw httpError('ZIP code is required', 400);
 
-  const { firstName, lastName } = splitRecipientName(address.recipientName);
+  const legacyName = splitRecipientName(providedRecipientName);
+  const firstName = providedFirstName || legacyName.firstName;
+  const lastName = providedLastName || legacyName.lastName;
   const country = countryToIso(address.country);
   const formatted = formatAddress({ ...address, country });
 
@@ -471,6 +490,8 @@ async function savePilotAddress({ sn, address }) {
 
   return {
     id: row.id,
+    firstName,
+    lastName,
     recipientName: `${firstName} ${lastName}`.replace(/ -$/, '').trim(),
     companyName: address.companyName || '',
     addressLine1: row.street,
@@ -485,7 +506,7 @@ async function savePilotAddress({ sn, address }) {
   };
 }
 
-async function createPilotOrder({ sn, quantity, shippingAddressId, approval }) {
+async function createPilotOrder({ sn, quantity, shippingAddressId, approval, shippingMethod }) {
   const addressId = shippingAddressId != null ? Number(shippingAddressId) : null;
 
   const quote = await loadPilotQuote(sn);
@@ -505,6 +526,8 @@ async function createPilotOrder({ sn, quantity, shippingAddressId, approval }) {
   }
 
   const totals = computePilotTotals(quote, quantity);
+  const shipping = resolveShippingOption(shippingMethod);
+  const totalWithShipping = moneyRound(totals.total + shipping.fee);
   const orderNo = makeOrderNo();
   const remark = JSON.stringify({
     source: 'sample-proposal-pilot',
@@ -513,6 +536,7 @@ async function createPilotOrder({ sn, quantity, shippingAddressId, approval }) {
     package_code: quote.package.code,
     discount_id: quote.discount.id,
     discount_ratio: quote.discount.ratio,
+    shipping_method: shipping.method,
     approval: approval || null,
   });
 
@@ -521,9 +545,9 @@ async function createPilotOrder({ sn, quantity, shippingAddressId, approval }) {
     customer_id: customerId,
     quantity: totals.quantity,
     amount: totals.magnetsAmount,
-    shipping_fee: 0,
+    shipping_fee: shipping.fee,
     tax_fee: 0,
-    total_amount: totals.total,
+    total_amount: totalWithShipping,
     status: ORDER_STATUS_UNPAID,
     payment_method: null,
     shipping_address_id: Number.isFinite(addressId) ? addressId : null,
@@ -557,10 +581,20 @@ async function createPilotOrder({ sn, quantity, shippingAddressId, approval }) {
     });
   }
 
+  await supabaseInsert('order_item', {
+    order_id: order.id,
+    magnet_id: null,
+    item_name: shipping.label,
+    item_type: 'shipping',
+    unit_price: shipping.fee,
+    quantity: 1,
+    subtotal: shipping.fee,
+  });
+
   return {
     orderId: order.id,
     orderNo: order.order_no,
-    totals,
+    totals: { ...totals, shippingFee: shipping.fee, total: totalWithShipping },
     quote,
     shippingAddressId: Number.isFinite(addressId) ? addressId : null,
   };
@@ -572,7 +606,7 @@ async function updateOrderShipping({ orderId, shippingAddressId }) {
   if (!Number.isFinite(id)) throw httpError('orderId is required', 400);
   if (!Number.isFinite(addressId)) throw httpError('shippingAddressId is required', 400);
 
-  const orders = await supabaseSelect('order', { select: 'id,customer_id,status', id: `eq.${id}`, limit: '1' });
+  const orders = await supabaseSelect('order', { select: '*', id: `eq.${id}`, limit: '1' });
   const order = Array.isArray(orders) ? orders[0] : null;
   if (!order) throw httpError('Order not found', 404);
   if (Number(order.status) === ORDER_STATUS_PAID) throw httpError('This order is already paid.', 409);
@@ -586,6 +620,45 @@ async function updateOrderShipping({ orderId, shippingAddressId }) {
   const address = Array.isArray(addressRows) ? addressRows[0] : null;
   if (!address) throw httpError('Shipping address not found for this customer', 404);
 
+  let remark = {};
+  try {
+    remark = order.remark ? JSON.parse(order.remark) : {};
+  } catch {
+    remark = {};
+  }
+  const persistedShippingMethod = remark.shipping_method
+    || (Number(order.shipping_fee) === SHIPPING_OPTIONS.air.fee ? 'air' : 'ocean');
+  const shipping = resolveShippingOption(persistedShippingMethod);
+  const items = await supabaseSelect('order_item', {
+    select: '*',
+    order_id: `eq.${id}`,
+    order: 'id.asc',
+  });
+  const existingShippingItem = (Array.isArray(items) ? items : []).find(item => item.item_type === 'shipping');
+  if (existingShippingItem) {
+    await supabaseUpdate('order_item', { id: `eq.${existingShippingItem.id}` }, {
+      item_name: shipping.label,
+      unit_price: shipping.fee,
+      quantity: 1,
+      subtotal: shipping.fee,
+    });
+  } else {
+    await supabaseInsert('order_item', {
+      order_id: id,
+      magnet_id: null,
+      item_name: shipping.label,
+      item_type: 'shipping',
+      unit_price: shipping.fee,
+      quantity: 1,
+      subtotal: shipping.fee,
+    });
+  }
+
+  const nonShippingSubtotal = (Array.isArray(items) ? items : [])
+    .filter(item => item.item_type !== 'shipping')
+    .reduce((sum, item) => sum + Number(item.subtotal || 0), 0);
+  remark.shipping_method = shipping.method;
+
   await supabaseUpdate(
     'order',
     { id: `eq.${id}` },
@@ -593,11 +666,14 @@ async function updateOrderShipping({ orderId, shippingAddressId }) {
       shipping_address_id: addressId,
       receiver_name: `${address.first_name} ${address.last_name}`.trim(),
       receiver_phone: address.phone,
+      shipping_fee: shipping.fee,
+      total_amount: moneyRound(nonShippingSubtotal + shipping.fee + Number(order.tax_fee || 0)),
+      remark: JSON.stringify(remark),
       updated_at: new Date().toISOString(),
     },
   );
 
-  return { orderId: id, shippingAddressId: addressId };
+  return { orderId: id, shippingAddressId: addressId, shippingMethod: shipping.method, shippingFee: shipping.fee };
 }
 
 async function createFinanceHandoff({ orderId, magnetSn, toEmail, toName }) {
@@ -675,6 +751,7 @@ async function loadOrderInvoice(orderId) {
     unitPrice: (order.unit_price_cents || 0) / 100,
     amount: Number(order.amount),
     shippingFee: Number(order.shipping_fee || 0),
+    shippingMethod: remark.shipping_method || (Number(order.shipping_fee) === SHIPPING_OPTIONS.air.fee ? 'air' : 'ocean'),
     taxFee: Number(order.tax_fee || 0),
     totalAmount: Number(order.total_amount),
     currency: order.currency || 'USD',
@@ -695,6 +772,8 @@ async function loadOrderInvoice(orderId) {
     shippingAddress: address
       ? {
           id: address.id,
+          firstName: address.first_name || '',
+          lastName: address.last_name || '',
           recipientName: `${address.first_name} ${address.last_name}`.trim(),
           phone: address.phone,
           addressLine1: address.street,
@@ -710,7 +789,7 @@ async function loadOrderInvoice(orderId) {
   };
 }
 
-async function getFinanceHandoffRow(token) {
+async function getFinanceHandoffRow(token, { allowPaidAfterExpiry = false } = {}) {
   const rows = await supabaseSelect('finance_handoff', {
     select: '*',
     token: `eq.${token}`,
@@ -718,7 +797,7 @@ async function getFinanceHandoffRow(token) {
   });
   const handoff = Array.isArray(rows) ? rows[0] : null;
   if (!handoff) throw httpError('Finance link not found or no longer available.', 404);
-  if (Date.now() > Date.parse(handoff.expires_at)) {
+  if (Date.now() > Date.parse(handoff.expires_at) && !(allowPaidAfterExpiry && handoff.status === 'paid')) {
     await supabaseUpdate('finance_handoff', { token: `eq.${token}` }, { status: 'expired', updated_at: new Date().toISOString() });
     throw httpError('This finance link has expired.', 410);
   }
@@ -791,6 +870,183 @@ async function findOrCreateStripeCustomer({ email, name, metadata = {} }) {
 
 async function retrieveStripeInvoice(invoiceId) {
   return stripeRequest('GET', `/invoices/${invoiceId}`, {});
+}
+
+function receiptMoney(value, currency = 'USD') {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: String(currency || 'USD').toUpperCase(),
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(Number(value || 0));
+}
+
+function receiptDate(value) {
+  const parsed = value instanceof Date ? value : new Date(value);
+  if (!Number.isFinite(parsed.getTime())) return '';
+  return new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeZone: 'UTC' }).format(parsed);
+}
+
+function safePdfText(value) {
+  return String(value || '')
+    .replace(/[–—]/g, '-')
+    .replace(/[‘’]/g, "'")
+    .replace(/[“”]/g, '"')
+    .replace(/[^\x20-\x7E]/g, ' ');
+}
+
+function wrapPdfText(text, font, size, maxWidth) {
+  const words = safePdfText(text).split(/\s+/).filter(Boolean);
+  const lines = [];
+  let line = '';
+  for (const word of words) {
+    const candidate = line ? `${line} ${word}` : word;
+    if (!line || font.widthOfTextAtSize(candidate, size) <= maxWidth) {
+      line = candidate;
+    } else {
+      lines.push(line);
+      line = word;
+    }
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+
+async function buildPaidReceiptPdf({ invoice, handoff, stripeInvoice }) {
+  const pdf = await PDFDocument.create();
+  pdf.setTitle(`Receipt ${invoice.orderNo}`);
+  pdf.setAuthor('FridgeChannel');
+  pdf.setSubject('Paid order receipt');
+  pdf.setCreator('FridgeChannel');
+  pdf.setProducer('FridgeChannel');
+
+  const page = pdf.addPage([612, 792]);
+  const regular = await pdf.embedFont(StandardFonts.Helvetica);
+  const medium = await pdf.embedFont(StandardFonts.HelveticaBold);
+  const ink = rgb(0.06, 0.09, 0.08);
+  const muted = rgb(0.36, 0.4, 0.38);
+  const green = rgb(0.09, 0.31, 0.22);
+  const paleGreen = rgb(0.91, 0.96, 0.93);
+  const line = rgb(0.88, 0.9, 0.88);
+  const left = 48;
+  const right = 564;
+  let y = 742;
+
+  const draw = (text, x, atY, size = 10, font = regular, color = ink) => {
+    page.drawText(safePdfText(text), { x, y: atY, size, font, color });
+  };
+  const drawRight = (text, atY, size = 10, font = regular, color = ink) => {
+    const value = safePdfText(text);
+    draw(value, right - font.widthOfTextAtSize(value, size), atY, size, font, color);
+  };
+
+  draw('FridgeChannel', left, y, 18, medium, green);
+  page.drawRectangle({ x: right - 58, y: y - 4, width: 58, height: 24, color: paleGreen, borderRadius: 12 });
+  drawRight('Paid', y + 3, 10, medium, green);
+
+  y -= 64;
+  draw('Receipt', left, y, 30, medium);
+  y -= 27;
+  draw(`Order #${invoice.orderNo}`, left, y, 11, regular, muted);
+  drawRight(`Receipt #${stripeInvoice.number || invoice.invoiceNumber}`, y, 11, regular, muted);
+
+  y -= 50;
+  draw('Payment received', left, y, 14, medium, green);
+  const paidAt = stripeInvoice.status_transitions?.paid_at
+    ? new Date(Number(stripeInvoice.status_transitions.paid_at) * 1000)
+    : invoice.paymentTime || handoff.updated_at || handoff.created_at;
+  drawRight(receiptDate(paidAt), y, 11, regular, muted);
+  y -= 22;
+  draw('Thank you. This order has been paid in full.', left, y, 11, regular, muted);
+
+  y -= 52;
+  draw('Ship to', left, y, 11, medium, muted);
+  y -= 22;
+  const address = invoice.shippingAddress;
+  draw(address?.recipientName || 'Customer', left, y, 12, medium);
+  y -= 18;
+  const addressParts = [
+    address?.addressLine1,
+    address?.addressLine2,
+    [address?.city, address?.state, address?.postalCode].filter(Boolean).join(', '),
+    address?.country,
+  ].filter(Boolean);
+  for (const addressLine of addressParts) {
+    for (const wrappedLine of wrapPdfText(addressLine, regular, 10, 300)) {
+      draw(wrappedLine, left, y, 10, regular, muted);
+      y -= 15;
+    }
+  }
+
+  y -= 28;
+  draw('Order details', left, y, 13, medium);
+  y -= 20;
+  page.drawLine({ start: { x: left, y }, end: { x: right, y }, thickness: 1, color: line });
+  y -= 22;
+
+  const itemRows = invoice.items.filter((item) => item.type !== 'shipping' && Number(item.subtotal) !== 0);
+  for (const item of itemRows) {
+    draw(item.name, left, y, 11, medium);
+    drawRight(receiptMoney(item.subtotal, invoice.currency), y, 11, medium);
+    y -= 17;
+    const detail = item.type === 'product' && item.quantity
+      ? `${item.quantity} x ${receiptMoney(item.unitPrice, invoice.currency)}`
+      : '';
+    if (detail) {
+      draw(detail, left, y, 9, regular, muted);
+      y -= 16;
+    }
+  }
+
+  const shippingLabel = invoice.shippingMethod === 'air' ? 'Express Air Shipping' : 'Economy Shipping by Sea';
+  draw(shippingLabel, left, y, 11, regular);
+  drawRight(receiptMoney(invoice.shippingFee, invoice.currency), y, 11, regular);
+  y -= 24;
+  draw('Tax', left, y, 11, regular);
+  drawRight(receiptMoney(invoice.taxFee, invoice.currency), y, 11, regular);
+  y -= 22;
+  page.drawLine({ start: { x: left, y }, end: { x: right, y }, thickness: 1, color: line });
+
+  y -= 34;
+  draw('Total paid', left, y, 15, medium);
+  const paidTotal = Number.isFinite(Number(stripeInvoice.amount_paid))
+    ? Number(stripeInvoice.amount_paid) / 100
+    : invoice.totalAmount;
+  drawRight(receiptMoney(paidTotal, invoice.currency), y - 2, 22, medium, green);
+
+  y -= 68;
+  draw('Payment method', left, y, 10, regular, muted);
+  drawRight('Stripe Invoice', y, 10, medium);
+  y -= 20;
+  draw('Payment reference', left, y, 10, regular, muted);
+  drawRight(invoice.orderNo, y, 10, medium);
+
+  draw('FridgeChannel - Paid receipt', left, 42, 9, regular, muted);
+  drawRight('Page 1 of 1', 42, 9, regular, muted);
+
+  return Buffer.from(await pdf.save());
+}
+
+async function getFinanceReceiptPdf(token) {
+  const handoff = await getFinanceHandoffRow(token, { allowPaidAfterExpiry: true });
+  if (handoff.status !== 'paid') {
+    throw httpError('The receipt is available after payment is complete.', 409, 'receipt_not_ready');
+  }
+
+  const invoiceId = handoff.stripe_invoice_id || handoff.stripe_checkout_session_id;
+  if (!invoiceId) throw httpError('Stripe invoice information is missing.', 404, 'invoice_missing');
+
+  const stripeInvoice = await retrieveStripeInvoice(invoiceId);
+  if (stripeInvoice.status !== 'paid') {
+    throw httpError('The receipt is available after payment is complete.', 409, 'receipt_not_ready');
+  }
+
+  const invoice = await loadOrderInvoice(handoff.order_id);
+  const safeOrderNumber = String(invoice.orderNo || handoff.order_id || 'order').replace(/[^A-Za-z0-9_-]+/g, '-');
+  return {
+    body: await buildPaidReceiptPdf({ invoice, handoff, stripeInvoice }),
+    filename: `receipt-${safeOrderNumber}.pdf`,
+  };
 }
 
 const STRIPE_INVOICE_COLUMNS = ['stripe_customer_id', 'stripe_invoice_id', 'hosted_invoice_url'];
@@ -968,6 +1224,7 @@ module.exports = {
   createFinanceHandoff,
   loadOrderInvoice,
   getFinanceHandoff,
+  getFinanceReceiptPdf,
   updateFinanceHandoffStatus,
   createStripeInvoiceForOrder,
   moneyRound,

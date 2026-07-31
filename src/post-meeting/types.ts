@@ -13,6 +13,7 @@ export type OrderStatus =
   | 'changes_requested'
 
 export type PaymentMethod = 'ach' | 'bank_transfer' | 'card'
+export type ShippingMethod = 'ocean' | 'air'
 
 export type SelectedPackage = {
   id: string
@@ -61,6 +62,8 @@ export type BillingDetails = {
 }
 
 export type ShippingAddress = {
+  firstName?: string
+  lastName?: string
   recipientName: string
   companyName: string
   addressLine1: string
@@ -115,6 +118,7 @@ export type OrderState = {
   financeHandoff?: FinanceHandoff
   shippingAddress: ShippingAddress
   billing: BillingDetails
+  shippingMethod: ShippingMethod
   paymentMethod: PaymentMethod
   paidAt?: string
   sentAt?: string

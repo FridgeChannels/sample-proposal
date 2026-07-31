@@ -1,4 +1,4 @@
-import type { OrderLineItem, OrderState, OrderStatus } from './types'
+import type { OrderLineItem, OrderState, OrderStatus, ShippingMethod } from './types'
 
 export const LIVE_DEMO_ORIGIN = 'https://dealquest.fridgechannels.com'
 export const LIVE_DEMO_URL = `${LIVE_DEMO_ORIGIN}/p/I9B44VTIHP`
@@ -27,6 +27,10 @@ export const statusLabels: Record<OrderStatus, string> = {
 }
 
 export const FIXED_MAGNET_QUANTITY = 1000
+export const SHIPPING_OPTIONS: Record<ShippingMethod, { label: string; eta: string; fee: number }> = {
+  ocean: { label: 'Economy Shipping by Sea', eta: 'Estimated 35 days', fee: 200 },
+  air: { label: 'Express Air Shipping', eta: 'Estimated 5–12 days', fee: 800 },
+}
 export const PILOT_OFFER_DURATION_MS = 8 * 24 * 60 * 60 * 1000
 
 /**
@@ -132,6 +136,8 @@ export const defaultOrder: OrderState = {
   estimatedLaunch: '',
   paymentTerms: 'Due on receipt',
   shippingAddress: {
+    firstName: '',
+    lastName: '',
     recipientName: '',
     companyName: '',
     addressLine1: '',
@@ -149,6 +155,7 @@ export const defaultOrder: OrderState = {
     address: '',
     poNumber: '',
   },
+  shippingMethod: 'ocean',
   paymentMethod: 'card',
 }
 
@@ -241,7 +248,9 @@ export const isPilotDiscountApplied = (order: OrderState, now = Date.now()) =>
 export const orderSubtotal = (order: OrderState, now = Date.now()) =>
   resolvedLineItems(order, now).reduce((sum, item) => sum + item.amount, 0)
 
-export const orderTotal = (order: OrderState, now = Date.now()) => orderSubtotal(order, now) + order.tax
+export const shippingFee = (order: OrderState) => SHIPPING_OPTIONS[order.shippingMethod === 'air' ? 'air' : 'ocean'].fee
+
+export const orderTotal = (order: OrderState, now = Date.now()) => orderSubtotal(order, now) + shippingFee(order) + order.tax
 
 export const resolvedLineItems = (order: OrderState, now = Date.now()): OrderLineItem[] => {
   if (order.pricing.loaded && order.lineItems.length) {

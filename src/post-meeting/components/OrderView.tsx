@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { orderTotal, resolvedLineItems } from '../config'
+import { orderTotal, resolvedLineItems, SHIPPING_OPTIONS } from '../config'
 import type { OrderState } from '../types'
 
 const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 })
@@ -12,6 +12,7 @@ export function OrderView({ order, now, onChange, onOpenAddress, onOpenFinance }
   const [addressRequired, setAddressRequired] = useState(false)
   const addressEntryRef = useRef<HTMLButtonElement>(null)
   const total = orderTotal(order, now)
+  const shipping = SHIPPING_OPTIONS[order.shippingMethod === 'air' ? 'air' : 'ocean']
   const shippingAddressText = [order.shippingAddress.addressLine1, order.shippingAddress.addressLine2, order.shippingAddress.city, order.shippingAddress.state, order.shippingAddress.postalCode].filter(Boolean).join(', ')
   const hasShippingAddress = Boolean(order.shippingAddress.recipientName && order.shippingAddress.addressLine1 && order.shippingAddress.city && order.shippingAddress.state && order.shippingAddress.postalCode)
   const servicePreview = order.package.includedServices.map((group) => group.items[0]).filter(Boolean).slice(0, 4)
@@ -96,7 +97,7 @@ export function OrderView({ order, now, onChange, onOpenAddress, onOpenFinance }
               <h3 className="order-section-title" id="price-breakdown-title">Price details</h3>
               <div className="line-items" role="table" aria-label="Order amount breakdown">
                 {resolvedLineItems(order, now).map((item) => <div role="row" key={item.id}><div role="cell"><strong>{item.kind === 'discount' ? <>Pilot discount · <span className="discount-rate">20% OFF</span></> : item.label}</strong>{item.id !== 'magnets' && item.detail && <small>{item.detail}</small>}</div><b role="cell" className={item.kind === 'discount' ? 'discount' : ''}>{item.amount < 0 ? `−${money.format(Math.abs(item.amount))}` : money.format(item.amount)}</b></div>)}
-                <div role="row"><div role="cell"><strong>Tax</strong></div><b role="cell">{money.format(order.tax)}</b></div>
+                <div role="row"><div role="cell"><strong>Shipping · {shipping.label}</strong><small>{shipping.eta}</small></div><b role="cell">{money.format(shipping.fee)}</b></div>
                 <div className="line-total" role="row"><div role="cell"><strong className="order-section-title">Total</strong></div><b role="cell">{money.format(total)}</b></div>
               </div>
             </section>

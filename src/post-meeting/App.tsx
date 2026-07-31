@@ -95,16 +95,6 @@ export function App() {
     if (view === 'demo') setDemoMounted(true)
   }, [view])
 
-  // Paid orders stay on the receipt — do not reopen plan / address / content.
-  useEffect(() => {
-    if (!paymentComplete) return
-    if (view !== 'finance') {
-      window.location.hash = 'finance'
-      setView('finance')
-      window.scrollTo({ top: 0, behavior: 'smooth' })
-    }
-  }, [paymentComplete, view])
-
   useEffect(() => {
     if (financeToken) return
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(order))
@@ -190,10 +180,20 @@ export function App() {
   }, [order.financeHandoff?.token, order.financeHandoff?.status, view, financeToken])
 
   const openView = (nextView: ViewKey) => {
-    const target = paymentComplete && nextView !== 'finance' ? 'finance' : nextView
-    window.location.hash = target
-    setView(target)
+    window.location.hash = nextView
+    setView(nextView)
     window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const openLive = () => {
+    if (financeToken) {
+      const liveUrl = new URL(window.location.href)
+      liveUrl.searchParams.delete('finance')
+      liveUrl.hash = 'demo'
+      window.location.assign(`${liveUrl.pathname}${liveUrl.search}${liveUrl.hash}`)
+      return
+    }
+    openView('demo')
   }
 
   const blockingError = handoffError || quoteError
@@ -201,30 +201,33 @@ export function App() {
 
   return (
     <div className={`post-meeting-app${view === 'demo' ? ' is-live-demo' : ''}${view === 'plan' ? ' has-plan-dock' : ''}${financeToken ? ' is-finance-handoff' : showGlobalUrgency ? ' has-global-urgency' : ''}`}>
-      {blockingLoading && <main className="finance-empty"><p className="eyebrow">LIVE PILOT</p><h1>Loading proposal data…</h1></main>}
+      {blockingLoading && <main className="finance-empty" aria-label="Loading" />}
       {blockingError && <main className="finance-empty"><h1>Proposal unavailable.</h1><p>{blockingError}</p></main>}
       {!blockingLoading && !blockingError && <>
       {showGlobalUrgency && <GlobalUrgencyRail order={order} now={offerNow} onNavigate={openView} />}
-      {demoMounted && !financeToken && !paymentComplete && <LiveDemoView active={view === 'demo'} onSeePlan={() => openView('plan')} />}
-      {view === 'content' && !paymentComplete && <SampleContentView onBack={() => openView('plan')} />}
-      {view === 'plan' && !paymentComplete && order.pricing.loaded && (
+      {demoMounted && !financeToken && <LiveDemoView active={view === 'demo'} onSeePlan={() => openView('plan')} />}
+      {view === 'content' && !financeToken && <SampleContentView onBack={() => openView('plan')} />}
+      {view === 'plan' && !financeToken && order.pricing.loaded && (
         <PilotPlanView
           order={order}
           magnetSn={magnetSn || order.pricing.magnetSn || ''}
           now={offerNow}
           onBack={() => window.history.back()}
           onOpenContent={() => openView('content')}
+          onViewReceipt={() => openView('finance')}
+          onChange={setOrder}
           onHandoffCreated={(financeHandoff, dbOrderId) => setOrder(current => ({ ...current, financeHandoff, dbOrderId, status: 'payment_pending' }))}
         />
       )}
       {view === 'address' && !paymentComplete && <AddressView order={order} onChange={setOrder} onBack={() => openView('plan')} />}
-      {(view === 'finance' || paymentComplete) && (
+      {view === 'finance' && (
         <FinanceView
           order={order}
           magnetSn={magnetSn || order.pricing.magnetSn || ''}
           now={offerNow}
           onChange={setOrder}
           onBack={() => openView('plan')}
+          onHome={openLive}
           externalHandoff={Boolean(financeToken) || paymentComplete}
         />
       )}
