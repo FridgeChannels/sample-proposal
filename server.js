@@ -3,6 +3,7 @@ const fs = require('fs/promises');
 const path = require('path');
 const {
   lookupSamplePhase,
+  loadSampleProposalBySn,
   loadPilotQuote,
   computePilotTotals,
   savePilotAddress,
@@ -72,33 +73,6 @@ const MIME_TYPES = {
   '.webp': 'image/webp',
   '.svg': 'image/svg+xml'
 };
-
-function slugify(value) {
-  return String(value || 'nike').trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'nike';
-}
-
-async function loadFallbackProposal(brand) {
-  const filePath = path.join(ROOT, 'data', 'proposals', `${slugify(brand)}.json`);
-  const raw = await fs.readFile(filePath, 'utf8');
-  return JSON.parse(raw);
-}
-
-async function loadFallbackProposalById(proposalId) {
-  const target = String(proposalId || '').trim();
-  if (!target) throw new Error('Missing proposal id');
-  const dir = path.join(ROOT, 'data', 'proposals');
-  const files = await fs.readdir(dir);
-  for (const file of files) {
-    if (!file.endsWith('.json')) continue;
-    const raw = await fs.readFile(path.join(dir, file), 'utf8');
-    const data = JSON.parse(raw);
-    const aliases = Array.isArray(data.route_aliases) ? data.route_aliases : [];
-    if (String(data.id || '').trim() === target || aliases.some(alias => String(alias).trim() === target)) {
-      return data;
-    }
-  }
-  throw new Error('Proposal not found');
-}
 
 async function sendJson(res, status, payload) {
   res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8' });
@@ -697,49 +671,15 @@ async function handleRequest(req, res) {
   }
 
   if (requestUrl.pathname === '/api/proposal') {
-    const id = requestUrl.searchParams.get('id');
-    const brand = requestUrl.searchParams.get('brand');
-
+    // Sample branding from magnet_brand_param (sn|id). Null fields → template defaults.
+    const sn = requestUrl.searchParams.get('sn') || requestUrl.searchParams.get('id') || '';
     try {
-      if (id) {
-        try {
-          const proposal = await loadFallbackProposalById(id);
-          await sendJson(res, 200, proposal);
-          return;
-        } catch (error) {
-          await sendJson(res, 404, {
-            error: 'Proposal not found',
-            id,
-            hint: 'Add this id or a matching route_aliases value to a JSON file in data/proposals.'
-          });
-          return;
-        }
-      }
-
-      if (!brand) {
-        const proposal = await loadFallbackProposal('Nike');
-        await sendJson(res, 200, proposal);
-        return;
-      }
-
-      const proposal = await loadFallbackProposal(brand);
+      const proposal = await loadSampleProposalBySn(sn);
       await sendJson(res, 200, proposal);
     } catch (error) {
       console.error('[api/proposal] unexpected error:', error && error.message);
-      try {
-        let proposal;
-        if (brand) {
-          proposal = await loadFallbackProposal(brand);
-        } else {
-          proposal = await loadFallbackProposal('Nike');
-        }
-        await sendJson(res, 200, proposal);
-      } catch (fallbackError) {
-        const status = brand ? 404 : 500;
-        await sendJson(res, status, {
-          error: brand ? 'Proposal not found' : error.message
-        });
-      }
+      const proposal = await loadSampleProposalBySn('');
+      await sendJson(res, 200, proposal);
     }
     return;
   }

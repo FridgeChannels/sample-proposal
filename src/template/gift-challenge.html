@@ -863,11 +863,11 @@
     const proposalId = pathMatch
       ? decodeURIComponent(pathMatch[1])
       : (proposalParams.get('sn') || proposalParams.get('id'));
-    const fallbackId = proposalId || 'UCB-GIFT-001';
+    const magnetSn = proposalId || '';
 
     function applyData(data) {
       if (data.template_type && data.template_type !== 'gift_challenge') {
-        throw new Error(`Proposal ${fallbackId} uses template ${data.template_type}, not gift_challenge`);
+        throw new Error(`Proposal uses template ${data.template_type}, not gift_challenge`);
       }
       if (data.brand_primary_color) document.documentElement.style.setProperty('--rust', data.brand_primary_color);
       if (data.brand_second_color) document.documentElement.style.setProperty('--gold', data.brand_second_color);
@@ -877,16 +877,27 @@
       }
       if (data.brand_light_color) document.documentElement.style.setProperty('--brand-light', data.brand_light_color);
       const brandName = data.brand_name || 'Brand';
-      document.querySelectorAll('[data-link]').forEach(el => { const value=data[el.dataset.link]; if(value) el.href=value; });
-      document.title = data.page_title || `${data.campaign_name || data.brand_name || 'Reward Challenge'} | Proposal`;
+      document.querySelectorAll('[data-link]').forEach(el => {
+        const value = data[el.dataset.link];
+        if (value) el.href = value;
+      });
+      document.title = data.page_title || `${data.campaign_name || brandName} | Proposal`;
       const description = document.querySelector('meta[name="description"]');
       if (description) description.content = `${data.campaign_name || brandName} proposal`;
     }
 
-    fetch(`/api/proposal?id=${encodeURIComponent(fallbackId)}`)
-      .then(async response => { const data=await response.json(); if(!response.ok) throw new Error(data.error||'Proposal not found'); return data; })
+    // Branding from magnet_brand_param via /api/proposal (null fields → server defaults).
+    fetch(`/api/proposal?sn=${encodeURIComponent(magnetSn)}`)
+      .then(async response => {
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Proposal not found');
+        return data;
+      })
       .then(applyData)
-      .catch(error => { console.error(error); document.body.dataset.loadError='true'; });
+      .catch(error => {
+        console.error(error);
+        document.body.dataset.loadError = 'true';
+      });
 
 
     const sectionRevealTargets=Array.from(document.querySelectorAll('main>section')).map(section=>section.firstElementChild||section);

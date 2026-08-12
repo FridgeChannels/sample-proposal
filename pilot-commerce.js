@@ -246,6 +246,88 @@ async function stripeRequest(method, apiPath, params = {}) {
   return payload;
 }
 
+/** Sample-page branding defaults when magnet_brand_param fields are null/missing. */
+const SAMPLE_PROPOSAL_DEFAULTS = Object.freeze({
+  template_type: 'gift_challenge',
+  brand_name: '',
+  page_title: 'Reward Challenge Proposal',
+  campaign_name: 'Reward Challenge',
+  brand_primary_color: '#ff5a1f',
+  brand_second_color: '#d8ff2f',
+  brand_dark_color: '#17382b',
+  brand_light_color: '#f6f0e6',
+  brand_logo: null,
+  website: null,
+  store_website: null,
+  footer_button_url: 'https://calendly.com/billy-fridgechannels/fridge-channel-pilot-meeting',
+});
+
+function pickNonEmpty(...values) {
+  for (const value of values) {
+    if (value == null) continue;
+    const text = String(value).trim();
+    if (text) return text;
+  }
+  return null;
+}
+
+function buildSampleProposalFromBrandRow(row, magnetSn, reason) {
+  const sn = pickNonEmpty(row?.magnet_sn, magnetSn) || '';
+  const brandName = pickNonEmpty(row?.brand_name) || SAMPLE_PROPOSAL_DEFAULTS.brand_name;
+  return {
+    id: sn || SAMPLE_PROPOSAL_DEFAULTS.page_title,
+    magnet_sn: sn || null,
+    template_type: SAMPLE_PROPOSAL_DEFAULTS.template_type,
+    brand_name: brandName,
+    page_title: brandName
+      ? `${brandName} | Reward Challenge Proposal`
+      : SAMPLE_PROPOSAL_DEFAULTS.page_title,
+    campaign_name: brandName || SAMPLE_PROPOSAL_DEFAULTS.campaign_name,
+    brand_primary_color: pickNonEmpty(row?.primary_color) || SAMPLE_PROPOSAL_DEFAULTS.brand_primary_color,
+    brand_second_color: pickNonEmpty(row?.secondary_color) || SAMPLE_PROPOSAL_DEFAULTS.brand_second_color,
+    brand_dark_color: SAMPLE_PROPOSAL_DEFAULTS.brand_dark_color,
+    brand_light_color: SAMPLE_PROPOSAL_DEFAULTS.brand_light_color,
+    brand_logo: pickNonEmpty(row?.brand_logo) || SAMPLE_PROPOSAL_DEFAULTS.brand_logo,
+    website: pickNonEmpty(row?.website) || SAMPLE_PROPOSAL_DEFAULTS.website,
+    store_website: pickNonEmpty(row?.store_website) || SAMPLE_PROPOSAL_DEFAULTS.store_website,
+    footer_button_url: SAMPLE_PROPOSAL_DEFAULTS.footer_button_url,
+    status: row?.status == null ? null : Number.parseInt(String(row.status), 10),
+    sample: row?.sample ?? null,
+    customer_id: row?.customer_id ?? null,
+    magnet_id: row?.magnet_id ?? null,
+    source: 'magnet_brand_param',
+    reason,
+  };
+}
+
+/**
+ * Sample deck branding for /api/proposal: load magnet_brand_param by SN.
+ * Null/missing fields fall back to SAMPLE_PROPOSAL_DEFAULTS (never 404 for branding).
+ */
+async function loadSampleProposalBySn(sn) {
+  const magnetSn = String(sn || '').trim();
+  if (!magnetSn) {
+    return buildSampleProposalFromBrandRow(null, '', 'missing_sn');
+  }
+
+  try {
+    const rows = await supabaseSelect('magnet_brand_param', {
+      select: 'magnet_sn,status,sample,brand_name,brand_logo,primary_color,secondary_color,store_website,website,customer_id,magnet_id',
+      magnet_sn: `eq.${magnetSn}`,
+      limit: '1',
+    });
+    const row = Array.isArray(rows) ? rows[0] : null;
+    if (!row) return buildSampleProposalFromBrandRow(null, magnetSn, 'not_found');
+    return buildSampleProposalFromBrandRow(row, magnetSn, 'ok');
+  } catch (error) {
+    if (error.code === 'supabase_unconfigured') {
+      return buildSampleProposalFromBrandRow(null, magnetSn, 'supabase_unconfigured');
+    }
+    console.warn(`[api/proposal] magnet_brand_param lookup failed for sn=${magnetSn}:`, error.message);
+    return buildSampleProposalFromBrandRow(null, magnetSn, 'lookup_error');
+  }
+}
+
 async function lookupSamplePhase(sn) {
   const magnetSn = String(sn || '').trim();
   if (!magnetSn) return { phase: 'sample', status: null, magnetSn: '', reason: 'missing_sn' };
@@ -1215,6 +1297,8 @@ async function createStripeInvoiceForOrder({ orderId, handoffToken, payerName })
 
 module.exports = {
   FINANCE_LINK_TTL_MS,
+  SAMPLE_PROPOSAL_DEFAULTS,
+  loadSampleProposalBySn,
   lookupSamplePhase,
   loadPilotQuote,
   computePilotTotals,

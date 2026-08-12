@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { captureEvent } from '../analytics'
 import { applyQuoteToOrder, defaultOrder, FIXED_MAGNET_QUANTITY, PILOT_OFFER_DURATION_MS, readApiJson, snFromLocation, type PilotQuoteApiResponse } from './config'
 import type { OrderState, ViewKey } from './types'
 import { LiveDemoView } from './components/LiveDemoView'
@@ -94,6 +95,14 @@ export function App() {
   useEffect(() => {
     if (view === 'demo') setDemoMounted(true)
   }, [view])
+
+  useEffect(() => {
+    captureEvent('deal_room_view', {
+      view,
+      magnet_sn: magnetSn,
+      finance_handoff: Boolean(financeToken),
+    })
+  }, [view, magnetSn, financeToken])
 
   useEffect(() => {
     if (financeToken) return

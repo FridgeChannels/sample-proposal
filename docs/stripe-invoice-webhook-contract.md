@@ -2,7 +2,17 @@
 
 `sample-proposal` creates Stripe Invoices and redirects finance users to the hosted invoice page. It does **not** receive Stripe webhooks and does **not** mark orders paid or redeem discounts.
 
-Payment confirmation and discount redemption belong to a dedicated Stripe webhook service. This document is the contract that service must implement.
+Payment confirmation, discount redemption, and package activation belong to the dedicated service at:
+
+**`/Users/markbai/Documents/stripe-webhook`**
+
+Production endpoint:
+
+```text
+https://hooks.fridgechannels.com/webhooks/stripe
+```
+
+Local default: `POST http://localhost:4180/webhooks/stripe`.
 
 ## Ownership split
 
@@ -10,9 +20,10 @@ Payment confirmation and discount redemption belong to a dedicated Stripe webhoo
 | --- | --- |
 | Quote active discount, create unpaid `order` + `order_item` snapshot | `sample-proposal` |
 | Create/send Stripe Invoice from DB totals; store invoice id on `finance_handoff` | `sample-proposal` |
-| Stripe `invoice.*` webhooks | External webhook system |
-| Mark `order` / `payment` / `finance_handoff` paid | External webhook system |
-| Set `customer_package_discounts.status = used` | External webhook system on successful payment only |
+| Stripe `invoice.*` webhooks | `stripe-webhook` service |
+| Mark `order` / `payment` / `finance_handoff` paid | `stripe-webhook` service |
+| Set `customer_package_discounts.status = used` | `stripe-webhook` on successful payment only |
+| Upsert `customer_packages` (one active subscription per customer) | `stripe-webhook` on successful payment only |
 
 ## Events to handle
 
@@ -74,8 +85,17 @@ Stripe may deliver the same event more than once. Every step must be safe to rep
      - `status = 'used'`
      - `used_at = now`
      - `updated_at = now`
+7. Activate the purchased package on `customer_packages` (idempotent):
+   - `customer_id` = `order.customer_id`
+   - `package_id` = `order.remark.package_id`
+   - Deactivate any other `is_active=true` rows for that customer (`ends_at=now`)
+   - If an active row already has the same `package_id`, refresh `updated_at` / notes only
+   - Otherwise insert a new active row (`starts_at=now`, `ends_at=null`, `is_active=true`)
+   - Notes may record `stripe_invoice:<id> order:<id>`
 
-Until this step runs, the discount must remain `active` so an unpaid customer can open another quote / invoice and still receive the offer.
+Until discount redemption runs, the discount must remain `active` so an unpaid customer can open another quote / invoice and still receive the offer.
+
+Package activation should not roll back a successful payment write if `package_id` is missing from remark — log and continue.
 
 ## `invoice.payment_failed`
 
@@ -96,7 +116,7 @@ Until this step runs, the discount must remain `active` so an unpaid customer ca
 ```text
 active  ──(quote / create order / create invoice)──►  still active
                                                       (snapshot only in order.remark + order_item)
-active  ──(invoice.paid in external webhook)────────►  used
+active  ──(invoice.paid in stripe-webhook)──────────►  used
 active  ──(payment_failed / voided)─────────────────►  still active  (no restore step needed)
 ```
 
@@ -106,11 +126,24 @@ active  ──(payment_failed / voided)─────────────�
 - Snapshots `discount_id` and `discount_ratio` into `order.remark`
 - Writes a discount `order_item` when the quote includes an active discount
 - Never writes `status = used`
+- Never writes `customer_packages`
 
-External webhook:
+`stripe-webhook` service:
 
-- Is the only writer that sets `used`
-- Must not redeem on failed or voided invoices
+- Is the only writer that sets discount `used`
+- Is the only writer that activates `customer_packages` from pilot invoice payment
+- Must not redeem discounts or change packages on failed or voided invoices
+
+## customer_packages on paid
+
+| Field | Source |
+| --- | --- |
+| `customer_id` | `order.customer_id` |
+| `package_id` | `order.remark.package_id` (set by sample-proposal) |
+| `is_active` | `true` for the purchased package; prior actives set to `false` |
+| `starts_at` / `ends_at` | new row starts now; deactivated rows get `ends_at=now` |
+
+Invariant: each customer has at most one `is_active = true` row after a successful paid handling.
 
 ## Invoice metadata reference (set by sample-proposal)
 

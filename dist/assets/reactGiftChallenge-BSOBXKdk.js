@@ -1,4 +1,4 @@
-import{n as e,r as t,t as n}from"./jsx-runtime-M5tw2uBi.js";var r=t(),i=e(),a=`<!doctype html>
+import{a as e,i as t,r as n,t as r}from"./analytics-CI-tSlcf.js";var i=e(),a=t(),o=`<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -863,11 +863,11 @@ import{n as e,r as t,t as n}from"./jsx-runtime-M5tw2uBi.js";var r=t(),i=e(),a=`<
     const proposalId = pathMatch
       ? decodeURIComponent(pathMatch[1])
       : (proposalParams.get('sn') || proposalParams.get('id'));
-    const fallbackId = proposalId || 'UCB-GIFT-001';
+    const magnetSn = proposalId || '';
 
     function applyData(data) {
       if (data.template_type && data.template_type !== 'gift_challenge') {
-        throw new Error(\`Proposal \${fallbackId} uses template \${data.template_type}, not gift_challenge\`);
+        throw new Error(\`Proposal uses template \${data.template_type}, not gift_challenge\`);
       }
       if (data.brand_primary_color) document.documentElement.style.setProperty('--rust', data.brand_primary_color);
       if (data.brand_second_color) document.documentElement.style.setProperty('--gold', data.brand_second_color);
@@ -877,16 +877,27 @@ import{n as e,r as t,t as n}from"./jsx-runtime-M5tw2uBi.js";var r=t(),i=e(),a=`<
       }
       if (data.brand_light_color) document.documentElement.style.setProperty('--brand-light', data.brand_light_color);
       const brandName = data.brand_name || 'Brand';
-      document.querySelectorAll('[data-link]').forEach(el => { const value=data[el.dataset.link]; if(value) el.href=value; });
-      document.title = data.page_title || \`\${data.campaign_name || data.brand_name || 'Reward Challenge'} | Proposal\`;
+      document.querySelectorAll('[data-link]').forEach(el => {
+        const value = data[el.dataset.link];
+        if (value) el.href = value;
+      });
+      document.title = data.page_title || \`\${data.campaign_name || brandName} | Proposal\`;
       const description = document.querySelector('meta[name="description"]');
       if (description) description.content = \`\${data.campaign_name || brandName} proposal\`;
     }
 
-    fetch(\`/api/proposal?id=\${encodeURIComponent(fallbackId)}\`)
-      .then(async response => { const data=await response.json(); if(!response.ok) throw new Error(data.error||'Proposal not found'); return data; })
+    // Branding from magnet_brand_param via /api/proposal (null fields → server defaults).
+    fetch(\`/api/proposal?sn=\${encodeURIComponent(magnetSn)}\`)
+      .then(async response => {
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Proposal not found');
+        return data;
+      })
       .then(applyData)
-      .catch(error => { console.error(error); document.body.dataset.loadError='true'; });
+      .catch(error => {
+        console.error(error);
+        document.body.dataset.loadError = 'true';
+      });
 
 
     const sectionRevealTargets=Array.from(document.querySelectorAll('main>section')).map(section=>section.firstElementChild||section);
@@ -1082,5 +1093,5 @@ import{n as e,r as t,t as n}from"./jsx-runtime-M5tw2uBi.js";var r=t(),i=e(),a=`<
   <\/script>
 </body>
 </html>
-`;function o(e=a){let t=new DOMParser().parseFromString(e,`text/html`),n=[...t.querySelectorAll(`style`)].map(e=>e.textContent||``).join(`
-`),r=[...t.body.querySelectorAll(`script`)].map(e=>e.textContent||``),i=[...t.head.querySelectorAll(`link[href]`)].map(e=>e.getAttribute(`href`)||``).filter(e=>e.includes(`fonts.googleapis.com`)||e.includes(`fonts.gstatic.com`));return t.body.querySelectorAll(`script`).forEach(e=>e.remove()),{bodyMarkup:t.body.innerHTML,css:n,scripts:r.filter(Boolean),fontLinks:i}}var s=n();function c(){let e=(0,r.useRef)(null),t=(0,r.useMemo)(()=>o(),[]);return(0,r.useEffect)(()=>{let e=t.fontLinks.map(e=>{let t=document.createElement(`link`);return t.rel=e.includes(`fonts.googleapis.com`)?`stylesheet`:`preconnect`,t.href=e,e.includes(`fonts.gstatic.com`)&&(t.crossOrigin=`anonymous`),t.dataset.proposalFont=`true`,document.head.appendChild(t),t}),n=t.scripts.map(e=>{let t=document.createElement(`script`);return t.text=`(() => {\n${e}\n})()`,t.dataset.proposalBehavior=`true`,document.body.appendChild(t),t});return()=>{n.forEach(e=>e.remove()),e.forEach(e=>e.remove())}},[t]),(0,r.useEffect)(()=>{let t=e.current?.querySelector(`.hero-video`);if(!t)return;let n=()=>{t.muted=!0,t.defaultMuted=!0,t.play().catch(()=>{})},r=()=>{document.visibilityState===`visible`&&n()};return t.addEventListener(`loadeddata`,n),t.addEventListener(`canplay`,n),document.addEventListener(`visibilitychange`,r),n(),()=>{t.removeEventListener(`loadeddata`,n),t.removeEventListener(`canplay`,n),document.removeEventListener(`visibilitychange`,r)}},[t]),(0,s.jsxs)(s.Fragment,{children:[(0,s.jsx)(`style`,{"data-proposal-style-config":!0,children:t.css}),(0,s.jsx)(`div`,{ref:e,dangerouslySetInnerHTML:{__html:t.bodyMarkup}})]})}(0,i.createRoot)(document.getElementById(`root`)).render((0,s.jsx)(c,{}));
+`;function s(e=o){let t=new DOMParser().parseFromString(e,`text/html`),n=[...t.querySelectorAll(`style`)].map(e=>e.textContent||``).join(`
+`),r=[...t.body.querySelectorAll(`script`)].map(e=>e.textContent||``),i=[...t.head.querySelectorAll(`link[href]`)].map(e=>e.getAttribute(`href`)||``).filter(e=>e.includes(`fonts.googleapis.com`)||e.includes(`fonts.gstatic.com`));return t.body.querySelectorAll(`script`).forEach(e=>e.remove()),{bodyMarkup:t.body.innerHTML,css:n,scripts:r.filter(Boolean),fontLinks:i}}var c=n();function l(){let e=(0,i.useRef)(null),t=(0,i.useMemo)(()=>s(),[]);return(0,i.useEffect)(()=>{let e=t.fontLinks.map(e=>{let t=document.createElement(`link`);return t.rel=e.includes(`fonts.googleapis.com`)?`stylesheet`:`preconnect`,t.href=e,e.includes(`fonts.gstatic.com`)&&(t.crossOrigin=`anonymous`),t.dataset.proposalFont=`true`,document.head.appendChild(t),t}),n=t.scripts.map(e=>{let t=document.createElement(`script`);return t.text=`(() => {\n${e}\n})()`,t.dataset.proposalBehavior=`true`,document.body.appendChild(t),t});return()=>{n.forEach(e=>e.remove()),e.forEach(e=>e.remove())}},[t]),(0,i.useEffect)(()=>{let t=e.current?.querySelector(`.hero-video`);if(!t)return;let n=()=>{t.muted=!0,t.defaultMuted=!0,t.play().catch(()=>{})},r=()=>{document.visibilityState===`visible`&&n()};return t.addEventListener(`loadeddata`,n),t.addEventListener(`canplay`,n),document.addEventListener(`visibilitychange`,r),n(),()=>{t.removeEventListener(`loadeddata`,n),t.removeEventListener(`canplay`,n),document.removeEventListener(`visibilitychange`,r)}},[t]),(0,c.jsxs)(c.Fragment,{children:[(0,c.jsx)(`style`,{"data-proposal-style-config":!0,children:t.css}),(0,c.jsx)(`div`,{ref:e,dangerouslySetInnerHTML:{__html:t.bodyMarkup}})]})}(0,a.createRoot)(document.getElementById(`root`)).render((0,c.jsx)(r,{page:`sample`,trackSectionDwell:!0,children:(0,c.jsx)(l,{})}));
