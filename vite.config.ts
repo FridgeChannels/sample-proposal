@@ -47,6 +47,18 @@ export default defineConfig({
             return
           }
 
+          if (url.pathname === '/qualified-meeting-doc' || url.pathname === '/qualified-meeting-doc/') {
+            req.url = `/qualified-meeting-doc.html${url.search}`
+            next()
+            return
+          }
+
+          if (url.pathname === '/fit-meeting-sample' || url.pathname === '/fit-meeting-sample/') {
+            req.url = `/fit-meeting-sample.html${url.search}`
+            next()
+            return
+          }
+
           const rewritten = await resolveSamplePhaseHtml(url.pathname)
           if (rewritten) {
             // Keep path semantics for the client (sn still comes from the browser URL);
@@ -63,6 +75,8 @@ export default defineConfig({
       input: {
         reactGiftChallenge: resolve(projectRoot, 'gift-challenge-react.html'),
         postMeeting: resolve(projectRoot, 'post-meeting.html'),
+        qualifiedMeetingDoc: resolve(projectRoot, 'qualified-meeting-doc.html'),
+        fitMeetingSample: resolve(projectRoot, 'fit-meeting-sample.html'),
       },
     },
   },

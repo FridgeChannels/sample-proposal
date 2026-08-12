@@ -1,4 +1,4 @@
-import{a as e,i as t,r as n,t as r}from"./analytics-CI-tSlcf.js";var i=e(),a=t(),o=`<!doctype html>
+function e(e=`<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -844,7 +844,6 @@ import{a as e,i as t,r as n,t as r}from"./analytics-CI-tSlcf.js";var i=e(),a=t()
         <div class="footer-box closing-box closing-box--pilot reveal">
           <header class="closing-copy">
             <h2 id="closing-title">One magnet. Every stage of retention.</h2>
-            <p class="closing-copy-text">First order → second. Subscriber → renewal. Cooling → warm. Gift recipient → repeat buyer. All other segment in your life circle management.</p>
             <p class="closing-copy-text">The magnet you’re holding can run any of these — same magnet, different mission.</p>
           </header>
           <div class="closing-gains package-gains">
@@ -1093,5 +1092,5 @@ import{a as e,i as t,r as n,t as r}from"./analytics-CI-tSlcf.js";var i=e(),a=t()
   <\/script>
 </body>
 </html>
-`;function s(e=o){let t=new DOMParser().parseFromString(e,`text/html`),n=[...t.querySelectorAll(`style`)].map(e=>e.textContent||``).join(`
-`),r=[...t.body.querySelectorAll(`script`)].map(e=>e.textContent||``),i=[...t.head.querySelectorAll(`link[href]`)].map(e=>e.getAttribute(`href`)||``).filter(e=>e.includes(`fonts.googleapis.com`)||e.includes(`fonts.gstatic.com`));return t.body.querySelectorAll(`script`).forEach(e=>e.remove()),{bodyMarkup:t.body.innerHTML,css:n,scripts:r.filter(Boolean),fontLinks:i}}var c=n();function l(){let e=(0,i.useRef)(null),t=(0,i.useMemo)(()=>s(),[]);return(0,i.useEffect)(()=>{let e=t.fontLinks.map(e=>{let t=document.createElement(`link`);return t.rel=e.includes(`fonts.googleapis.com`)?`stylesheet`:`preconnect`,t.href=e,e.includes(`fonts.gstatic.com`)&&(t.crossOrigin=`anonymous`),t.dataset.proposalFont=`true`,document.head.appendChild(t),t}),n=t.scripts.map(e=>{let t=document.createElement(`script`);return t.text=`(() => {\n${e}\n})()`,t.dataset.proposalBehavior=`true`,document.body.appendChild(t),t});return()=>{n.forEach(e=>e.remove()),e.forEach(e=>e.remove())}},[t]),(0,i.useEffect)(()=>{let t=e.current?.querySelector(`.hero-video`);if(!t)return;let n=()=>{t.muted=!0,t.defaultMuted=!0,t.play().catch(()=>{})},r=()=>{document.visibilityState===`visible`&&n()};return t.addEventListener(`loadeddata`,n),t.addEventListener(`canplay`,n),document.addEventListener(`visibilitychange`,r),n(),()=>{t.removeEventListener(`loadeddata`,n),t.removeEventListener(`canplay`,n),document.removeEventListener(`visibilitychange`,r)}},[t]),(0,c.jsxs)(c.Fragment,{children:[(0,c.jsx)(`style`,{"data-proposal-style-config":!0,children:t.css}),(0,c.jsx)(`div`,{ref:e,dangerouslySetInnerHTML:{__html:t.bodyMarkup}})]})}(0,a.createRoot)(document.getElementById(`root`)).render((0,c.jsx)(r,{page:`sample`,trackSectionDwell:!0,children:(0,c.jsx)(l,{})}));
+`){let t=new DOMParser().parseFromString(e,`text/html`),n=[...t.querySelectorAll(`style`)].map(e=>e.textContent||``).join(`
+`),r=[...t.body.querySelectorAll(`script`)].map(e=>e.textContent||``),i=[...t.head.querySelectorAll(`link[href]`)].map(e=>e.getAttribute(`href`)||``).filter(e=>e.includes(`fonts.googleapis.com`)||e.includes(`fonts.gstatic.com`));return t.body.querySelectorAll(`script`).forEach(e=>e.remove()),{bodyMarkup:t.body.innerHTML,css:n,scripts:r.filter(Boolean),fontLinks:i}}export{e as t};

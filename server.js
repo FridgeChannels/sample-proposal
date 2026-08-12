@@ -144,6 +144,22 @@ async function servePostMeeting(res) {
   await serveDistHtml(res, 'post-meeting.html', 'Failed to load post-meeting deal room (run `npm run build` to generate dist/)');
 }
 
+async function serveQualifiedMeetingDoc(res) {
+  await serveDistHtml(
+    res,
+    'qualified-meeting-doc.html',
+    'Failed to load QualifiedMeetingDoc (run `npm run build` to generate dist/)',
+  );
+}
+
+async function serveFitMeetingSample(res) {
+  await serveDistHtml(
+    res,
+    'fit-meeting-sample.html',
+    'Failed to load Fit Meeting Sample (run `npm run build` to generate dist/)',
+  );
+}
+
 async function serveSampleOrLiveBySn(res, sn) {
   const { phase } = await lookupSamplePhase(sn);
   if (phase === 'live') {
@@ -656,6 +672,24 @@ async function handleRequest(req, res) {
 
   if (requestUrl.pathname === '/post-meeting.html') {
     await servePostMeeting(res);
+    return;
+  }
+
+  if (
+    requestUrl.pathname === '/qualified-meeting-doc'
+    || requestUrl.pathname === '/qualified-meeting-doc/'
+    || requestUrl.pathname === '/qualified-meeting-doc.html'
+  ) {
+    await serveQualifiedMeetingDoc(res);
+    return;
+  }
+
+  if (
+    requestUrl.pathname === '/fit-meeting-sample'
+    || requestUrl.pathname === '/fit-meeting-sample/'
+    || requestUrl.pathname === '/fit-meeting-sample.html'
+  ) {
+    await serveFitMeetingSample(res);
     return;
   }
 
