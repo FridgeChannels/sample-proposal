@@ -65,6 +65,7 @@ const loadOrder = (): OrderState => {
       approval: undefined,
       package: packageSelection,
       timeline: defaultOrder.timeline,
+      shippingMethod: 'air',
     }))
   } catch {
     return applyStatusPreview(ensureOfferWindow(defaultOrder))
@@ -224,8 +225,7 @@ export function App() {
           onBack={() => window.history.back()}
           onOpenContent={() => openView('content')}
           onViewReceipt={() => openView('finance')}
-          onChange={setOrder}
-          onHandoffCreated={(financeHandoff, dbOrderId) => setOrder(current => ({ ...current, financeHandoff, dbOrderId, status: 'payment_pending' }))}
+          onHandoffCreated={(financeHandoff, dbOrderId) => setOrder(current => ({ ...current, financeHandoff, dbOrderId, status: 'payment_pending', shippingMethod: 'air' }))}
         />
       )}
       {view === 'address' && !paymentComplete && <AddressView order={order} onChange={setOrder} onBack={() => openView('plan')} />}

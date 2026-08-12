@@ -125,8 +125,7 @@ export function FinanceView({
   const displayedName = nameParts(displayedShipping)
   const usesUsStateList = isUnitedStatesCountry(displayedShipping.country)
   const displayedUsState = normalizedUsStateCode(displayedShipping.state)
-  const selectedShippingMethod = order.shippingMethod === 'air' ? 'air' : 'ocean'
-  const selectedShipping = SHIPPING_OPTIONS[selectedShippingMethod]
+  const selectedShipping = SHIPPING_OPTIONS.air
   const [paying, setPaying] = useState(false)
   const [payError, setPayError] = useState('')
   const [receiptDownloading, setReceiptDownloading] = useState(false)

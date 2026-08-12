@@ -12,7 +12,7 @@ export function OrderView({ order, now, onChange, onOpenAddress, onOpenFinance }
   const [addressRequired, setAddressRequired] = useState(false)
   const addressEntryRef = useRef<HTMLButtonElement>(null)
   const total = orderTotal(order, now)
-  const shipping = SHIPPING_OPTIONS[order.shippingMethod === 'air' ? 'air' : 'ocean']
+  const shipping = SHIPPING_OPTIONS.air
   const shippingAddressText = [order.shippingAddress.addressLine1, order.shippingAddress.addressLine2, order.shippingAddress.city, order.shippingAddress.state, order.shippingAddress.postalCode].filter(Boolean).join(', ')
   const hasShippingAddress = Boolean(order.shippingAddress.recipientName && order.shippingAddress.addressLine1 && order.shippingAddress.city && order.shippingAddress.state && order.shippingAddress.postalCode)
   const servicePreview = order.package.includedServices.map((group) => group.items[0]).filter(Boolean).slice(0, 4)

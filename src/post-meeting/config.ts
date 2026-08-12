@@ -155,7 +155,7 @@ export const defaultOrder: OrderState = {
     address: '',
     poNumber: '',
   },
-  shippingMethod: 'ocean',
+  shippingMethod: 'air',
   paymentMethod: 'card',
 }
 
@@ -248,7 +248,7 @@ export const isPilotDiscountApplied = (order: OrderState, now = Date.now()) =>
 export const orderSubtotal = (order: OrderState, now = Date.now()) =>
   resolvedLineItems(order, now).reduce((sum, item) => sum + item.amount, 0)
 
-export const shippingFee = (order: OrderState) => SHIPPING_OPTIONS[order.shippingMethod === 'air' ? 'air' : 'ocean'].fee
+export const shippingFee = (_order?: OrderState) => SHIPPING_OPTIONS.air.fee
 
 export const orderTotal = (order: OrderState, now = Date.now()) => orderSubtotal(order, now) + shippingFee(order) + order.tax
 

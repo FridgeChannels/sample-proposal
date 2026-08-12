@@ -1,15 +1,12 @@
 import { useState } from 'react'
 import { orderTotal, readApiJson, resolvedLineItems, SHIPPING_OPTIONS } from '../config'
-import type { FinanceHandoff, OrderState, ShippingMethod } from '../types'
+import type { FinanceHandoff, OrderState } from '../types'
 import { PaymentLinkModal } from './PaymentLinkModal'
 
 const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 })
 const number = new Intl.NumberFormat('en-US')
 const date = new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' })
-const shippingOptions: Array<{ method: ShippingMethod; label: string; eta: string; fee: number }> = [
-  { method: 'ocean', ...SHIPPING_OPTIONS.ocean },
-  { method: 'air', ...SHIPPING_OPTIONS.air },
-]
+const airShipping = SHIPPING_OPTIONS.air
 
 function DetailsChevron() {
   return (
@@ -79,7 +76,6 @@ export function PilotPlanView({
   onBack,
   onOpenContent,
   onViewReceipt,
-  onChange,
   onHandoffCreated,
 }: {
   order: OrderState
@@ -88,7 +84,6 @@ export function PilotPlanView({
   onBack: () => void
   onOpenContent: () => void
   onViewReceipt: () => void
-  onChange: (order: OrderState) => void
   onHandoffCreated: (handoff: FinanceHandoff, dbOrderId: number) => void
 }) {
   const [creatingLink, setCreatingLink] = useState(false)
@@ -99,7 +94,6 @@ export function PilotPlanView({
   const brand = order.brandName || order.shippingAddress.companyName || 'Client'
   const createdDate = formatDate(order.createdAt)
   const isPaid = order.status === 'paid' || order.financeHandoff?.status === 'paid'
-  const shippingLocked = isPaid || creatingLink || Boolean(order.financeHandoff?.token)
 
   const createPaymentLink = async () => {
     if (isPaid) {
@@ -122,7 +116,7 @@ export function PilotPlanView({
           quantity: order.quantity,
           baseUrl: window.location.origin,
           proposalPath: window.location.pathname,
-          shippingMethod: order.shippingMethod === 'air' ? 'air' : 'ocean',
+          shippingMethod: 'air',
         }),
       })
       const data = await readApiJson<{ handoff: FinanceHandoff; orderId: number }>(
@@ -217,25 +211,16 @@ export function PilotPlanView({
                 <strong className={item.kind === 'discount' ? 'discount' : ''}>{item.amount < 0 ? `−${money.format(Math.abs(item.amount))}` : money.format(item.amount)}</strong>
               </div>
             ))}
-            <fieldset className="plan-shipping-options" disabled={shippingLocked}>
-              <legend>Shipping</legend>
-              {shippingOptions.map((option) => (
-                <label className={order.shippingMethod === option.method ? 'is-selected' : ''} key={option.method}>
-                  <input
-                    type="radio"
-                    name="plan-shipping-method"
-                    value={option.method}
-                    checked={order.shippingMethod === option.method}
-                    onChange={() => onChange({ ...order, shippingMethod: option.method })}
-                  />
-                  <span>
-                    <strong>{option.label}</strong>
-                    <small>{option.eta}</small>
-                  </span>
-                  <b>{money.format(option.fee)}</b>
-                </label>
-              ))}
-            </fieldset>
+            <div className="plan-shipping-options" aria-label="Shipping">
+              <span className="plan-shipping-label">Shipping</span>
+              <div className="plan-shipping-fixed">
+                <span>
+                  <strong>{airShipping.label}</strong>
+                  <small>{airShipping.eta}</small>
+                </span>
+                <b>{money.format(airShipping.fee)}</b>
+              </div>
+            </div>
             <div className="plan-total"><span>Total</span><strong>{money.format(total)}</strong></div>
           </div>
 
