@@ -213,9 +213,10 @@ main > section.hero-definition-section {
 }
 
 .hero-definition-section .hero-supporting-copy {
-  width: min(calc(100% - clamp(40px, 6vw, 100px)), 1600px);
+  box-sizing: border-box;
+  width: min(100% - clamp(32px, 6vw, 100px), 1100px);
   margin: 0 auto;
-  padding: clamp(30px, 5vw, 70px);
+  padding: clamp(28px, 5vw, 70px) 0;
   text-align: center;
 }
 
@@ -225,22 +226,26 @@ main > section.hero-definition-section {
 }
 
 .hero-definition-section .hero-sub {
+  box-sizing: border-box;
   width: 100%;
-  max-width: none !important;
-  margin: 0;
-  font-size: clamp(1.25rem, 2vw, 2.2rem);
+  max-width: 38ch !important;
+  margin: 0 auto;
+  font-size: clamp(1.15rem, 2.1vw, 2rem);
   font-weight: 600;
-  line-height: normal;
+  line-height: 1.35;
   text-align: center;
-  white-space: nowrap;
+  text-wrap: balance;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .hero-definition-section .hero-body {
-  max-width: 900px !important;
-  margin: clamp(24px, 4vh, 42px) auto 0;
-  font-size: clamp(1rem, 1.45vw, 1.4rem);
+  max-width: 52ch !important;
+  margin: clamp(20px, 3.5vh, 36px) auto 0;
+  font-size: clamp(0.95rem, 1.35vw, 1.25rem);
   font-weight: 500;
-  line-height: 1.65;
+  line-height: 1.6;
+  text-wrap: pretty;
 }
 
 .fit-section .fit-check {
@@ -752,8 +757,19 @@ main > section.fit-decision-section {
     margin: 0 auto !important;
   }
 
+  .hero-definition-section .hero-supporting-copy {
+    width: min(100% - 32px, 680px);
+    padding: clamp(40px, 8vw, 72px) 0;
+  }
+
   .hero-definition-section .hero-sub {
-    white-space: normal;
+    max-width: 28ch !important;
+    font-size: clamp(1.2rem, 5.4vw, 1.65rem);
+  }
+
+  .hero-definition-section .hero-body {
+    max-width: 34ch !important;
+    font-size: clamp(0.95rem, 3.8vw, 1.05rem);
   }
 
   .first-meeting-purpose > .first-meeting-purpose-layout,
