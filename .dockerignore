@@ -3,6 +3,7 @@
 .playwright-cli
 .preview
 docs
+dist
 node_modules
 .env
 .env.*

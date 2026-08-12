@@ -6,7 +6,8 @@ COPY package.json package-lock.json* ./
 RUN npm ci
 
 COPY vite.config.ts tsconfig.json tsconfig.app.json tsconfig.node.json ./
-COPY gift-challenge-react.html post-meeting.html ./
+COPY gift-challenge-react.html post-meeting.html qualified-meeting-doc.html fit-meeting-sample.html ./
+COPY public ./public
 COPY src ./src
 
 RUN npm run build
