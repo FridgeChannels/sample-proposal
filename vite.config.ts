@@ -31,6 +31,16 @@ export default defineConfig({
   plugins: [
     react(),
     {
+      name: 'inject-post-meeting-public-config',
+      transformIndexHtml(html, ctx) {
+        if (!ctx.filename.endsWith('post-meeting.html')) return html
+        const legalBase = String(process.env.VITE_LEGAL_DOCS_BASE_URL || '').replace(/\/$/, '')
+        if (!legalBase) return html
+        const injection = `<script>window.__FC_LEGAL_DOCS_BASE_URL__=${JSON.stringify(legalBase)};</script>`
+        return html.replace('</head>', `${injection}</head>`)
+      },
+    },
+    {
       // Homepage is the React gift-challenge page, matching server.js's `/` route
       name: 'serve-gift-challenge-as-index',
       configureServer(server) {

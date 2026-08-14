@@ -7,6 +7,7 @@ const {
   loadPilotQuote,
   computePilotTotals,
   savePilotAddress,
+  savePilotBilling,
   createPilotOrder,
   updateOrderShipping,
   createFinanceHandoff,
@@ -82,6 +83,7 @@ const MIME_TYPES = {
   '.jpeg': 'image/jpeg',
   '.webp': 'image/webp',
   '.svg': 'image/svg+xml',
+  '.pdf': 'application/pdf',
   '.mp4': 'video/mp4',
 };
 
@@ -120,7 +122,11 @@ async function serveStatic(req, res) {
   for (const candidate of [filePath, path.normalize(path.join(DIST_ROOT, pathname))]) {
     try {
       const body = await fs.readFile(candidate);
-      res.writeHead(200, { 'Content-Type': MIME_TYPES[ext] || 'application/octet-stream' });
+      const headers = { 'Content-Type': MIME_TYPES[ext] || 'application/octet-stream' };
+      if (ext === '.pdf') {
+        headers['Content-Disposition'] = 'inline';
+      }
+      res.writeHead(200, headers);
       res.end(body);
       return;
     } catch (error) {
@@ -133,9 +139,19 @@ async function serveStatic(req, res) {
 
 const GIFT_PROPOSAL_ROUTE_RE = /^\/(?:gift-proposal|p)(?:\/([^/?#]+))?\/?$/;
 
-async function serveDistHtml(res, fileName, missingMessage) {
+async function serveDistHtml(res, fileName, missingMessage, { injectPublicConfig = false } = {}) {
   try {
-    const body = await fs.readFile(path.join(DIST_ROOT, fileName));
+    let body = await fs.readFile(
+      path.join(DIST_ROOT, fileName),
+      injectPublicConfig ? 'utf8' : undefined,
+    );
+    if (injectPublicConfig && typeof body === 'string') {
+      const legalBase = String(process.env.VITE_LEGAL_DOCS_BASE_URL || process.env.LEGAL_DOCS_BASE_URL || '').replace(/\/$/, '');
+      if (legalBase) {
+        const injection = `<script>window.__FC_LEGAL_DOCS_BASE_URL__=${JSON.stringify(legalBase)};</script>`;
+        body = body.replace('</head>', `${injection}</head>`);
+      }
+    }
     res.writeHead(200, {
       'Content-Type': MIME_TYPES['.html'],
       'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
@@ -152,7 +168,12 @@ async function serveGiftChallenge(res) {
 }
 
 async function servePostMeeting(res) {
-  await serveDistHtml(res, 'post-meeting.html', 'Failed to load post-meeting deal room (run `npm run build` to generate dist/)');
+  await serveDistHtml(
+    res,
+    'post-meeting.html',
+    'Failed to load post-meeting deal room (run `npm run build` to generate dist/)',
+    { injectPublicConfig: true },
+  );
 }
 
 async function serveQualifiedMeetingDoc(res) {
@@ -546,10 +567,25 @@ async function handleRequest(req, res) {
         orderId,
         shippingAddressId,
         billing: body.billing || undefined,
+        termsAccepted: Boolean(body.termsAccepted),
       });
       await sendJson(res, 200, result);
     } catch (error) {
       await sendJson(res, error.status || 500, { error: error.message || 'Unable to update shipping.', code: error.code });
+    }
+    return;
+  }
+
+  if (requestUrl.pathname === '/api/pilot-orders/billing' && req.method === 'PATCH') {
+    try {
+      const body = await readJsonBody(req);
+      const sn = String(body.sn || '').trim();
+      if (!sn) return sendJson(res, 400, { error: 'Magnet SN is required.' });
+      if (!body.billing) return sendJson(res, 400, { error: 'Billing details are required.' });
+      const result = await savePilotBilling({ sn, billing: body.billing });
+      await sendJson(res, 200, result);
+    } catch (error) {
+      await sendJson(res, error.status || 500, { error: error.message || 'Unable to save billing.', code: error.code });
     }
     return;
   }

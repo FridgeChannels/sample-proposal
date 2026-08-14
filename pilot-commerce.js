@@ -16,6 +16,10 @@ const SAMPLE_STATUS_LIVE = 3;
 const DEFAULT_PACKAGE_CODE = 'PKG-PPM';
 const DEFAULT_PILOT_DISCOUNT_RATIO = 0.8;
 const DEFAULT_PILOT_DISCOUNT_DAYS = 10;
+const PILOT_TERMS_DOCUMENTS = Object.freeze([
+  'pilot-order-service-terms',
+  'data-processing-addendum',
+]);
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const STRIPE_INVOICE_DAYS_UNTIL_DUE = 7;
 
@@ -424,7 +428,7 @@ function mapPackage(pkg) {
   };
 }
 
-async function loadPilotQuote(sn) {
+async function loadPilotQuote(sn, { includeBilling = true } = {}) {
   const magnetSn = String(sn || '').trim();
   if (!magnetSn) throw httpError('Magnet SN is required', 400);
 
@@ -451,6 +455,7 @@ async function loadPilotQuote(sn) {
 
   let customerCreatedAt = null;
   let customerEmail = null;
+  let customerBilling = null;
   const customerId = brand.customer_id ?? null;
   if (customerId != null) {
     const customers = await supabaseSelect('customer', {
@@ -461,6 +466,9 @@ async function loadPilotQuote(sn) {
     const customer = Array.isArray(customers) ? customers[0] : null;
     customerCreatedAt = customer?.created_at || null;
     customerEmail = customer?.email || null;
+    if (includeBilling) {
+      customerBilling = await loadCustomerBilling(customerId);
+    }
   }
 
   const discounts = await supabaseSelect('customer_package_discounts', {
@@ -518,6 +526,7 @@ async function loadPilotQuote(sn) {
     customerId,
     customerCreatedAt,
     customerEmail,
+    billing: customerBilling,
     magnetId: brand.magnet_id ?? null,
     status: Number.parseInt(String(brand.status ?? ''), 10) || null,
     pilot: {
@@ -552,6 +561,126 @@ function computePilotTotals(quote, quantity) {
     total,
     currency: quote.package.currency || 'USD',
   };
+}
+
+function normalizeBillingInput(billing) {
+  if (!billing || typeof billing !== 'object') {
+    return {
+      companyName: '',
+      address: '',
+      contactName: '',
+      jobTitle: '',
+      email: '',
+      poNumber: '',
+    };
+  }
+  return {
+    companyName: String(billing.companyName || '').trim(),
+    address: String(billing.address || '').trim(),
+    contactName: String(billing.contactName || '').trim(),
+    jobTitle: String(billing.jobTitle || '').trim(),
+    email: String(billing.email || '').trim(),
+    poNumber: String(billing.poNumber || '').trim(),
+  };
+}
+
+function billingRowToClient(row) {
+  if (!row) return null;
+  return normalizeBillingInput({
+    companyName: row.company_name,
+    address: row.registered_address,
+    contactName: row.signatory_name,
+    jobTitle: row.signatory_title,
+    email: row.corporate_email,
+    poNumber: row.po_number,
+  });
+}
+
+async function loadCustomerBilling(customerId) {
+  const id = Number(customerId);
+  if (!Number.isFinite(id)) return null;
+  const rows = await supabaseSelect('customer_billing', {
+    select: '*',
+    customer_id: `eq.${id}`,
+    limit: '1',
+  });
+  return billingRowToClient(Array.isArray(rows) ? rows[0] : null);
+}
+
+async function saveCustomerBilling({ customerId, billing }) {
+  const id = Number(customerId);
+  if (!Number.isFinite(id)) throw httpError('customer_id is required', 400);
+  const normalized = normalizeBillingInput(billing);
+  const payload = {
+    company_name: normalized.companyName,
+    registered_address: normalized.address,
+    signatory_name: normalized.contactName,
+    signatory_title: normalized.jobTitle,
+    corporate_email: normalized.email,
+    po_number: normalized.poNumber || null,
+    updated_at: new Date().toISOString(),
+  };
+
+  const existingRows = await supabaseSelect('customer_billing', {
+    select: 'id',
+    customer_id: `eq.${id}`,
+    limit: '1',
+  });
+  const existing = Array.isArray(existingRows) ? existingRows[0] : null;
+  if (existing) {
+    await supabaseUpdate('customer_billing', { id: `eq.${existing.id}` }, payload);
+  } else {
+    await supabaseInsert('customer_billing', { customer_id: id, ...payload });
+  }
+  return normalized;
+}
+
+async function savePilotBilling({ sn, billing }) {
+  const quote = await loadPilotQuote(sn, { includeBilling: false });
+  const customerId = Number(quote.customerId);
+  if (!Number.isFinite(customerId)) throw httpError('Sample is missing customer_id; cannot save billing', 409, 'customer_missing');
+  const saved = await saveCustomerBilling({ customerId, billing });
+  return { billing: saved };
+}
+
+async function loadOrderTermsAcceptance(orderId) {
+  const id = Number(orderId);
+  if (!Number.isFinite(id)) return null;
+  const rows = await supabaseSelect('order_terms_acceptance', {
+    select: '*',
+    order_id: `eq.${id}`,
+    limit: '1',
+  });
+  return Array.isArray(rows) ? rows[0] : null;
+}
+
+async function recordOrderTermsAcceptance({ orderId, customerId, billing, termsAccepted }) {
+  if (!termsAccepted) {
+    throw httpError('Terms must be accepted before continuing to payment.', 400, 'terms_not_accepted');
+  }
+  const normalized = normalizeBillingInput(billing);
+  if (!normalized.contactName || !normalized.email) {
+    throw httpError('Signatory name and email are required to record terms acceptance.', 400, 'signatory_missing');
+  }
+
+  const payload = {
+    order_id: Number(orderId),
+    customer_id: Number(customerId),
+    documents: [...PILOT_TERMS_DOCUMENTS],
+    signatory_name: normalized.contactName,
+    signatory_email: normalized.email,
+    signatory_title: normalized.jobTitle || null,
+    accepted_at: new Date().toISOString(),
+  };
+
+  const existing = await loadOrderTermsAcceptance(orderId);
+  if (existing) {
+    await supabaseUpdate('order_terms_acceptance', { id: `eq.${existing.id}` }, payload);
+    return { ...payload, id: existing.id, updated: true };
+  }
+
+  const row = await supabaseInsert('order_terms_acceptance', payload);
+  return { ...payload, id: row?.id, updated: false };
 }
 
 async function savePilotAddress({ sn, address }) {
@@ -705,7 +834,7 @@ async function createPilotOrder({ sn, quantity, shippingAddressId, approval, shi
   };
 }
 
-async function updateOrderShipping({ orderId, shippingAddressId, billing }) {
+async function updateOrderShipping({ orderId, shippingAddressId, billing, termsAccepted }) {
   const id = Number(orderId);
   const addressId = Number(shippingAddressId);
   if (!Number.isFinite(id)) throw httpError('orderId is required', 400);
@@ -733,14 +862,18 @@ async function updateOrderShipping({ orderId, shippingAddressId, billing }) {
   }
 
   if (billing && typeof billing === 'object') {
-    remark.billing = {
-      companyName: String(billing.companyName || '').trim(),
-      address: String(billing.address || '').trim(),
-      contactName: String(billing.contactName || '').trim(),
-      jobTitle: String(billing.jobTitle || '').trim(),
-      email: String(billing.email || '').trim(),
-      poNumber: String(billing.poNumber || '').trim(),
-    };
+    remark.billing = normalizeBillingInput(billing);
+    await saveCustomerBilling({ customerId: order.customer_id, billing: remark.billing });
+  }
+
+  let termsAcceptance = null;
+  if (termsAccepted) {
+    termsAcceptance = await recordOrderTermsAcceptance({
+      orderId: id,
+      customerId: order.customer_id,
+      billing: remark.billing || billing,
+      termsAccepted: true,
+    });
   }
 
   const persistedShippingMethod = remark.shipping_method
@@ -790,7 +923,13 @@ async function updateOrderShipping({ orderId, shippingAddressId, billing }) {
     },
   );
 
-  return { orderId: id, shippingAddressId: addressId, shippingMethod: shipping.method, shippingFee: shipping.fee };
+  return {
+    orderId: id,
+    shippingAddressId: addressId,
+    shippingMethod: shipping.method,
+    shippingFee: shipping.fee,
+    termsAcceptance,
+  };
 }
 
 async function createFinanceHandoff({ orderId, magnetSn, toEmail, toName }) {
@@ -857,6 +996,8 @@ async function loadOrderInvoice(orderId) {
         ? 'approved'
         : 'ready_for_approval';
 
+  const customerBilling = order.customer_id ? await loadCustomerBilling(order.customer_id) : null;
+
   return {
     orderId: order.id,
     orderNo: order.order_no,
@@ -877,7 +1018,7 @@ async function loadOrderInvoice(orderId) {
     paymentMethod: order.payment_method,
     paymentTime: order.payment_time,
     approval: remark.approval || null,
-    billing: remark.billing || null,
+    billing: customerBilling || remark.billing || null,
     discountId: remark.discount_id || null,
     items: (Array.isArray(items) ? items : []).map((item) => ({
       id: item.id,
@@ -1227,6 +1368,11 @@ async function createStripeInvoiceForOrder({ orderId, handoffToken, payerName })
   if (Number(invoice.dbStatus) === ORDER_STATUS_PAID) throw httpError('This order is already paid.', 409);
   if (!invoice.shippingAddress) throw httpError('Shipping address is required before invoicing.', 409, 'shipping_missing');
 
+  const termsAcceptance = await loadOrderTermsAcceptance(orderId);
+  if (!termsAcceptance) {
+    throw httpError('Terms must be accepted before invoicing.', 409, 'terms_not_accepted');
+  }
+
   let handoffRow = null;
   if (handoffToken) {
     handoffRow = await getFinanceHandoffRow(handoffToken);
@@ -1517,6 +1663,9 @@ module.exports = {
   ensureSampleLive,
   loadPilotSession,
   savePilotAddress,
+  savePilotBilling,
+  loadOrderTermsAcceptance,
+  recordOrderTermsAcceptance,
   createPilotOrder,
   updateOrderShipping,
   createFinanceHandoff,

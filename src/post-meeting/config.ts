@@ -3,6 +3,25 @@ import type { OrderLineItem, OrderState, OrderStatus, ShippingMethod } from './t
 export const LIVE_DEMO_ORIGIN = 'https://dealquest.fridgechannels.com'
 export const LIVE_DEMO_URL = `${LIVE_DEMO_ORIGIN}/p/I9B44VTIHP`
 
+/** CDN / S3 base for checkout legal PDFs, e.g. https://assets.example.com/legal */
+export function getLegalDocsBaseUrl() {
+  if (typeof window !== 'undefined') {
+    const injected = window.__FC_LEGAL_DOCS_BASE_URL__
+    if (injected) return String(injected).replace(/\/$/, '')
+  }
+  return String(import.meta.env.VITE_LEGAL_DOCS_BASE_URL || '').replace(/\/$/, '')
+}
+
+export function legalDocAssetUrl(filename: string) {
+  const clean = filename.replace(/^\//, '')
+  const base = getLegalDocsBaseUrl()
+  return base ? `${base}/${clean}` : `/legal/${clean}`
+}
+
+export function legalDocPreviewUrl(filename: string) {
+  return `${legalDocAssetUrl(filename)}#toolbar=0&navpanes=0`
+}
+
 export const snFromLocation = (location: Pick<Location, 'pathname' | 'search'> = window.location): string | null => {
   const pathMatch = /^\/(?:gift-proposal|p)\/([^/?#]+)\/?$/.exec(location.pathname)
   if (pathMatch?.[1]) return decodeURIComponent(pathMatch[1])
@@ -88,6 +107,14 @@ export type PilotQuoteApiResponse = {
       durationDays: number | null
       confirmedAt: string | null
     }
+    billing?: {
+      companyName: string
+      address: string
+      contactName: string
+      jobTitle: string
+      email: string
+      poNumber: string
+    } | null
     tax: { collected: boolean; label: string; amount: number }
   }
   totals: {
@@ -167,6 +194,15 @@ export const defaultOrder: OrderState = {
   paymentMethod: 'card',
 }
 
+function mergeStoredBilling(current: OrderState['billing'], stored?: PilotQuoteApiResponse['quote']['billing']) {
+  if (!stored) return current
+  const merged = { ...current }
+  ;(['companyName', 'address', 'contactName', 'jobTitle', 'email', 'poNumber'] as const).forEach((field) => {
+    if (!String(merged[field] || '').trim() && stored[field]) merged[field] = stored[field]
+  })
+  return merged
+}
+
 export function applyQuoteToOrder(order: OrderState, payload: PilotQuoteApiResponse): OrderState {
   const { quote, totals } = payload
   const startedAt = new Date().toISOString()
@@ -216,9 +252,7 @@ export function applyQuoteToOrder(order: OrderState, payload: PilotQuoteApiRespo
       ...order.shippingAddress,
       companyName: quote.brandName || order.shippingAddress.companyName,
     },
-    billing: {
-      ...order.billing,
-    },
+    billing: mergeStoredBilling(order.billing, quote.billing),
     pricing: {
       loaded: true,
       magnetSn: quote.sn,

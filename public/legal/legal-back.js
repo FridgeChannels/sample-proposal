@@ -1,4 +1,10 @@
 (function () {
+  const params = new URLSearchParams(window.location.search)
+  if (params.get('embed') === '1') {
+    document.documentElement.classList.add('is-embed')
+    document.body.classList.add('is-embed')
+  }
+
   const back = document.getElementById('legal-back')
   if (!back) return
 

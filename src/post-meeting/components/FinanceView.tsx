@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { orderTotal, readApiJson, resolvedLineItems, SHIPPING_OPTIONS } from '../config'
+import { orderTotal, readApiJson, resolvedLineItems, SHIPPING_OPTIONS, legalDocPreviewUrl } from '../config'
 import type { BillingDetails, OrderState, PaymentMethod, ShippingAddress } from '../types'
+import { LegalDocModal, type LegalDocPreview } from './LegalDocModal'
 
 const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 })
 const number = new Intl.NumberFormat('en-US')
@@ -12,11 +13,10 @@ const paymentMethodLabels: Record<PaymentMethod, string> = {
   card: 'Credit card',
 }
 
-const LEGAL_DOCS = [
-  { label: 'Order Summary', href: '/legal/actual-order-summary.html' },
-  { label: 'Pilot Order & Service Terms', href: '/legal/pilot-order-service-terms.html' },
-  { label: 'Data Processing Addendum', href: '/legal/data-processing-addendum.html' },
-] as const
+const LEGAL_DOCS: LegalDocPreview[] = [
+  { label: 'Pilot Order & Service Terms', previewSrc: legalDocPreviewUrl('pilot-order-service-terms-en.pdf') },
+  { label: 'Data Processing Addendum', previewSrc: legalDocPreviewUrl('data-processing-addendum-en.pdf') },
+]
 
 const US_STATE_OPTIONS = [
   ['AL', 'Alabama'], ['AK', 'Alaska'], ['AZ', 'Arizona'], ['AR', 'Arkansas'],
@@ -162,16 +162,18 @@ export function FinanceView({
   const [receiptDownloading, setReceiptDownloading] = useState(false)
   const [receiptError, setReceiptError] = useState('')
   const [termsAccepted, setTermsAccepted] = useState(false)
+  const [previewDoc, setPreviewDoc] = useState<LegalDocPreview | null>(null)
+  const billingSaveTimer = useRef<number | null>(null)
   const [addressSuggestions, setAddressSuggestions] = useState<AddressSuggestion[]>([])
   const [addressSearching, setAddressSearching] = useState(false)
   const [addressResolving, setAddressResolving] = useState(false)
-  const [addressNotice, setAddressNotice] = useState('')
   const [suggestionsOpen, setSuggestionsOpen] = useState(false)
   const [activeSuggestion, setActiveSuggestion] = useState(-1)
   const [touchedShippingFields, setTouchedShippingFields] = useState<Partial<Record<RequiredShippingField, boolean>>>({})
   const [touchedBillingFields, setTouchedBillingFields] = useState<Partial<Record<RequiredBillingField, boolean>>>({})
   const [submitAttempted, setSubmitAttempted] = useState(false)
   const placesSessionToken = useRef(crypto.randomUUID())
+  const placesAutocompleteDisabled = useRef(false)
   const skipNextAutocomplete = useRef(false)
   const shippingValues: Record<RequiredShippingField, string> = {
     firstName: displayedName.firstName,
@@ -269,6 +271,25 @@ export function FinanceView({
     updateBillingFields({ [field]: value })
   }
 
+  useEffect(() => {
+    if (!magnetSn || isPaid || !onChange) return
+    const hasBillingInput = Object.values(order.billing).some((value) => String(value || '').trim())
+    if (!hasBillingInput) return
+
+    if (billingSaveTimer.current) window.clearTimeout(billingSaveTimer.current)
+    billingSaveTimer.current = window.setTimeout(() => {
+      void fetch('/api/pilot-orders/billing', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sn: magnetSn, billing: order.billing }),
+      }).catch(() => undefined)
+    }, 800)
+
+    return () => {
+      if (billingSaveTimer.current) window.clearTimeout(billingSaveTimer.current)
+    }
+  }, [magnetSn, isPaid, onChange, order.billing])
+
   const updateRecipientName = (field: 'firstName' | 'lastName', value: string) => {
     const nextFirstName = field === 'firstName' ? value : displayedName.firstName
     const nextLastName = field === 'lastName' ? value : displayedName.lastName
@@ -284,10 +305,10 @@ export function FinanceView({
       skipNextAutocomplete.current = false
       return
     }
+    if (placesAutocompleteDisabled.current) return
     if (input.length < 3) {
       setAddressSuggestions([])
       setSuggestionsOpen(false)
-      setAddressNotice('')
       setAddressSearching(false)
       return
     }
@@ -295,7 +316,6 @@ export function FinanceView({
     const controller = new AbortController()
     const timer = window.setTimeout(async () => {
       setAddressSearching(true)
-      setAddressNotice('')
       try {
         const params = new URLSearchParams({
           input,
@@ -305,15 +325,11 @@ export function FinanceView({
         const response = await fetch(`/api/places/autocomplete?${params}`, { signal: controller.signal })
         const data = await response.json().catch(() => ({})) as {
           suggestions?: AddressSuggestion[]
-          error?: string
-          code?: string
         }
         if (!response.ok) {
+          placesAutocompleteDisabled.current = true
           setAddressSuggestions([])
           setSuggestionsOpen(false)
-          setAddressNotice(data.code === 'places_not_configured'
-            ? 'Address suggestions need a Google Maps API key.'
-            : 'Suggestions unavailable. Enter the address manually.')
           return
         }
         const nextSuggestions = Array.isArray(data.suggestions) ? data.suggestions : []
@@ -322,9 +338,9 @@ export function FinanceView({
         setActiveSuggestion(-1)
       } catch (error) {
         if (error instanceof DOMException && error.name === 'AbortError') return
+        placesAutocompleteDisabled.current = true
         setAddressSuggestions([])
         setSuggestionsOpen(false)
-        setAddressNotice('Suggestions unavailable. Enter the address manually.')
       } finally {
         if (!controller.signal.aborted) setAddressSearching(false)
       }
@@ -338,15 +354,14 @@ export function FinanceView({
 
   const selectAddressSuggestion = async (suggestion: AddressSuggestion) => {
     setAddressResolving(true)
-    setAddressNotice('')
     try {
       const params = new URLSearchParams({
         placeId: suggestion.placeId,
         sessionToken: placesSessionToken.current,
       })
       const response = await fetch(`/api/places/details?${params}`)
-      const data = await response.json().catch(() => ({})) as { address?: ResolvedPlaceAddress; error?: string }
-      if (!response.ok || !data.address) throw new Error(data.error || 'Unable to load that address.')
+      const data = await response.json().catch(() => ({})) as { address?: ResolvedPlaceAddress }
+      if (!response.ok || !data.address) return
 
       skipNextAutocomplete.current = true
       updateShippingFields({
@@ -365,8 +380,8 @@ export function FinanceView({
       setSuggestionsOpen(false)
       setActiveSuggestion(-1)
       placesSessionToken.current = crypto.randomUUID()
-    } catch (error) {
-      setAddressNotice(error instanceof Error ? error.message : 'Unable to load that address.')
+    } catch {
+      // Autocomplete is optional; manual entry remains available without surfacing errors.
     } finally {
       setAddressResolving(false)
     }
@@ -444,6 +459,7 @@ export function FinanceView({
           orderId: order.dbOrderId,
           shippingAddressId: addressData.address.id,
           billing: billingPayload,
+          termsAccepted: true,
         }),
       })
       await readApiJson(shippingResponse, 'Unable to link shipping address.')
@@ -681,7 +697,6 @@ export function FinanceView({
                 {showShippingFieldValid('addressLine1') && <i className="shipping-valid-icon" aria-label="Street address complete">✓</i>}
                 {showShippingFieldError('addressLine1') && <small id="shipping-address-line-1-error" className="field-error">{shippingErrors.addressLine1}</small>}
                 {addressSearching && <small className="address-search-status">Finding addresses…</small>}
-                {addressNotice && <small className="address-search-status">{addressNotice}</small>}
                 {suggestionsOpen && addressSuggestions.length > 0 && (
                   <div id="shipping-address-suggestions" className="address-suggestions" role="listbox">
                     {addressSuggestions.map((suggestion, index) => (
@@ -764,28 +779,22 @@ export function FinanceView({
                 />
                 <span>
                   I have reviewed and agree to the{' '}
-                  {LEGAL_DOCS.map((doc, index) => {
-                    const returnTo = `${window.location.pathname}${window.location.search}${window.location.hash || '#finance'}`
-                    const href = `${doc.href}?return=${encodeURIComponent(returnTo)}`
-                    return (
-                      <span key={doc.href}>
-                        {index > 0 && (index === LEGAL_DOCS.length - 1 ? ', and ' : ', ')}
-                        <a
-                          href={href}
-                          onClick={(event) => {
-                            event.stopPropagation()
-                            try {
-                              window.sessionStorage.setItem('fc-order-summary-draft', JSON.stringify(order))
-                            } catch {
-                              // ignore quota / private mode failures; page still falls back to localStorage
-                            }
-                          }}
-                        >
-                          {doc.label}
-                        </a>
-                      </span>
-                    )
-                  })}
+                  {LEGAL_DOCS.map((doc, index) => (
+                    <span key={doc.previewSrc}>
+                      {index > 0 && (index === LEGAL_DOCS.length - 1 ? ', and ' : ', ')}
+                      <button
+                        type="button"
+                        className="legal-doc-link"
+                        onClick={(event) => {
+                          event.preventDefault()
+                          event.stopPropagation()
+                          setPreviewDoc(doc)
+                        }}
+                      >
+                        {doc.label}
+                      </button>
+                    </span>
+                  ))}
                   .
                 </span>
               </label>
@@ -803,6 +812,7 @@ export function FinanceView({
           </div>
         </aside>
       </div>
+      {previewDoc && <LegalDocModal doc={previewDoc} onClose={() => setPreviewDoc(null)} />}
     </main>
   )
 
