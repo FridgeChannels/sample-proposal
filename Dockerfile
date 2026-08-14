@@ -6,6 +6,7 @@ COPY package.json package-lock.json* ./
 RUN npm ci
 
 COPY vite.config.ts tsconfig.json tsconfig.app.json tsconfig.node.json ./
+COPY pilot-ops-auth.js ./
 COPY gift-challenge-react.html post-meeting.html qualified-meeting-doc.html fit-meeting-sample.html \
      pilot-plan.html pilot-plan-prep.html ./
 COPY public ./public
