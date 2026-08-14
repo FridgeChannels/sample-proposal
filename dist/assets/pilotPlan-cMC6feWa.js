@@ -618,7 +618,6 @@ import{n as e,r as t,t as n}from"./jsx-runtime-M5tw2uBi.js";var r=t(),i=e(),a=`<
     :host *:not(#fc-font-weight-reset),
     :host *:not(#fc-font-weight-reset)::before,
     :host *:not(#fc-font-weight-reset)::after{font-weight:400!important}
-    body[data-meet-mode="true"] .pilot-commercial-summary{display:none!important}
     body[data-meet-mode="true"] [data-meet-hidden]{display:none!important}
     [data-meet-only]{display:none}
     body[data-meet-mode="true"] [data-meet-only]{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px}
