@@ -82,6 +82,12 @@ export type PilotQuoteApiResponse = {
       active: boolean
       expiresAt: string | null
     }
+    pilot?: {
+      kpi: string | null
+      segment: string | null
+      durationDays: number | null
+      confirmedAt: string | null
+    }
     tax: { collected: boolean; label: string; amount: number }
   }
   totals: {
@@ -223,6 +229,7 @@ export function applyQuoteToOrder(order: OrderState, payload: PilotQuoteApiRespo
       taxLabel: quote.tax.label,
       taxCollected: quote.tax.collected,
     },
+    pilot: quote.pilot ?? order.pilot,
   }
 }
 

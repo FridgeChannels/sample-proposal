@@ -14,8 +14,18 @@ const {
   getFinanceReceiptPdf,
   updateFinanceHandoffStatus,
   createStripeInvoiceForOrder,
+  savePilotPlan,
+  ensureSampleLive,
+  loadPilotSession,
   moneyRound,
 } = require('./pilot-commerce');
+const {
+  listCalendlyEvents,
+  resolvePilotSession,
+  listPackages,
+  createDashboardLoginLink,
+  bindPilotCustomerAccount,
+} = require('./pilot-session');
 
 const ROOT = __dirname;
 const DIST_ROOT = path.join(__dirname, 'dist');
@@ -71,7 +81,8 @@ const MIME_TYPES = {
   '.jpg': 'image/jpeg',
   '.jpeg': 'image/jpeg',
   '.webp': 'image/webp',
-  '.svg': 'image/svg+xml'
+  '.svg': 'image/svg+xml',
+  '.mp4': 'video/mp4',
 };
 
 async function sendJson(res, status, payload) {
@@ -157,6 +168,22 @@ async function serveFitMeetingSample(res) {
     res,
     'fit-meeting-sample.html',
     'Failed to load Fit Meeting Sample (run `npm run build` to generate dist/)',
+  );
+}
+
+async function servePilotPlan(res) {
+  await serveDistHtml(
+    res,
+    'pilot-plan.html',
+    'Failed to load Pilot Plan proposal (run `npm run build` to generate dist/)',
+  );
+}
+
+async function servePilotPlanPrep(res) {
+  await serveDistHtml(
+    res,
+    'pilot-plan-prep.html',
+    'Failed to load Pilot Plan prep (run `npm run build` to generate dist/)',
   );
 }
 
@@ -665,6 +692,116 @@ async function handleRequest(req, res) {
     return;
   }
 
+  if (requestUrl.pathname === '/api/calendly/events') {
+    if (req.method !== 'GET') {
+      await sendJson(res, 405, { error: 'Method not allowed.' });
+      return;
+    }
+    try {
+      const date = requestUrl.searchParams.get('date') || '';
+      const result = await listCalendlyEvents(date || undefined);
+      await sendJson(res, 200, result);
+    } catch (error) {
+      await sendJson(res, error.status || 500, { error: error.message || 'Calendly unavailable.' });
+    }
+    return;
+  }
+
+  if (requestUrl.pathname === '/api/pilot-session/resolve' && req.method === 'POST') {
+    try {
+      const body = await readJsonBody(req);
+      const result = await resolvePilotSession(body);
+      await sendJson(res, 200, result);
+    } catch (error) {
+      await sendJson(res, error.status || 500, { error: error.message || 'Resolve failed.' });
+    }
+    return;
+  }
+
+  if (requestUrl.pathname === '/api/pilot-session/bind-account' && req.method === 'POST') {
+    try {
+      const body = await readJsonBody(req);
+      const result = await bindPilotCustomerAccount({
+        sn: body.sn,
+        email: body.email,
+        nickname: body.nickname,
+      });
+      await sendJson(res, 200, { success: true, data: result });
+    } catch (error) {
+      await sendJson(res, error.status || 500, { error: error.message || 'Bind account failed.' });
+    }
+    return;
+  }
+
+  if (requestUrl.pathname === '/api/pilot-session') {
+    if (req.method !== 'GET') {
+      await sendJson(res, 405, { error: 'Method not allowed.' });
+      return;
+    }
+    try {
+      const sn = requestUrl.searchParams.get('sn') || '';
+      const session = await loadPilotSession(sn);
+      await sendJson(res, 200, session);
+    } catch (error) {
+      await sendJson(res, error.status || 500, { error: error.message || 'Session unavailable.' });
+    }
+    return;
+  }
+
+  if (requestUrl.pathname === '/api/pilot-plan/packages') {
+    if (req.method !== 'GET') {
+      await sendJson(res, 405, { error: 'Method not allowed.' });
+      return;
+    }
+    try {
+      const packages = await listPackages();
+      await sendJson(res, 200, { packages });
+    } catch (error) {
+      await sendJson(res, error.status || 500, { error: error.message || 'Packages unavailable.' });
+    }
+    return;
+  }
+
+  if (requestUrl.pathname === '/api/pilot-plan/generate' && req.method === 'POST') {
+    try {
+      const body = await readJsonBody(req);
+      const result = await savePilotPlan({
+        sn: body.sn,
+        packageId: body.package_id || body.packageId,
+        pilotKpi: body.pilot_kpi || body.pilotKpi,
+        pilotSegment: body.pilot_segment || body.pilotSegment,
+        pilotDurationDays: body.pilot_duration_days ?? body.pilotDurationDays,
+      });
+      await sendJson(res, 200, result);
+    } catch (error) {
+      await sendJson(res, error.status || 500, { error: error.message || 'Generate failed.', code: error.code });
+    }
+    return;
+  }
+
+  if (requestUrl.pathname === '/api/pilot-plan/open-dashboard' && req.method === 'POST') {
+    try {
+      const body = await readJsonBody(req);
+      const sn = String(body.sn || '').trim();
+      if (!sn) {
+        await sendJson(res, 400, { error: 'sn is required' });
+        return;
+      }
+      const live = await ensureSampleLive(sn);
+      const quote = await loadPilotQuote(sn);
+      const email = quote.customerEmail;
+      if (!email) {
+        await sendJson(res, 400, { error: 'Customer email is required for dashboard login.' });
+        return;
+      }
+      const login = await createDashboardLoginLink({ email, next: body.next || '/' });
+      await sendJson(res, 200, { live, url: login.url, expires_in: login.expires_in });
+    } catch (error) {
+      await sendJson(res, error.status || 500, { error: error.message || 'Dashboard link failed.' });
+    }
+    return;
+  }
+
   if (requestUrl.pathname === '/' || requestUrl.pathname === '/gift-challenge-react.html') {
     await serveGiftChallenge(res);
     return;
@@ -690,6 +827,37 @@ async function handleRequest(req, res) {
     || requestUrl.pathname === '/fit-meeting-sample.html'
   ) {
     await serveFitMeetingSample(res);
+    return;
+  }
+
+  if (
+    requestUrl.pathname === '/pilot-plan/prep'
+    || requestUrl.pathname === '/pilot-plan/prep/'
+    || requestUrl.pathname === '/pilot-plan-prep.html'
+  ) {
+    await servePilotPlanPrep(res);
+    return;
+  }
+
+  if (
+    requestUrl.pathname === '/pilot-plan/meet'
+    || requestUrl.pathname === '/pilot-plan/meet/'
+  ) {
+    await servePilotPlan(res);
+    return;
+  }
+
+  if (
+    requestUrl.pathname === '/pilot-plan'
+    || requestUrl.pathname === '/pilot-plan/'
+  ) {
+    res.writeHead(302, { Location: '/pilot-plan/prep' });
+    res.end();
+    return;
+  }
+
+  if (requestUrl.pathname === '/pilot-plan.html') {
+    await servePilotPlan(res);
     return;
   }
 

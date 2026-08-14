@@ -14,6 +14,9 @@ const DEFAULT_MIN_QUANTITY = 1000;
 const DEFAULT_PILOT_QUANTITY = 1000;
 const SAMPLE_STATUS_LIVE = 3;
 const DEFAULT_PACKAGE_CODE = 'PKG-PPM';
+const DEFAULT_PILOT_DISCOUNT_RATIO = 0.8;
+const DEFAULT_PILOT_DISCOUNT_DAYS = 10;
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const STRIPE_INVOICE_DAYS_UNTIL_DUE = 7;
 
 const COUNTRY_TO_ISO = {
@@ -425,11 +428,24 @@ async function loadPilotQuote(sn) {
   const magnetSn = String(sn || '').trim();
   if (!magnetSn) throw httpError('Magnet SN is required', 400);
 
-  const brandRows = await supabaseSelect('magnet_brand_param', {
-    select: 'magnet_sn,brand_name,customer_id,magnet_id,status',
-    magnet_sn: `eq.${magnetSn}`,
-    limit: '1',
-  });
+  const brandSelectWithPilot = 'magnet_sn,brand_name,customer_id,magnet_id,status,pilot_kpi,pilot_segment,pilot_duration_days,pilot_confirmed_at';
+  const brandSelectBase = 'magnet_sn,brand_name,customer_id,magnet_id,status';
+
+  let brandRows;
+  try {
+    brandRows = await supabaseSelect('magnet_brand_param', {
+      select: brandSelectWithPilot,
+      magnet_sn: `eq.${magnetSn}`,
+      limit: '1',
+    });
+  } catch (error) {
+    if (!String(error.message || '').includes('pilot_')) throw error;
+    brandRows = await supabaseSelect('magnet_brand_param', {
+      select: brandSelectBase,
+      magnet_sn: `eq.${magnetSn}`,
+      limit: '1',
+    });
+  }
   const brand = Array.isArray(brandRows) ? brandRows[0] : null;
   if (!brand) throw httpError('Magnet SN not found', 404, 'sn_not_found');
 
@@ -503,6 +519,13 @@ async function loadPilotQuote(sn) {
     customerCreatedAt,
     customerEmail,
     magnetId: brand.magnet_id ?? null,
+    status: Number.parseInt(String(brand.status ?? ''), 10) || null,
+    pilot: {
+      kpi: brand.pilot_kpi || null,
+      segment: brand.pilot_segment || null,
+      durationDays: brand.pilot_duration_days ?? null,
+      confirmedAt: brand.pilot_confirmed_at || null,
+    },
     package: packageInfo,
     includedServices,
     discount: discountInfo,
@@ -1295,6 +1318,180 @@ async function createStripeInvoiceForOrder({ orderId, handoffToken, payerName })
   };
 }
 
+function defaultPilotDiscountExpiresAt(from = new Date()) {
+  const expires = new Date(from.getTime());
+  expires.setUTCDate(expires.getUTCDate() + DEFAULT_PILOT_DISCOUNT_DAYS);
+  return expires.toISOString();
+}
+
+async function resolveDiscountCustomerId(customerId) {
+  const value = customerId == null ? '' : String(customerId).trim();
+  if (!value) return null;
+  if (UUID_PATTERN.test(value)) return value;
+
+  const numericId = Number.parseInt(value, 10);
+  if (!Number.isFinite(numericId) || numericId <= 0) return null;
+
+  const rows = await supabaseSelect('customer', {
+    select: 'id,auth_user_id',
+    id: `eq.${numericId}`,
+    limit: '1',
+  });
+  const customer = Array.isArray(rows) ? rows[0] : null;
+  const authUserId = customer?.auth_user_id ? String(customer.auth_user_id).trim() : '';
+  return authUserId && UUID_PATTERN.test(authUserId) ? authUserId : null;
+}
+
+async function ensureSampleLive(sn) {
+  const magnetSn = String(sn || '').trim();
+  if (!magnetSn) throw httpError('Magnet SN is required', 400);
+
+  const phase = await lookupSamplePhase(magnetSn);
+  if (phase.reason === 'not_found') throw httpError('Sample not found', 404, 'sn_not_found');
+  if (phase.status === SAMPLE_STATUS_LIVE) {
+    return { sn: magnetSn, status: SAMPLE_STATUS_LIVE, changed: false };
+  }
+
+  // magnet_brand_param has no updated_at column — only patch status.
+  await supabaseUpdate('magnet_brand_param', { magnet_sn: `eq.${magnetSn}` }, {
+    status: SAMPLE_STATUS_LIVE,
+  });
+  return { sn: magnetSn, status: SAMPLE_STATUS_LIVE, changed: true };
+}
+
+async function upsertActivePackageDiscount({ sn, packageId, discountCustomerId, existingDiscountId }) {
+  const now = new Date().toISOString();
+  const row = {
+    customer_id: discountCustomerId,
+    magnet_sn: sn,
+    package_id: packageId,
+    discount_ratio: DEFAULT_PILOT_DISCOUNT_RATIO,
+    status: 'active',
+    expires_at: defaultPilotDiscountExpiresAt(),
+    notes: 'pilot-plan generate',
+    updated_at: now,
+  };
+
+  let saved;
+  if (existingDiscountId) {
+    saved = await supabaseUpdate('customer_package_discounts', { id: `eq.${existingDiscountId}` }, row);
+  } else {
+    saved = await supabaseInsert('customer_package_discounts', { ...row, created_at: now });
+  }
+
+  const savedId = saved?.id || existingDiscountId;
+  if (savedId) {
+    const rows = await supabaseSelect('customer_package_discounts', {
+      select: 'id',
+      customer_id: `eq.${discountCustomerId}`,
+      magnet_sn: `eq.${sn}`,
+      status: 'eq.active',
+    });
+    for (const other of Array.isArray(rows) ? rows : []) {
+      if (other?.id && String(other.id) !== String(savedId)) {
+        await supabaseUpdate('customer_package_discounts', { id: `eq.${other.id}` }, {
+          status: 'cancelled',
+          updated_at: now,
+        });
+      }
+    }
+  }
+
+  return saved;
+}
+
+async function savePilotPlan({
+  sn,
+  packageId,
+  pilotKpi,
+  pilotSegment,
+  pilotDurationDays,
+}) {
+  const magnetSn = String(sn || '').trim();
+  const pkgId = String(packageId || '').trim();
+  const kpi = String(pilotKpi || '').trim();
+  const segment = String(pilotSegment || '').trim();
+  const durationDays = Number.parseInt(String(pilotDurationDays ?? ''), 10);
+
+  if (!magnetSn) throw httpError('Magnet SN is required', 400);
+  if (!pkgId) throw httpError('Package is required', 400);
+  if (!kpi) throw httpError('Success metric is required', 400);
+  if (!segment) throw httpError('Target segment is required', 400);
+  if (!Number.isFinite(durationDays) || durationDays <= 0) {
+    throw httpError('Pilot duration must be a positive number', 400);
+  }
+
+  const brandRows = await supabaseSelect('magnet_brand_param', {
+    select: 'magnet_sn,customer_id,status',
+    magnet_sn: `eq.${magnetSn}`,
+    limit: '1',
+  });
+  const brand = Array.isArray(brandRows) ? brandRows[0] : null;
+  if (!brand) throw httpError('Sample not found', 404, 'sn_not_found');
+  if (brand.customer_id == null || brand.customer_id === '') {
+    throw httpError('Bind a customer account before generating the pilot plan', 400, 'account_required');
+  }
+
+  const discountCustomerId = await resolveDiscountCustomerId(brand.customer_id);
+  if (!discountCustomerId) {
+    throw httpError('Bound customer is missing auth_user_id for package discount', 400, 'auth_user_missing');
+  }
+
+  const now = new Date().toISOString();
+  // magnet_brand_param has no updated_at column.
+  await supabaseUpdate('magnet_brand_param', { magnet_sn: `eq.${magnetSn}` }, {
+    pilot_kpi: kpi,
+    pilot_segment: segment,
+    pilot_duration_days: durationDays,
+    pilot_confirmed_at: now,
+  });
+
+  const discounts = await supabaseSelect('customer_package_discounts', {
+    select: 'id',
+    magnet_sn: `eq.${magnetSn}`,
+    customer_id: `eq.${discountCustomerId}`,
+    order: 'updated_at.desc',
+    limit: '1',
+  });
+  const existingDiscount = Array.isArray(discounts) ? discounts[0] : null;
+
+  const discount = await upsertActivePackageDiscount({
+    sn: magnetSn,
+    packageId: pkgId,
+    discountCustomerId,
+    existingDiscountId: existingDiscount?.id || null,
+  });
+
+  const live = await ensureSampleLive(magnetSn);
+  const quote = await loadPilotQuote(magnetSn);
+
+  return {
+    sn: magnetSn,
+    pilot: quote.pilot,
+    package: quote.package,
+    discount,
+    live,
+  };
+}
+
+async function loadPilotSession(sn) {
+  const magnetSn = String(sn || '').trim();
+  if (!magnetSn) throw httpError('Magnet SN is required', 400);
+
+  const phase = await lookupSamplePhase(magnetSn);
+  let quote = null;
+  try {
+    quote = await loadPilotQuote(magnetSn);
+  } catch (error) {
+    if (error.status !== 404) throw error;
+  }
+
+  return {
+    phase,
+    quote,
+  };
+}
+
 module.exports = {
   FINANCE_LINK_TTL_MS,
   SAMPLE_PROPOSAL_DEFAULTS,
@@ -1302,6 +1499,9 @@ module.exports = {
   lookupSamplePhase,
   loadPilotQuote,
   computePilotTotals,
+  savePilotPlan,
+  ensureSampleLive,
+  loadPilotSession,
   savePilotAddress,
   createPilotOrder,
   updateOrderShipping,
@@ -1313,4 +1513,5 @@ module.exports = {
   createStripeInvoiceForOrder,
   moneyRound,
   toCents,
+  supabaseUpdate,
 };

@@ -127,4 +127,10 @@ export type OrderState = {
   dbOrderId?: number | null
   /** Persisted shipping_address.id */
   shippingAddressId?: number | null
+  pilot?: {
+    kpi: string | null
+    segment: string | null
+    durationDays: number | null
+    confirmedAt: string | null
+  }
 }

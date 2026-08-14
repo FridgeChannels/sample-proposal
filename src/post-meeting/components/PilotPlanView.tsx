@@ -102,6 +102,9 @@ export function PilotPlanView({
   const brand = order.brandName || order.shippingAddress.companyName || 'Client'
   const createdDate = formatDate(order.createdAt)
   const isPaid = order.status === 'paid' || order.financeHandoff?.status === 'paid'
+  const pilotObjective = order.pilot?.durationDays && order.pilot.segment && order.pilot.kpi
+    ? `Within ${order.pilot.durationDays} days, run this pilot for ${order.pilot.segment} by comparing customers in the same pilot segment who receive a Magnet with those who do not, based on ${order.pilot.kpi}.`
+    : 'Within [30 / 45 / 60 / 90] days, run this pilot for [Target Customer Segment] by comparing customers in the same pilot segment who receive a Magnet with those who do not, based on [Core Metric].'
 
   const createPaymentLink = async () => {
     if (isPaid) {
@@ -239,7 +242,7 @@ export function PilotPlanView({
           <dl className="plan-template-fields">
             <div>
               <dt>Pilot objective</dt>
-              <dd>Within [30 / 45 / 60 / 90] days, run this pilot for [Target Customer Segment] by comparing customers in the same pilot segment who receive a Magnet with those who do not, based on [Core Metric].</dd>
+              <dd>{pilotObjective}</dd>
             </div>
             <div><dt>Payment</dt><dd>100% upfront. Final Design and Final Sample begin after payment.</dd></div>
           </dl>

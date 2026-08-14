@@ -59,6 +59,24 @@ export default defineConfig({
             return
           }
 
+          if (url.pathname === '/pilot-plan' || url.pathname === '/pilot-plan/') {
+            req.url = `/pilot-plan-prep.html${url.search}`
+            next()
+            return
+          }
+
+          if (url.pathname === '/pilot-plan/prep' || url.pathname === '/pilot-plan/prep/') {
+            req.url = `/pilot-plan-prep.html${url.search}`
+            next()
+            return
+          }
+
+          if (url.pathname === '/pilot-plan/meet' || url.pathname === '/pilot-plan/meet/') {
+            req.url = `/pilot-plan.html${url.search}`
+            next()
+            return
+          }
+
           const rewritten = await resolveSamplePhaseHtml(url.pathname)
           if (rewritten) {
             // Keep path semantics for the client (sn still comes from the browser URL);
@@ -77,6 +95,8 @@ export default defineConfig({
         postMeeting: resolve(projectRoot, 'post-meeting.html'),
         qualifiedMeetingDoc: resolve(projectRoot, 'qualified-meeting-doc.html'),
         fitMeetingSample: resolve(projectRoot, 'fit-meeting-sample.html'),
+        pilotPlan: resolve(projectRoot, 'pilot-plan.html'),
+        pilotPlanPrep: resolve(projectRoot, 'pilot-plan-prep.html'),
       },
     },
   },
@@ -84,6 +104,8 @@ export default defineConfig({
     proxy: {
       '/api': API_ORIGIN,
       '/pics': API_ORIGIN,
+      '/assets': API_ORIGIN,
+      '/data': API_ORIGIN,
       '/dashboard2': API_ORIGIN,
     },
   },

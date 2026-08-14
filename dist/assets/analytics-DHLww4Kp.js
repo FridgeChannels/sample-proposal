@@ -1,1 +1,0 @@
-import{r as e,t}from"./jsx-runtime-M5tw2uBi.js";var n=e(),r=t();function i({page:e,children:t,trackSectionDwell:i=!1}){return(0,n.useRef)(null),(0,n.useEffect)(()=>{},[e,i]),(0,r.jsx)(r.Fragment,{children:t})}function a(e,t){}export{a as n,i as t};
