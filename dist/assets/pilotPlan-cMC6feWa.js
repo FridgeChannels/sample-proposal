@@ -906,17 +906,9 @@ import{n as e,r as t,t as n}from"./jsx-runtime-M5tw2uBi.js";var r=t(),i=e(),a=`<
               <div class="lane-label lane-brand">Brand</div>
             </div>
             <div class="swim-steps">
-              <div class="swim-row is-fc">
-                <div class="swim-card">
-                  <div class="swim-card-top"><span class="swim-num">01</span><span class="swim-days">Before expiry</span></div>
-                  <h4>Prepare the pilot order</h4>
-                  <p>FC prepares the pilot plan, live demo, dashboard access, order link, and invoice.</p>
-                  <div class="swim-output"><b>Deliverable:</b> Ready-to-approve pilot order</div>
-                </div>
-              </div>
               <div class="swim-row is-brand">
                 <div class="swim-card">
-                  <div class="swim-card-top"><span class="swim-num">02</span><span class="swim-days">Day 0</span></div>
+                  <div class="swim-card-top"><span class="swim-num">01</span><span class="swim-days">Day 0</span></div>
                   <h4>Confirm and pay</h4>
                   <p>Brand confirms the plan, provides the required data and permissions, accepts the terms, and completes payment.</p>
                   <div class="swim-output"><b>Deliverable:</b> Approved and fully paid order</div>
@@ -924,7 +916,7 @@ import{n as e,r as t,t as n}from"./jsx-runtime-M5tw2uBi.js";var r=t(),i=e(),a=`<
               </div>
               <div class="swim-row is-fc">
                 <div class="swim-card">
-                  <div class="swim-card-top"><span class="swim-num">03</span><span class="swim-days">Day 1</span></div>
+                  <div class="swim-card-top"><span class="swim-num">02</span><span class="swim-days">Day 1</span></div>
                   <h4>Provide the production specification</h4>
                   <p>FC provides magnet dimensions, design templates, and technical requirements, then checks production feasibility.</p>
                   <div class="swim-output"><b>Deliverable:</b> Production-ready design pack</div>
@@ -932,39 +924,39 @@ import{n as e,r as t,t as n}from"./jsx-runtime-M5tw2uBi.js";var r=t(),i=e(),a=`<
               </div>
               <div class="swim-row is-brand">
                 <div class="swim-card">
-                  <div class="swim-card-top"><span class="swim-num">04</span><span class="swim-days">24-hour window</span></div>
+                  <div class="swim-card-top"><span class="swim-num">03</span><span class="swim-days">24-hour window</span></div>
                   <h4>Submit and approve the artwork</h4>
-                  <p>Brand supplies print-ready CMYK front and back artwork and confirms the final version in writing.</p>
+                  <p>Brand emails print-ready CMYK artwork for the front and back, then confirms the final version by email.</p>
                   <div class="swim-output"><b>Deliverable:</b> Design Lock</div>
                 </div>
               </div>
               <div class="swim-row is-fc">
                 <div class="swim-card">
-                  <div class="swim-card-top"><span class="swim-num">05</span><span class="swim-days">After Design Lock</span></div>
-                  <h4>Produce the final sample</h4>
-                  <p>FC produces and ships the first physical sample. If required, FC applies one consolidated feedback round and ships Round 2.</p>
-                  <div class="swim-output"><b>Deliverable:</b> Final physical sample</div>
+                  <div class="swim-card-top"><span class="swim-num">04</span><span class="swim-days">After Design Lock</span></div>
+                  <h4>Produce and present the Final Sample</h4>
+                  <p>FC produces the Final Sample and presents the physical result in a remote video review, so Brand can confirm color, finish, size, tap behavior, and content.</p>
+                  <div class="swim-output"><b>Deliverable:</b> Remote video review of the Final Sample</div>
                 </div>
               </div>
               <div class="swim-row is-brand">
                 <div class="swim-card">
-                  <div class="swim-card-top"><span class="swim-num">06</span><span class="swim-days">Within 7 business days</span></div>
-                  <h4>Inspect and approve the sample</h4>
-                  <p>Brand checks the product, color, size, tap behavior, and content, then approves it or returns one consolidated response.</p>
-                  <div class="swim-output"><b>Deliverable:</b> Written Final Sample approval</div>
+                  <div class="swim-card-top"><span class="swim-num">05</span><span class="swim-days">After the video review</span></div>
+                  <h4>Confirm the sample by email</h4>
+                  <p>If the sample is approved, Brand confirms it by email. Mass production begins only after this written confirmation.</p>
+                  <div class="swim-output"><b>Deliverable:</b> Email confirmation to start mass production</div>
                 </div>
               </div>
               <div class="swim-row is-fc">
                 <div class="swim-card">
-                  <div class="swim-card-top"><span class="swim-num">07</span><span class="swim-days">After approval</span></div>
+                  <div class="swim-card-top"><span class="swim-num">06</span><span class="swim-days">About 14 business days</span></div>
                   <h4>Produce and deliver</h4>
-                  <p>FC completes mass production and ships the full magnet quantity to the confirmed warehouse or 3PL.</p>
+                  <p>FC completes mass production and delivers the full magnet quantity door-to-door to the confirmed warehouse or 3PL.</p>
                   <div class="swim-output"><b>Deliverable:</b> Full production quantity delivered</div>
                 </div>
               </div>
               <div class="swim-row is-brand">
                 <div class="swim-card">
-                  <div class="swim-card-top"><span class="swim-num">08</span><span class="swim-days">Launch</span></div>
+                  <div class="swim-card-top"><span class="swim-num">07</span><span class="swim-days">Launch</span></div>
                   <h4>Insert magnets into target orders</h4>
                   <p>Brand confirms receipt and instructs its warehouse or 3PL to place magnets into orders for the selected pilot segment.</p>
                   <div class="swim-output"><b>Deliverable:</b> Pilot live in customer shipments</div>

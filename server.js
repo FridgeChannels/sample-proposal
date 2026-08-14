@@ -27,6 +27,14 @@ const {
   createDashboardLoginLink,
   bindPilotCustomerAccount,
 } = require('./pilot-session');
+const {
+  isAuthenticated,
+  isPilotOpsLoginPath,
+  isPilotOpsProtectedPath,
+  redirectToLogin,
+  handleAuthLogin,
+  handleAuthLogout,
+} = require('./pilot-ops-auth');
 
 const ROOT = __dirname;
 const DIST_ROOT = path.join(__dirname, 'dist');
@@ -206,6 +214,20 @@ async function servePilotPlanPrep(res) {
     'pilot-plan-prep.html',
     'Failed to load Pilot Plan prep (run `npm run build` to generate dist/)',
   );
+}
+
+async function servePilotPlanLogin(res) {
+  try {
+    const body = await fs.readFile(path.join(ROOT, 'public', 'pilot-plan-login.html'));
+    res.writeHead(200, {
+      'Content-Type': MIME_TYPES['.html'],
+      'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+    });
+    res.end(body);
+  } catch (error) {
+    res.writeHead(500);
+    res.end('Failed to load pilot plan login page.');
+  }
 }
 
 async function serveSampleOrLiveBySn(res, sn) {
@@ -504,6 +526,37 @@ async function resolvePlaceAddress({ placeId, sessionToken }) {
 
 async function handleRequest(req, res) {
   const requestUrl = new URL(req.url, `http://${req.headers.host}`);
+
+  if (requestUrl.pathname === '/api/pilot-plan/auth' && req.method === 'POST') {
+    await handleAuthLogin(req, res, readJsonBody, sendJson);
+    return;
+  }
+
+  if (requestUrl.pathname === '/api/pilot-plan/logout' && req.method === 'POST') {
+    await handleAuthLogout(req, res, sendJson);
+    return;
+  }
+
+  if (isPilotOpsLoginPath(requestUrl.pathname)) {
+    if (isAuthenticated(req)) {
+      const returnTo = requestUrl.searchParams.get('return') || '/pilot-plan/prep';
+      const safeReturn = String(returnTo).startsWith('/') ? returnTo : '/pilot-plan/prep';
+      res.writeHead(302, { Location: safeReturn });
+      res.end();
+      return;
+    }
+    await servePilotPlanLogin(res);
+    return;
+  }
+
+  if (isPilotOpsProtectedPath(requestUrl.pathname) && !isAuthenticated(req)) {
+    if (requestUrl.pathname.startsWith('/api/')) {
+      await sendJson(res, 401, { error: 'Authentication required.', code: 'pilot_ops_auth_required' });
+      return;
+    }
+    redirectToLogin(res, `${requestUrl.pathname}${requestUrl.search}`);
+    return;
+  }
 
   if (requestUrl.pathname === '/api/places/autocomplete' && req.method === 'GET') {
     try {

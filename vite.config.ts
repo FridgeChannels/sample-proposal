@@ -1,11 +1,36 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { createRequire } from 'node:module'
+import { existsSync, readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { resolve } from 'node:path'
 
 const projectRoot = fileURLToPath(new URL('.', import.meta.url))
+const require = createRequire(import.meta.url)
+const pilotOpsAuth = require('./pilot-ops-auth.js') as {
+  isPilotOpsLoginPath: (pathname: string) => boolean
+  isPilotOpsProtectedPath: (pathname: string) => boolean
+  isAuthenticated: (req: import('http').IncomingMessage) => boolean
+  redirectToLogin: (res: import('http').ServerResponse, returnUrl?: string) => void
+}
 const API_ORIGIN = 'http://127.0.0.1:4173'
 const SAMPLE_PATH_RE = /^\/(?:gift-proposal|p)\/([^/?#]+)\/?/
+
+function loadPilotOpsEnv() {
+  const envPath = resolve(projectRoot, '.env')
+  if (!existsSync(envPath)) return
+  readFileSync(envPath, 'utf8').split(/\r?\n/).forEach((line) => {
+    const trimmed = line.trim()
+    if (!trimmed || trimmed.startsWith('#')) return
+    const separator = trimmed.indexOf('=')
+    if (separator === -1) return
+    const key = trimmed.slice(0, separator).trim()
+    const value = trimmed.slice(separator + 1).trim().replace(/^['"]|['"]$/g, '')
+    if (key && process.env[key] === undefined) process.env[key] = value
+  })
+}
+
+loadPilotOpsEnv()
 
 /**
  * In Vite dev, rewrite /p/{sn} to sample or live HTML based on Supabase status
@@ -44,13 +69,33 @@ export default defineConfig({
       // Homepage is the React gift-challenge page, matching server.js's `/` route
       name: 'serve-gift-challenge-as-index',
       configureServer(server) {
-        server.middlewares.use(async (req, _res, next) => {
+        server.middlewares.use(async (req, res, next) => {
           if (!req.url) {
             next()
             return
           }
 
           const url = new URL(req.url, 'http://localhost')
+
+          if (pilotOpsAuth.isPilotOpsLoginPath(url.pathname)) {
+            if (pilotOpsAuth.isAuthenticated(req)) {
+              const returnTo = url.searchParams.get('return') || '/pilot-plan/prep'
+              const safeReturn = returnTo.startsWith('/') ? returnTo : '/pilot-plan/prep'
+              res.statusCode = 302
+              res.setHeader('Location', safeReturn)
+              res.end()
+              return
+            }
+            req.url = `/pilot-plan-login.html${url.search}`
+            next()
+            return
+          }
+
+          if (pilotOpsAuth.isPilotOpsProtectedPath(url.pathname) && !pilotOpsAuth.isAuthenticated(req)) {
+            pilotOpsAuth.redirectToLogin(res, `${url.pathname}${url.search}`)
+            return
+          }
+
           if (url.pathname === '/') {
             req.url = `/gift-challenge-react.html${url.search}`
             next()

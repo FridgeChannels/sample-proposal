@@ -20,7 +20,8 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm ci --omit=dev
 
-COPY server.js pilot-commerce.js pilot-session.js ./
+COPY server.js pilot-commerce.js pilot-session.js pilot-ops-auth.js ./
+COPY public/pilot-plan-login.html ./public/pilot-plan-login.html
 COPY sql ./sql
 COPY proposal-template.md ./
 COPY ["proposal template doc", "./"]

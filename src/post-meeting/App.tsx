@@ -93,7 +93,7 @@ export function App() {
   const [quoteError, setQuoteError] = useState('')
   const offerNow = previewOfferNow(order, now)
   const paymentComplete = order.status === 'paid' || order.financeHandoff?.status === 'paid'
-  const showGlobalUrgency = !financeToken && !paymentComplete && order.pricing.loaded
+  const showGlobalUrgency = !financeToken && !paymentComplete && order.pricing.loaded && view !== 'demo'
 
   useEffect(() => {
     const syncView = () => setView(viewFromHash())
