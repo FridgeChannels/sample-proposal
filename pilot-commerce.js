@@ -705,7 +705,7 @@ async function createPilotOrder({ sn, quantity, shippingAddressId, approval, shi
   };
 }
 
-async function updateOrderShipping({ orderId, shippingAddressId }) {
+async function updateOrderShipping({ orderId, shippingAddressId, billing }) {
   const id = Number(orderId);
   const addressId = Number(shippingAddressId);
   if (!Number.isFinite(id)) throw httpError('orderId is required', 400);
@@ -731,6 +731,18 @@ async function updateOrderShipping({ orderId, shippingAddressId }) {
   } catch {
     remark = {};
   }
+
+  if (billing && typeof billing === 'object') {
+    remark.billing = {
+      companyName: String(billing.companyName || '').trim(),
+      address: String(billing.address || '').trim(),
+      contactName: String(billing.contactName || '').trim(),
+      jobTitle: String(billing.jobTitle || '').trim(),
+      email: String(billing.email || '').trim(),
+      poNumber: String(billing.poNumber || '').trim(),
+    };
+  }
+
   const persistedShippingMethod = remark.shipping_method
     || (Number(order.shipping_fee) === SHIPPING_OPTIONS.air.fee ? 'air' : 'ocean');
   const shipping = resolveShippingOption(persistedShippingMethod);
@@ -865,6 +877,7 @@ async function loadOrderInvoice(orderId) {
     paymentMethod: order.payment_method,
     paymentTime: order.payment_time,
     approval: remark.approval || null,
+    billing: remark.billing || null,
     discountId: remark.discount_id || null,
     items: (Array.isArray(items) ? items : []).map((item) => ({
       id: item.id,
@@ -1179,12 +1192,12 @@ async function updateFinanceHandoff(query, patch) {
 
 /**
  * Stripe Invoice email is Stripe's feature (customer + hosted invoice).
- * Resolve the address from stored handoff / shipping / customer — never from
- * a finance-page form field.
+ * Resolve from stored handoff / billing / shipping / customer records.
  */
 async function resolveInvoiceEmail({ invoice, handoffRow }) {
   const candidates = [
     handoffRow?.to_email,
+    invoice.billing?.email,
     invoice.shippingAddress?.email,
   ];
   for (const value of candidates) {
@@ -1240,10 +1253,11 @@ async function createStripeInvoiceForOrder({ orderId, handoffToken, payerName })
 
   const customer = await findOrCreateStripeCustomer({
     email: paymentEmail,
-    name: payerName || invoice.shippingAddress.recipientName,
+    name: payerName || invoice.billing?.contactName || invoice.shippingAddress.recipientName,
     metadata: {
       orderId: String(invoice.orderId),
       magnet_sn: invoice.magnetSn || '',
+      company_name: invoice.billing?.companyName || '',
     },
   });
 

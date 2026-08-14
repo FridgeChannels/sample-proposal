@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { orderTotal, readApiJson, resolvedLineItems, SHIPPING_OPTIONS } from '../config'
-import type { OrderState, PaymentMethod, ShippingAddress } from '../types'
+import type { BillingDetails, OrderState, PaymentMethod, ShippingAddress } from '../types'
 
 const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 })
 const number = new Intl.NumberFormat('en-US')
@@ -11,6 +11,12 @@ const paymentMethodLabels: Record<PaymentMethod, string> = {
   bank_transfer: 'Bank transfer',
   card: 'Credit card',
 }
+
+const LEGAL_DOCS = [
+  { label: 'Order Summary', href: '/legal/actual-order-summary.html' },
+  { label: 'Pilot Order & Service Terms', href: '/legal/pilot-order-service-terms.html' },
+  { label: 'Data Processing Addendum', href: '/legal/data-processing-addendum.html' },
+] as const
 
 const US_STATE_OPTIONS = [
   ['AL', 'Alabama'], ['AK', 'Alaska'], ['AZ', 'Arizona'], ['AR', 'Arkansas'],
@@ -51,6 +57,7 @@ type ResolvedPlaceAddress = Pick<
 >
 
 type RequiredShippingField = 'firstName' | 'lastName' | 'addressLine1' | 'city' | 'state' | 'postalCode' | 'country' | 'phone'
+type RequiredBillingField = 'companyName' | 'address' | 'contactName' | 'jobTitle' | 'email'
 
 const REQUIRED_SHIPPING_FIELDS: RequiredShippingField[] = [
   'firstName',
@@ -61,6 +68,14 @@ const REQUIRED_SHIPPING_FIELDS: RequiredShippingField[] = [
   'postalCode',
   'country',
   'phone',
+]
+
+const REQUIRED_BILLING_FIELDS: RequiredBillingField[] = [
+  'companyName',
+  'address',
+  'contactName',
+  'jobTitle',
+  'email',
 ]
 
 function shippingFieldError(field: RequiredShippingField, value: string, country: string) {
@@ -87,6 +102,22 @@ function shippingFieldError(field: RequiredShippingField, value: string, country
   if (field === 'phone') {
     const digits = trimmed.replace(/\D/g, '')
     if (digits.length < 7 || digits.length > 15) return 'Enter a valid phone number.'
+  }
+  return ''
+}
+
+function billingFieldError(field: RequiredBillingField, value: string) {
+  const trimmed = value.trim()
+  const requiredMessages: Record<RequiredBillingField, string> = {
+    companyName: 'Enter the company name.',
+    address: 'Enter the company registered address.',
+    contactName: 'Enter the signatory name.',
+    jobTitle: 'Enter the signatory job title.',
+    email: 'Enter a corporate email.',
+  }
+  if (!trimmed) return requiredMessages[field]
+  if (field === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+    return 'Enter a valid corporate email.'
   }
   return ''
 }
@@ -130,6 +161,7 @@ export function FinanceView({
   const [payError, setPayError] = useState('')
   const [receiptDownloading, setReceiptDownloading] = useState(false)
   const [receiptError, setReceiptError] = useState('')
+  const [termsAccepted, setTermsAccepted] = useState(false)
   const [addressSuggestions, setAddressSuggestions] = useState<AddressSuggestion[]>([])
   const [addressSearching, setAddressSearching] = useState(false)
   const [addressResolving, setAddressResolving] = useState(false)
@@ -137,6 +169,7 @@ export function FinanceView({
   const [suggestionsOpen, setSuggestionsOpen] = useState(false)
   const [activeSuggestion, setActiveSuggestion] = useState(-1)
   const [touchedShippingFields, setTouchedShippingFields] = useState<Partial<Record<RequiredShippingField, boolean>>>({})
+  const [touchedBillingFields, setTouchedBillingFields] = useState<Partial<Record<RequiredBillingField, boolean>>>({})
   const [submitAttempted, setSubmitAttempted] = useState(false)
   const placesSessionToken = useRef(crypto.randomUUID())
   const skipNextAutocomplete = useRef(false)
@@ -160,8 +193,31 @@ export function FinanceView({
   const remainingShippingFields = REQUIRED_SHIPPING_FIELDS.length - completedShippingFields
   const shippingComplete = remainingShippingFields === 0
 
+  const billingValues: Record<RequiredBillingField, string> = {
+    companyName: order.billing.companyName || '',
+    address: order.billing.address || '',
+    contactName: order.billing.contactName || '',
+    jobTitle: order.billing.jobTitle || '',
+    email: order.billing.email || '',
+  }
+  const billingErrors = Object.fromEntries(
+    REQUIRED_BILLING_FIELDS.map((field) => [
+      field,
+      billingFieldError(field, billingValues[field]),
+    ]),
+  ) as Record<RequiredBillingField, string>
+  const completedBillingFields = REQUIRED_BILLING_FIELDS.filter((field) => !billingErrors[field]).length
+  const remainingBillingFields = REQUIRED_BILLING_FIELDS.length - completedBillingFields
+  const billingComplete = remainingBillingFields === 0
+  const checkoutComplete = shippingComplete && billingComplete
+  const remainingCheckoutFields = remainingShippingFields + remainingBillingFields
+
   const markShippingFieldTouched = (field: RequiredShippingField) => {
     setTouchedShippingFields((current) => ({ ...current, [field]: true }))
+  }
+
+  const markBillingFieldTouched = (field: RequiredBillingField) => {
+    setTouchedBillingFields((current) => ({ ...current, [field]: true }))
   }
 
   const showShippingFieldError = (field: RequiredShippingField) =>
@@ -170,13 +226,29 @@ export function FinanceView({
   const showShippingFieldValid = (field: RequiredShippingField) =>
     Boolean(shippingValues[field].trim() && !shippingErrors[field] && (touchedShippingFields[field] || submitAttempted))
 
+  const showBillingFieldError = (field: RequiredBillingField) =>
+    Boolean(billingErrors[field] && (touchedBillingFields[field] || submitAttempted))
+
+  const showBillingFieldValid = (field: RequiredBillingField) =>
+    Boolean(billingValues[field].trim() && !billingErrors[field] && (touchedBillingFields[field] || submitAttempted))
+
   const shippingFieldClass = (field: RequiredShippingField, baseClass = '') =>
     `${baseClass}${baseClass ? ' ' : ''}shipping-feedback-field${showShippingFieldError(field) ? ' has-error' : ''}${showShippingFieldValid(field) ? ' is-valid' : ''}`
 
-  const focusFirstShippingError = () => {
-    const firstInvalidField = REQUIRED_SHIPPING_FIELDS.find((field) => shippingErrors[field])
-    if (!firstInvalidField) return
-    const input = document.querySelector<HTMLInputElement>(`[data-shipping-field="${firstInvalidField}"]`)
+  const billingFieldClass = (field: RequiredBillingField, baseClass = '') =>
+    `${baseClass}${baseClass ? ' ' : ''}shipping-feedback-field${showBillingFieldError(field) ? ' has-error' : ''}${showBillingFieldValid(field) ? ' is-valid' : ''}`
+
+  const focusFirstCheckoutError = () => {
+    const firstInvalidBilling = REQUIRED_BILLING_FIELDS.find((field) => billingErrors[field])
+    if (firstInvalidBilling) {
+      const input = document.querySelector<HTMLInputElement | HTMLTextAreaElement>(`[data-billing-field="${firstInvalidBilling}"]`)
+      input?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      window.setTimeout(() => input?.focus({ preventScroll: true }), 280)
+      return
+    }
+    const firstInvalidShipping = REQUIRED_SHIPPING_FIELDS.find((field) => shippingErrors[field])
+    if (!firstInvalidShipping) return
+    const input = document.querySelector<HTMLInputElement>(`[data-shipping-field="${firstInvalidShipping}"]`)
     input?.scrollIntoView({ behavior: 'smooth', block: 'center' })
     window.setTimeout(() => input?.focus({ preventScroll: true }), 280)
   }
@@ -185,8 +257,16 @@ export function FinanceView({
     onChange?.({ ...order, shippingAddress: { ...order.shippingAddress, ...patch } })
   }
 
+  const updateBillingFields = (patch: Partial<BillingDetails>) => {
+    onChange?.({ ...order, billing: { ...order.billing, ...patch } })
+  }
+
   const updateShipping = (field: keyof ShippingAddress, value: string) => {
     updateShippingFields({ [field]: value })
+  }
+
+  const updateBilling = (field: keyof BillingDetails, value: string) => {
+    updateBillingFields({ [field]: value })
   }
 
   const updateRecipientName = (field: 'firstName' | 'lastName', value: string) => {
@@ -316,11 +396,29 @@ export function FinanceView({
       setPayError('Order is not ready for payment.')
       return
     }
-    if (!shippingComplete) {
+    if (!checkoutComplete) {
       setSubmitAttempted(true)
       setPayError('')
-      window.requestAnimationFrame(focusFirstShippingError)
+      window.requestAnimationFrame(focusFirstCheckoutError)
       return
+    }
+    if (!termsAccepted) {
+      setPayError('Please review and check the box to agree before continuing to payment.')
+      return
+    }
+
+    const billingPayload: BillingDetails = {
+      companyName: (order.billing.companyName || '').trim(),
+      address: (order.billing.address || '').trim(),
+      contactName: (order.billing.contactName || '').trim(),
+      jobTitle: (order.billing.jobTitle || '').trim(),
+      email: (order.billing.email || '').trim(),
+      poNumber: (order.billing.poNumber || '').trim(),
+    }
+    const shippingPayload = {
+      ...displayedShipping,
+      email: billingPayload.email,
+      companyName: billingPayload.companyName,
     }
 
     setPaying(true)
@@ -331,7 +429,7 @@ export function FinanceView({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           sn: magnetSn,
-          address: displayedShipping,
+          address: shippingPayload,
         }),
       })
       const addressData = await readApiJson<{ address: { id: number } }>(
@@ -345,13 +443,15 @@ export function FinanceView({
         body: JSON.stringify({
           orderId: order.dbOrderId,
           shippingAddressId: addressData.address.id,
+          billing: billingPayload,
         }),
       })
       await readApiJson(shippingResponse, 'Unable to link shipping address.')
 
       onChange?.({
         ...order,
-        shippingAddress: displayedShipping,
+        billing: billingPayload,
+        shippingAddress: shippingPayload,
         shippingAddressId: addressData.address.id,
       })
 
@@ -361,7 +461,7 @@ export function FinanceView({
         body: JSON.stringify({
           orderId: order.dbOrderId,
           handoffToken: order.financeHandoff?.token,
-          payerName: displayedShipping.recipientName,
+          payerName: billingPayload.contactName || shippingPayload.recipientName,
         }),
       })
       const invoiceData = await readApiJson<{ hostedInvoiceUrl?: string }>(
@@ -448,15 +548,111 @@ export function FinanceView({
               <div className="line-total"><div><strong>Amount due</strong></div><b>{money.format(total)}</b></div>
             </div>
           </section>
+          <section className="finance-section billing-section">
+            <div className="section-heading">
+              <div>
+                <h2>Company & signatory</h2>
+                <p>Legal company details used for the pilot order and service terms.</p>
+                <p className="required-fields-note">Fields marked * are required.</p>
+              </div>
+              <span className={`shipping-completion${billingComplete ? ' is-complete' : ''}`}>
+                {billingComplete ? 'Complete ✓' : `${completedBillingFields} of ${REQUIRED_BILLING_FIELDS.length} complete`}
+              </span>
+            </div>
+            <div className="finance-shipping-form finance-billing-form form-grid">
+              <label className={billingFieldClass('companyName', 'full-field')}>
+                <span>Company name <b aria-hidden="true">*</b></span>
+                <input
+                  data-billing-field="companyName"
+                  autoComplete="organization"
+                  placeholder="Legal company name"
+                  required
+                  aria-invalid={showBillingFieldError('companyName')}
+                  aria-describedby="billing-company-name-error"
+                  value={order.billing.companyName || ''}
+                  onBlur={() => markBillingFieldTouched('companyName')}
+                  onChange={(event) => updateBilling('companyName', event.target.value)}
+                />
+                {showBillingFieldValid('companyName') && <i className="shipping-valid-icon" aria-label="Company name complete">✓</i>}
+                {showBillingFieldError('companyName') && <small id="billing-company-name-error" className="field-error">{billingErrors.companyName}</small>}
+              </label>
+              <label className={billingFieldClass('address', 'full-field')}>
+                <span>Company registered address <b aria-hidden="true">*</b></span>
+                <textarea
+                  data-billing-field="address"
+                  autoComplete="street-address"
+                  rows={3}
+                  placeholder="Registered / legal address"
+                  required
+                  aria-invalid={showBillingFieldError('address')}
+                  aria-describedby="billing-address-error"
+                  value={order.billing.address || ''}
+                  onBlur={() => markBillingFieldTouched('address')}
+                  onChange={(event) => updateBilling('address', event.target.value)}
+                />
+                {showBillingFieldValid('address') && <i className="shipping-valid-icon" aria-label="Registered address complete">✓</i>}
+                {showBillingFieldError('address') && <small id="billing-address-error" className="field-error">{billingErrors.address}</small>}
+              </label>
+              <label className={billingFieldClass('contactName')}>
+                <span>Signatory name <b aria-hidden="true">*</b></span>
+                <input
+                  data-billing-field="contactName"
+                  autoComplete="name"
+                  placeholder="Full name"
+                  required
+                  aria-invalid={showBillingFieldError('contactName')}
+                  aria-describedby="billing-contact-name-error"
+                  value={order.billing.contactName || ''}
+                  onBlur={() => markBillingFieldTouched('contactName')}
+                  onChange={(event) => updateBilling('contactName', event.target.value)}
+                />
+                {showBillingFieldValid('contactName') && <i className="shipping-valid-icon" aria-label="Signatory name complete">✓</i>}
+                {showBillingFieldError('contactName') && <small id="billing-contact-name-error" className="field-error">{billingErrors.contactName}</small>}
+              </label>
+              <label className={billingFieldClass('jobTitle')}>
+                <span>Job title <b aria-hidden="true">*</b></span>
+                <input
+                  data-billing-field="jobTitle"
+                  autoComplete="organization-title"
+                  placeholder="Title / role"
+                  required
+                  aria-invalid={showBillingFieldError('jobTitle')}
+                  aria-describedby="billing-job-title-error"
+                  value={order.billing.jobTitle || ''}
+                  onBlur={() => markBillingFieldTouched('jobTitle')}
+                  onChange={(event) => updateBilling('jobTitle', event.target.value)}
+                />
+                {showBillingFieldValid('jobTitle') && <i className="shipping-valid-icon" aria-label="Job title complete">✓</i>}
+                {showBillingFieldError('jobTitle') && <small id="billing-job-title-error" className="field-error">{billingErrors.jobTitle}</small>}
+              </label>
+              <label className={billingFieldClass('email', 'full-field')}>
+                <span>Corporate email <b aria-hidden="true">*</b></span>
+                <input
+                  data-billing-field="email"
+                  type="email"
+                  autoComplete="email"
+                  inputMode="email"
+                  placeholder="name@company.com"
+                  required
+                  aria-invalid={showBillingFieldError('email')}
+                  aria-describedby="billing-email-error"
+                  value={order.billing.email || ''}
+                  onBlur={() => markBillingFieldTouched('email')}
+                  onChange={(event) => updateBilling('email', event.target.value)}
+                />
+                {showBillingFieldValid('email') && <i className="shipping-valid-icon" aria-label="Corporate email complete">✓</i>}
+                {showBillingFieldError('email') && <small id="billing-email-error" className="field-error">{billingErrors.email}</small>}
+              </label>
+            </div>
+          </section>
           <section className="finance-section shipping-section">
             <div className="section-heading">
-              <div><h2>Shipping address</h2><p>Enter the delivery location for the {number.format(order.quantity)} pilot magnets.</p><p className="required-fields-note">Fields marked * are required.</p></div>
+              <div><h2>Shipping address</h2><p>Enter the delivery contact and location for the {number.format(order.quantity)} pilot magnets.</p><p className="required-fields-note">Fields marked * are required.</p></div>
               <span className={`shipping-completion${shippingComplete ? ' is-complete' : ''}`}>{shippingComplete ? 'Complete ✓' : `${completedShippingFields} of ${REQUIRED_SHIPPING_FIELDS.length} complete`}</span>
             </div>
             <div className="finance-shipping-form form-grid">
-              <label className={shippingFieldClass('firstName', 'shipping-first-name')}><span>First name <b aria-hidden="true">*</b></span><input data-shipping-field="firstName" autoComplete="shipping given-name" placeholder="First name" required aria-invalid={showShippingFieldError('firstName')} aria-describedby="shipping-first-name-error" value={displayedName.firstName} onBlur={() => markShippingFieldTouched('firstName')} onChange={(event) => updateRecipientName('firstName', event.target.value)} />{showShippingFieldValid('firstName') && <i className="shipping-valid-icon" aria-label="First name complete">✓</i>}{showShippingFieldError('firstName') && <small id="shipping-first-name-error" className="field-error">{shippingErrors.firstName}</small>}</label>
-              <label className={shippingFieldClass('lastName', 'shipping-last-name')}><span>Last name <b aria-hidden="true">*</b></span><input data-shipping-field="lastName" autoComplete="shipping family-name" placeholder="Last name" required aria-invalid={showShippingFieldError('lastName')} aria-describedby="shipping-last-name-error" value={displayedName.lastName} onBlur={() => markShippingFieldTouched('lastName')} onChange={(event) => updateRecipientName('lastName', event.target.value)} />{showShippingFieldValid('lastName') && <i className="shipping-valid-icon" aria-label="Last name complete">✓</i>}{showShippingFieldError('lastName') && <small id="shipping-last-name-error" className="field-error">{shippingErrors.lastName}</small>}</label>
-              <label className="shipping-company full-field"><span>Company <em>(optional)</em></span><input autoComplete="shipping organization" placeholder="Company name" value={displayedShipping.companyName} onChange={(event) => updateShipping('companyName', event.target.value)} /></label>
+              <label className={shippingFieldClass('firstName', 'shipping-first-name')}><span>Contact first name <b aria-hidden="true">*</b></span><input data-shipping-field="firstName" autoComplete="shipping given-name" placeholder="First name" required aria-invalid={showShippingFieldError('firstName')} aria-describedby="shipping-first-name-error" value={displayedName.firstName} onBlur={() => markShippingFieldTouched('firstName')} onChange={(event) => updateRecipientName('firstName', event.target.value)} />{showShippingFieldValid('firstName') && <i className="shipping-valid-icon" aria-label="First name complete">✓</i>}{showShippingFieldError('firstName') && <small id="shipping-first-name-error" className="field-error">{shippingErrors.firstName}</small>}</label>
+              <label className={shippingFieldClass('lastName', 'shipping-last-name')}><span>Contact last name <b aria-hidden="true">*</b></span><input data-shipping-field="lastName" autoComplete="shipping family-name" placeholder="Last name" required aria-invalid={showShippingFieldError('lastName')} aria-describedby="shipping-last-name-error" value={displayedName.lastName} onBlur={() => markShippingFieldTouched('lastName')} onChange={(event) => updateRecipientName('lastName', event.target.value)} />{showShippingFieldValid('lastName') && <i className="shipping-valid-icon" aria-label="Last name complete">✓</i>}{showShippingFieldError('lastName') && <small id="shipping-last-name-error" className="field-error">{shippingErrors.lastName}</small>}</label>
               <div className={shippingFieldClass('addressLine1', 'full-field address-autocomplete')}>
                 <label htmlFor="shipping-address-line-1"><span>Address line 1 <b aria-hidden="true">*</b></span>
                   <input
@@ -554,9 +750,52 @@ export function FinanceView({
           </section>
           <div className="invoice-actions">
             <p className="eyebrow">Amount due</p><strong className="payment-total">{money.format(total)}</strong>
-            {submitAttempted && !shippingComplete && <p className="checkout-feedback is-error" role="alert">Complete {remainingShippingFields} required {remainingShippingFields === 1 ? 'field' : 'fields'} to continue.</p>}
-            {shippingComplete && <p className="checkout-feedback is-complete">✓ Shipping information complete</p>}
-            <button type="button" className="primary-action pay-invoice" disabled={paying} onClick={payWithStripeInvoice}>
+            {submitAttempted && !checkoutComplete && <p className="checkout-feedback is-error" role="alert">Complete {remainingCheckoutFields} required {remainingCheckoutFields === 1 ? 'field' : 'fields'} to continue.</p>}
+            {checkoutComplete && <p className="checkout-feedback is-complete">✓ Company and shipping information complete</p>}
+            <div className="plan-terms-agree">
+              <label className="plan-terms-check">
+                <input
+                  type="checkbox"
+                  checked={termsAccepted}
+                  onChange={(event) => {
+                    setTermsAccepted(event.target.checked)
+                    if (event.target.checked) setPayError('')
+                  }}
+                />
+                <span>
+                  I have reviewed and agree to the{' '}
+                  {LEGAL_DOCS.map((doc, index) => {
+                    const returnTo = `${window.location.pathname}${window.location.search}${window.location.hash || '#finance'}`
+                    const href = `${doc.href}?return=${encodeURIComponent(returnTo)}`
+                    return (
+                      <span key={doc.href}>
+                        {index > 0 && (index === LEGAL_DOCS.length - 1 ? ', and ' : ', ')}
+                        <a
+                          href={href}
+                          onClick={(event) => {
+                            event.stopPropagation()
+                            try {
+                              window.sessionStorage.setItem('fc-order-summary-draft', JSON.stringify(order))
+                            } catch {
+                              // ignore quota / private mode failures; page still falls back to localStorage
+                            }
+                          }}
+                        >
+                          {doc.label}
+                        </a>
+                      </span>
+                    )
+                  })}
+                  .
+                </span>
+              </label>
+            </div>
+            <button
+              type="button"
+              className="primary-action pay-invoice"
+              disabled={paying || !termsAccepted}
+              onClick={payWithStripeInvoice}
+            >
               {paying ? 'Opening payment…' : 'Continue to payment'} <span>→</span>
             </button>
             {payError && <p className="backend-note">{payError}</p>}
@@ -613,12 +852,13 @@ export function FinanceView({
             </dl>
           </section>
 
-          {(order.billing.companyName || order.billing.contactName || order.billing.address) && <section className="finance-section receipt-billing-section">
-            <div className="section-heading"><h2>Billing information</h2></div>
+          {(order.billing.companyName || order.billing.contactName || order.billing.address || order.billing.email) && <section className="finance-section receipt-billing-section">
+            <div className="section-heading"><h2>Company & signatory</h2></div>
             <dl className="receipt-details">
               {order.billing.companyName && <div><dt>Company</dt><dd>{order.billing.companyName}</dd></div>}
-              {order.billing.contactName && <div><dt>Contact</dt><dd>{order.billing.contactName}</dd></div>}
-              {order.billing.address && <div><dt>Billing address</dt><dd>{order.billing.address}</dd></div>}
+              {order.billing.address && <div><dt>Registered address</dt><dd>{order.billing.address}</dd></div>}
+              {order.billing.contactName && <div><dt>Signatory</dt><dd>{order.billing.contactName}{order.billing.jobTitle ? ` · ${order.billing.jobTitle}` : ''}</dd></div>}
+              {order.billing.email && <div><dt>Corporate email</dt><dd>{order.billing.email}</dd></div>}
               {order.billing.poNumber && <div><dt>PO number</dt><dd>{order.billing.poNumber}</dd></div>}
             </dl>
           </section>}

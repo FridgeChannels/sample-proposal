@@ -159,6 +159,8 @@ export const defaultOrder: OrderState = {
     companyName: '',
     contactName: '',
     address: '',
+    jobTitle: '',
+    email: '',
     poNumber: '',
   },
   shippingMethod: 'air',
@@ -216,7 +218,6 @@ export function applyQuoteToOrder(order: OrderState, payload: PilotQuoteApiRespo
     },
     billing: {
       ...order.billing,
-      companyName: quote.brandName || order.billing.companyName,
     },
     pricing: {
       loaded: true,

@@ -563,7 +563,7 @@ html{font-size:16.4px}
 
 .pilot-plan-view{min-height:100vh;padding:0 0 calc(168px + env(safe-area-inset-bottom));background:var(--leg-background);color:var(--leg-foreground)}
 .pilot-plan-view .plan-order-cta{display:grid;gap:10px;padding:12px max(16px,calc((100% - 960px)/2)) calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--leg-border);background:color-mix(in oklch,var(--leg-background) 94%,transparent);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
-.plan-terms-agree{padding:0 2px}.plan-terms-agree.has-error .plan-terms-check{color:#9b3d32}.plan-terms-check{display:flex;align-items:flex-start;gap:10px;margin:0;color:var(--leg-foreground);font-size:12.5px;line-height:1.45;cursor:pointer}.plan-terms-check input{flex:0 0 auto;width:16px;height:16px;margin:2px 0 0;accent-color:var(--leg-brand)}.plan-terms-check a{color:var(--leg-brand);font-weight:600;text-decoration:underline;text-underline-offset:2px}.plan-terms-check a:hover{opacity:.82}.plan-terms-hint{margin:6px 0 0 26px;color:#9b3d32;font-size:12px;line-height:1.4}
+.plan-terms-agree{padding:0 2px}.plan-terms-agree.has-error .plan-terms-check{color:#9b3d32}.plan-terms-check{display:flex;align-items:flex-start;gap:10px;margin:0;color:var(--leg-foreground);font-size:12.5px;line-height:1.45;cursor:pointer}.plan-terms-check input{flex:0 0 auto;width:16px;height:16px;margin:2px 0 0;accent-color:var(--leg-brand)}.plan-terms-check a{color:var(--leg-brand);font-weight:600;text-decoration:underline;text-underline-offset:2px}.plan-terms-check a:hover{opacity:.82}.plan-terms-hint{margin:6px 0 0 26px;color:#9b3d32;font-size:12px;line-height:1.4}.invoice-actions .plan-terms-agree{margin:4px 0 2px}
 .pilot-plan-shell{width:min(920px,calc(100% - 40px));margin:0 auto}
 .pilot-plan-header{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,.45fr);gap:56px;padding:72px 0 42px;border-bottom:1px solid var(--leg-border)}
 .pilot-plan-header h1{margin:0;font-size:clamp(3rem,7vw,5.6rem);font-weight:400;line-height:.92;letter-spacing:-.065em}.pilot-plan-header>div>p:last-child{max-width:580px;margin:18px 0 0;color:var(--leg-muted-foreground);font-size:16px;line-height:1.55}
@@ -588,7 +588,7 @@ html{font-size:16.4px}
 .plan-terms{display:grid;grid-template-columns:1fr 1fr;gap:36px}.plan-terms>.eyebrow{grid-column:1/-1;margin-bottom:-6px}.plan-terms p{margin:0;color:var(--leg-muted-foreground);font-size:13px;line-height:1.55}
 .payment-link-result{display:grid;gap:12px}.payment-link-result label{display:grid;gap:8px}.payment-link-result label>span{color:var(--leg-muted-foreground);font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}.payment-link-result input{width:100%;height:48px;padding:0 12px;border:1px solid var(--leg-border);border-radius:0;background:var(--leg-background);color:var(--leg-foreground);font-size:13px}.payment-link-result .primary-action,.payment-link-result .secondary-action{width:100%}.payment-link-open{min-height:48px}
 
-.invoice-package-description{margin:14px 0 0;color:var(--leg-muted-foreground);font-size:13px;line-height:1.5}.finance-service-groups{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--leg-border)}.finance-service-groups>div{padding:18px 20px 18px 0;border-bottom:1px solid var(--leg-border)}.finance-service-groups>div:nth-child(even){padding-left:20px;border-left:1px solid var(--leg-border)}.finance-service-groups h3{margin:0 0 10px;font-size:13px}.finance-service-groups ul{display:grid;gap:5px;margin:0;padding-left:18px;color:var(--leg-muted-foreground);font-size:12px;line-height:1.4}.shipping-section .section-heading p{margin:5px 0 0;color:var(--leg-muted-foreground);font-size:12px}.finance-shipping-form{gap:12px}.finance-shipping-form label>span{font-size:10px}.finance-shipping-form input{min-height:42px;font-size:14px}
+.invoice-package-description{margin:14px 0 0;color:var(--leg-muted-foreground);font-size:13px;line-height:1.5}.finance-service-groups{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--leg-border)}.finance-service-groups>div{padding:18px 20px 18px 0;border-bottom:1px solid var(--leg-border)}.finance-service-groups>div:nth-child(even){padding-left:20px;border-left:1px solid var(--leg-border)}.finance-service-groups h3{margin:0 0 10px;font-size:13px}.finance-service-groups ul{display:grid;gap:5px;margin:0;padding-left:18px;color:var(--leg-muted-foreground);font-size:12px;line-height:1.4}.shipping-section .section-heading p{margin:5px 0 0;color:var(--leg-muted-foreground);font-size:12px}.billing-section .section-heading{align-items:flex-start;justify-content:space-between}.billing-section .section-heading p{margin:5px 0 0;color:var(--leg-muted-foreground);font-size:12px}.finance-shipping-form{gap:12px}.finance-shipping-form label>span{font-size:10px}.finance-shipping-form input,.finance-shipping-form textarea{min-height:42px;font-size:14px}.finance-shipping-form textarea{min-height:84px;padding:10px 0;resize:vertical;line-height:1.45}
 .shipping-section .section-heading{align-items:flex-start;justify-content:space-between}.shipping-completion{flex:0 0 auto;padding:5px 8px;border-radius:999px;background:color-mix(in oklch,#b45309 9%,transparent);color:#92400e!important;font-size:9px!important;font-weight:600;letter-spacing:.06em;text-transform:uppercase}.shipping-completion.is-complete{background:color-mix(in oklch,var(--leg-brand) 9%,transparent);color:var(--leg-brand)!important}.finance-shipping-form input::placeholder{color:var(--leg-muted-foreground);opacity:.72}
 
 @media(max-width:700px){
@@ -867,11 +867,12 @@ html{font-size:16.4px}
 .payment-shell .finance-side .invoice-actions{position:static;top:auto}
 .payment-shell .finance-side .secure-fields .form-grid{grid-template-columns:1fr}
 @media(min-width:901px){
-  .payment-shell .finance-layout{grid-template-rows:auto auto}
+  .payment-shell .finance-layout{grid-template-rows:auto auto auto}
   .payment-shell .finance-main{display:contents}
   .payment-shell .summary-section{grid-column:1;grid-row:1}
-  .payment-shell .shipping-section{grid-column:1;grid-row:2}
-  .payment-shell .finance-side{grid-column:2;grid-row:1;align-self:start}
+  .payment-shell .billing-section{grid-column:1;grid-row:2}
+  .payment-shell .shipping-section{grid-column:1;grid-row:3}
+  .payment-shell .finance-side{grid-column:2;grid-row:1 / span 3;align-self:start}
   .payment-shell .finance-side .invoice-actions{order:-1}
 }
 @media(max-width:900px){

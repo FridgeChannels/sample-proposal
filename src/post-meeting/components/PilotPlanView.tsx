@@ -8,12 +8,6 @@ const number = new Intl.NumberFormat('en-US')
 const date = new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' })
 const airShipping = SHIPPING_OPTIONS.air
 
-const LEGAL_DOCS = [
-  { label: 'Actual Order Summary', href: '/legal/actual-order-summary.html' },
-  { label: 'Pilot Order & Service Terms', href: '/legal/pilot-order-service-terms.html' },
-  { label: 'Data Processing Addendum', href: '/legal/data-processing-addendum.html' },
-] as const
-
 function DetailsChevron() {
   return (
     <svg className="details-chevron" viewBox="0 0 24 24" aria-hidden="true">
@@ -96,8 +90,6 @@ export function PilotPlanView({
   const [paymentUrl, setPaymentUrl] = useState('')
   const [linkError, setLinkError] = useState('')
   const [copied, setCopied] = useState(false)
-  const [termsAccepted, setTermsAccepted] = useState(false)
-  const [termsPrompt, setTermsPrompt] = useState(false)
   const total = orderTotal(order, now)
   const brand = order.brandName || order.shippingAddress.companyName || 'Client'
   const createdDate = formatDate(order.createdAt)
@@ -109,10 +101,6 @@ export function PilotPlanView({
   const createPaymentLink = async () => {
     if (isPaid) {
       onViewReceipt()
-      return
-    }
-    if (!termsAccepted) {
-      setTermsPrompt(true)
       return
     }
     if (!magnetSn) {
@@ -282,41 +270,6 @@ export function PilotPlanView({
       </div>
 
       <div className="flow-cta-bar plan-order-cta">
-        {!isPaid && (
-          <div className={`plan-terms-agree${termsPrompt && !termsAccepted ? ' has-error' : ''}`}>
-            <label className="plan-terms-check">
-              <input
-                type="checkbox"
-                checked={termsAccepted}
-                onChange={(event) => {
-                  setTermsAccepted(event.target.checked)
-                  if (event.target.checked) setTermsPrompt(false)
-                }}
-              />
-              <span>
-                I have reviewed and agree to the{' '}
-                {LEGAL_DOCS.map((doc, index) => {
-                  const returnTo = `${window.location.pathname}${window.location.search}${window.location.hash || '#plan'}`
-                  const href = `${doc.href}?return=${encodeURIComponent(returnTo)}`
-                  return (
-                    <span key={doc.href}>
-                      {index > 0 && (index === LEGAL_DOCS.length - 1 ? ', and ' : ', ')}
-                      <a href={href} onClick={(event) => event.stopPropagation()}>
-                        {doc.label}
-                      </a>
-                    </span>
-                  )
-                })}
-                .
-              </span>
-            </label>
-            {termsPrompt && !termsAccepted && (
-              <p className="plan-terms-hint" role="alert">
-                Please review and check the box to agree before placing the order.
-              </p>
-            )}
-          </div>
-        )}
         <button type="button" className={`flow-cta-button${isPaid ? ' is-paid' : ''}`} onClick={isPaid ? onViewReceipt : createPaymentLink} disabled={!isPaid && (creatingLink || !order.pricing.loaded)}>
           <span>{isPaid ? 'View receipt' : creatingLink ? 'Creating secure link…' : 'Place Order'}</span>
           <b>→</b>

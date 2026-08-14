@@ -66,6 +66,14 @@ const loadOrder = (): OrderState => {
       package: packageSelection,
       timeline: defaultOrder.timeline,
       shippingMethod: 'air',
+      billing: {
+        ...defaultOrder.billing,
+        ...(parsed.billing || {}),
+      },
+      shippingAddress: {
+        ...defaultOrder.shippingAddress,
+        ...(parsed.shippingAddress || {}),
+      },
     }))
   } catch {
     return applyStatusPreview(ensureOfferWindow(defaultOrder))
@@ -106,6 +114,7 @@ export function App() {
   }, [view, magnetSn, financeToken])
 
   useEffect(() => {
+    window.sessionStorage.setItem('fc-order-summary-draft', JSON.stringify(order))
     if (financeToken) return
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(order))
   }, [financeToken, order])

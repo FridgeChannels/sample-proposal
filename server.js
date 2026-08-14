@@ -293,10 +293,12 @@ function invoiceToClientOrder(invoice, handoff, quoteExtras = {}) {
           email: '',
         },
     billing: {
-      companyName: quoteExtras.brandName || '',
-      contactName: invoice.approval?.name || '',
-      address: invoice.shippingAddress?.formattedAddress || '',
-      poNumber: '',
+      companyName: invoice.billing?.companyName || '',
+      contactName: invoice.billing?.contactName || invoice.approval?.name || '',
+      address: invoice.billing?.address || '',
+      jobTitle: invoice.billing?.jobTitle || '',
+      email: invoice.billing?.email || '',
+      poNumber: invoice.billing?.poNumber || '',
     },
     paymentMethod: 'card',
     paidAt: invoice.paymentTime || undefined,
@@ -540,7 +542,11 @@ async function handleRequest(req, res) {
       const body = await readJsonBody(req);
       const orderId = Number(body.orderId);
       const shippingAddressId = Number(body.shippingAddressId);
-      const result = await updateOrderShipping({ orderId, shippingAddressId });
+      const result = await updateOrderShipping({
+        orderId,
+        shippingAddressId,
+        billing: body.billing || undefined,
+      });
       await sendJson(res, 200, result);
     } catch (error) {
       await sendJson(res, error.status || 500, { error: error.message || 'Unable to update shipping.', code: error.code });

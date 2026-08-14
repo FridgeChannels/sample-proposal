@@ -56,8 +56,13 @@ export type FinanceHandoff = {
 
 export type BillingDetails = {
   companyName: string
-  contactName: string
+  /** Company registered / legal address */
   address: string
+  /** Signatory full name */
+  contactName: string
+  jobTitle: string
+  /** Corporate email for the signatory */
+  email: string
   poNumber: string
 }
 
