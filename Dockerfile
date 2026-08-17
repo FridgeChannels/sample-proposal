@@ -12,6 +12,17 @@ COPY gift-challenge-react.html post-meeting.html qualified-meeting-doc.html fit-
 COPY public ./public
 COPY src ./src
 
+# Vite inlines VITE_* at build time. Runtime .env on the container does not
+# enable PostHog — pass these as build args (see docker-compose.yml).
+ARG VITE_POSTHOG_PROJECT_TOKEN
+ARG VITE_POSTHOG_HOST
+ARG VITE_POSTHOG_SESSION_REPLAY
+ARG VITE_LEGAL_DOCS_BASE_URL
+ENV VITE_POSTHOG_PROJECT_TOKEN=$VITE_POSTHOG_PROJECT_TOKEN \
+    VITE_POSTHOG_HOST=$VITE_POSTHOG_HOST \
+    VITE_POSTHOG_SESSION_REPLAY=$VITE_POSTHOG_SESSION_REPLAY \
+    VITE_LEGAL_DOCS_BASE_URL=$VITE_LEGAL_DOCS_BASE_URL
+
 RUN npm run build
 
 FROM node:22-alpine
