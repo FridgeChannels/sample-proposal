@@ -614,6 +614,11 @@
     .closing-copy-text+.closing-copy-text{margin-top:14px}
     .pilot-design-copy{margin-top:24px;color:color-mix(in oklch,var(--leg-brand-foreground) 76%,transparent);font-size:16.4px;line-height:1.55}
     .pilot-design-copy em{color:var(--leg-brand-foreground)}
+    .pilot-email-alt{margin:12px 0 0;color:color-mix(in oklch,var(--leg-brand-foreground) 72%,transparent);font-size:13px;line-height:1.45;text-align:center}
+    .pilot-email-alt a{color:inherit;text-decoration:underline;text-underline-offset:3px}
+    .pilot-email-alt a:hover{opacity:.82}
+    .pilot-cta-stack{display:flex;flex-direction:column;align-items:center;width:max-content;max-width:100%;margin-top:32px}
+    .closing-gains .pilot-cta-stack .btn{margin-top:0}
     @media(max-width:760px){
       main>section.hero{display:block!important;min-height:auto!important;padding:0!important}
       main>section.hero .hero-grid{display:flex!important;width:100%!important;min-height:0!important;gap:0!important}
@@ -632,6 +637,7 @@
       .pilot-design-copy{max-width:34ch;margin-right:auto;margin-left:auto;text-align:center}
       .closing-gains .btn{width:max-content;max-width:100%;min-height:60px;margin-right:auto;margin-left:auto;padding:8px 12px 8px 24px;white-space:nowrap}
       .closing-gains .btn:after{width:32px;height:32px;margin-left:8px}
+      .pilot-cta-stack{width:100%;align-items:center}
     }
   </style>
 </head>
@@ -848,7 +854,10 @@
           </header>
           <div class="closing-gains package-gains">
             <p class="pilot-design-copy">Then one design session is all it takes: your magnet flips from sample to <em>your brand</em> — live before the first 20 minutes are up, built around the problem you picked. No reprint. Nothing to install.</p>
-            <a class="btn" href="https://calendly.com/billy-fridgechannels/fridge-channel-pilot-meeting" data-link="footer_button_url" data-pilot-cta>Make it mine — live in 20 minutes</a>
+            <div class="pilot-cta-stack">
+              <a class="btn" href="https://calendly.com/billy-fridgechannels/fridge-channel-pilot-meeting" data-link="footer_button_url" data-pilot-cta>Make it mine — live in 20 minutes</a>
+              <p class="pilot-email-alt">Prefer email? <a href="mailto:billy@fridgechannels.com">billy@fridgechannels.com</a></p>
+            </div>
           </div>
         </div>
       </div>
