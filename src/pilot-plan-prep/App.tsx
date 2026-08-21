@@ -78,7 +78,6 @@ export function PilotPlanPrep() {
   const [bindingAccount, setBindingAccount] = useState(false)
   const [credentials, setCredentials] = useState<Credentials | null>(null)
   const [copiedField, setCopiedField] = useState<'email' | 'password' | 'both' | ''>('')
-  const [resettingSample, setResettingSample] = useState(false)
 
   const selectedEvent = useMemo(
     () => events.find((event) => event.uri === selectedEventUri) ?? null,
@@ -226,40 +225,6 @@ export function PilotPlanPrep() {
     }
   }
 
-  const resetToSample = async () => {
-    const sn = resolvedSn
-    if (!sn) {
-      setError('Resolve or enter a magnet SN first.')
-      return
-    }
-    if (!window.confirm(`Reset ${sn} to sample status (magnet_brand_param.status = 2)?`)) return
-
-    setResettingSample(true)
-    setError('')
-    setStatus('Resetting sample status…')
-    try {
-      const payload = await readJson<{ data: { sn: string; status: number; changed: boolean } }>(
-        await fetch('/api/pilot-session/reset-sample', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sn }),
-        }),
-        'Reset sample failed.',
-      )
-      await runResolve(inviteeEmail || selectedEmail, sn)
-      setStatus(
-        payload.data.changed
-          ? `Sample status reset to sample (2) for ${sn}.`
-          : `${sn} was already sample (2).`,
-      )
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Reset sample failed.')
-      setStatus('')
-    } finally {
-      setResettingSample(false)
-    }
-  }
-
   return (
     <main className="prep-shell">
       <header className="prep-header">
@@ -336,14 +301,6 @@ export function PilotPlanPrep() {
             <div><dt>Client</dt><dd>{resolve.client?.title || '—'}</dd></div>
             <div><dt>Keyperson</dt><dd>{resolve.keyperson?.name || '—'}</dd></div>
             <div><dt>Sample</dt><dd>{resolve.sample ? 'Found' : 'Not found'}</dd></div>
-            <div>
-              <dt>Status</dt>
-              <dd>
-                {resolve.sample?.status != null
-                  ? String(resolve.sample.status)
-                  : '—'}
-              </dd>
-            </div>
             <div><dt>Account</dt><dd>{resolve.customer?.email || 'Not bound'}</dd></div>
           </dl>
         ) : null}
@@ -424,14 +381,6 @@ export function PilotPlanPrep() {
             <a className="prep-primary" href={meetUrl}>Open meet page</a>
           </div>
         )}
-        {snVerified ? (
-          <div className="prep-row">
-            <p className="prep-muted">SN {resolvedSn} — reset page routing back to sample deck.</p>
-            <button type="button" disabled={resettingSample} onClick={() => void resetToSample()}>
-              {resettingSample ? 'Resetting…' : 'Reset to sample'}
-            </button>
-          </div>
-        ) : null}
       </section>
 
       {selectedEvent ? (

@@ -13,7 +13,6 @@ const DEFAULT_MIN_QUANTITY = 1000;
 /** Pilot ships 1,000 magnets unless the package requires more. */
 const DEFAULT_PILOT_QUANTITY = 1000;
 const SAMPLE_STATUS_LIVE = 3;
-const SAMPLE_STATUS_SAMPLE = 2;
 const DEFAULT_PACKAGE_CODE = 'PKG-PPM';
 const DEFAULT_PILOT_DISCOUNT_RATIO = 0.8;
 const DEFAULT_PILOT_DISCOUNT_DAYS = 10;
@@ -1520,23 +1519,6 @@ async function ensureSampleLive(sn) {
   return { sn: magnetSn, status: SAMPLE_STATUS_LIVE, changed: true };
 }
 
-/** Reset magnet_brand_param.status to sample (2) for prep / re-demo. */
-async function resetSampleToSample(sn) {
-  const magnetSn = String(sn || '').trim();
-  if (!magnetSn) throw httpError('Magnet SN is required', 400);
-
-  const phase = await lookupSamplePhase(magnetSn);
-  if (phase.reason === 'not_found') throw httpError('Sample not found', 404, 'sn_not_found');
-  if (phase.status === SAMPLE_STATUS_SAMPLE) {
-    return { sn: magnetSn, status: SAMPLE_STATUS_SAMPLE, changed: false };
-  }
-
-  await supabaseUpdate('magnet_brand_param', { magnet_sn: `eq.${magnetSn}` }, {
-    status: SAMPLE_STATUS_SAMPLE,
-  });
-  return { sn: magnetSn, status: SAMPLE_STATUS_SAMPLE, changed: true };
-}
-
 async function upsertActivePackageDiscount({ sn, packageId, discountCustomerId, existingDiscountId }) {
   const now = new Date().toISOString();
   const row = {
@@ -1679,7 +1661,6 @@ module.exports = {
   computePilotTotals,
   savePilotPlan,
   ensureSampleLive,
-  resetSampleToSample,
   loadPilotSession,
   savePilotAddress,
   savePilotBilling,
