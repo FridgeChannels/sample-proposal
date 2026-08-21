@@ -17,6 +17,7 @@ const {
   createStripeInvoiceForOrder,
   savePilotPlan,
   ensureSampleLive,
+  resetSampleToSample,
   loadPilotSession,
   moneyRound,
 } = require('./pilot-commerce');
@@ -824,6 +825,22 @@ async function handleRequest(req, res) {
       await sendJson(res, 200, { success: true, data: result });
     } catch (error) {
       await sendJson(res, error.status || 500, { error: error.message || 'Bind account failed.' });
+    }
+    return;
+  }
+
+  if (requestUrl.pathname === '/api/pilot-session/reset-sample' && req.method === 'POST') {
+    try {
+      const body = await readJsonBody(req);
+      const sn = String(body.sn || '').trim();
+      if (!sn) {
+        await sendJson(res, 400, { error: 'sn is required' });
+        return;
+      }
+      const result = await resetSampleToSample(sn);
+      await sendJson(res, 200, { success: true, data: result });
+    } catch (error) {
+      await sendJson(res, error.status || 500, { error: error.message || 'Reset sample failed.' });
     }
     return;
   }
