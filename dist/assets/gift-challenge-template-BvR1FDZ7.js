@@ -392,7 +392,7 @@ function e(e=`<!doctype html>
     .closing-gains li{font-weight:400;color:var(--leg-brand-foreground)}
     .closing-gains li:before{color:color-mix(in oklch,var(--leg-brand-foreground) 62%,transparent)}
     .btn,.footer-slide .btn{min-height:44px;padding:8px 10px 8px 20px;border:0!important;border-radius:var(--leg-pill)!important;background:var(--leg-brand)!important;color:var(--leg-brand-foreground)!important;font-family:var(--leg-font);font-size:16.4px;font-weight:500;text-transform:none;letter-spacing:0;box-shadow:none;transition:background-color .2s ease,transform .2s ease}
-    .footer-slide .btn{background:var(--rust)!important;color:#fff!important}
+    .footer-slide .btn{background:var(--rust)!important;color:#000!important}
     .btn:after{content:"→";display:grid;place-items:center;width:26px;height:26px;margin-left:4px;border-radius:50%;background:var(--leg-brand-foreground);color:var(--leg-brand);font-size:16.4px;transition:transform .2s ease}
     .footer-slide .btn:after{background:#fff;color:var(--rust)}
     .btn:hover{transform:none;box-shadow:none;background:var(--leg-brand-dark)!important}
@@ -614,6 +614,11 @@ function e(e=`<!doctype html>
     .closing-copy-text+.closing-copy-text{margin-top:14px}
     .pilot-design-copy{margin-top:24px;color:color-mix(in oklch,var(--leg-brand-foreground) 76%,transparent);font-size:16.4px;line-height:1.55}
     .pilot-design-copy em{color:var(--leg-brand-foreground)}
+    .pilot-email-alt{margin:12px 0 0;color:color-mix(in oklch,var(--leg-brand-foreground) 72%,transparent);font-size:13px;line-height:1.45;text-align:center}
+    .pilot-email-alt a{color:inherit;text-decoration:underline;text-underline-offset:3px}
+    .pilot-email-alt a:hover{opacity:.82}
+    .pilot-cta-stack{display:flex;flex-direction:column;align-items:center;width:max-content;max-width:100%;margin-top:32px}
+    .closing-gains .pilot-cta-stack .btn{margin-top:0}
     @media(max-width:760px){
       main>section.hero{display:block!important;min-height:auto!important;padding:0!important}
       main>section.hero .hero-grid{display:flex!important;width:100%!important;min-height:0!important;gap:0!important}
@@ -632,6 +637,7 @@ function e(e=`<!doctype html>
       .pilot-design-copy{max-width:34ch;margin-right:auto;margin-left:auto;text-align:center}
       .closing-gains .btn{width:max-content;max-width:100%;min-height:60px;margin-right:auto;margin-left:auto;padding:8px 12px 8px 24px;white-space:nowrap}
       .closing-gains .btn:after{width:32px;height:32px;margin-left:8px}
+      .pilot-cta-stack{width:100%;align-items:center}
     }
   </style>
 </head>
@@ -848,7 +854,10 @@ function e(e=`<!doctype html>
           </header>
           <div class="closing-gains package-gains">
             <p class="pilot-design-copy">Then one design session is all it takes: your magnet flips from sample to <em>your brand</em> — live before the first 20 minutes are up, built around the problem you picked. No reprint. Nothing to install.</p>
-            <a class="btn" href="https://calendly.com/billy-fridgechannels/fridge-channel-pilot-meeting" data-link="footer_button_url" data-pilot-cta>Make it mine — live in 20 minutes</a>
+            <div class="pilot-cta-stack">
+              <a class="btn" href="https://calendly.com/billy-fridgechannels/fridge-channel-pilot-meeting" data-link="footer_button_url" data-pilot-cta>Make it mine — live in 20 minutes</a>
+              <p class="pilot-email-alt">Prefer email? <a href="mailto:billy@fridgechannels.com">billy@fridgechannels.com</a></p>
+            </div>
           </div>
         </div>
       </div>
