@@ -200,6 +200,14 @@ async function serveFitMeetingSample(res) {
   );
 }
 
+async function serveFcAsinPlusSample(res) {
+  await serveDistHtml(
+    res,
+    'fc-asin-plus-sample.html',
+    'Failed to load FC-ASIN Plus Sample (run `npm run build` to generate dist/)',
+  );
+}
+
 async function servePilotPlan(res) {
   await serveDistHtml(
     res,
@@ -922,6 +930,15 @@ async function handleRequest(req, res) {
     || requestUrl.pathname === '/fit-meeting-sample.html'
   ) {
     await serveFitMeetingSample(res);
+    return;
+  }
+
+  if (
+    requestUrl.pathname === '/fc-asin-plus-sample'
+    || requestUrl.pathname === '/fc-asin-plus-sample/'
+    || requestUrl.pathname === '/fc-asin-plus-sample.html'
+  ) {
+    await serveFcAsinPlusSample(res);
     return;
   }
 
