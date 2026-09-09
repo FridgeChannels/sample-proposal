@@ -79,7 +79,7 @@ function MultiSelect({
   error: boolean
 }) {
   return (
-    <fieldset className="campaign-question" aria-invalid={error}>
+    <fieldset className="campaign-question" aria-invalid={error} aria-required="true">
       <legend>{legend}</legend>
       <p className="campaign-input-type">Multi-select</p>
       <div className="campaign-choice-grid">
@@ -107,7 +107,7 @@ function MultiSelect({
 
 function SingleSelect({ legend, name, options }: { legend: string; name: string; options: string[] }) {
   return (
-    <fieldset className="campaign-question">
+    <fieldset className="campaign-question" aria-required="true">
       <legend>{legend}</legend>
       <p className="campaign-input-type">Single select</p>
       <div className="campaign-radio-list">
@@ -157,18 +157,26 @@ export function ChristmasAsinCampaign() {
         <main>
           <section className="campaign-hero" id="top">
             <div className="campaign-wrap campaign-hero-copy">
-              <h1>Turn Christmas ASINs into repeat purchases</h1>
-              <p className="campaign-lede">FC turns your Christmas gift into an AI-powered NFC Magnet customers can see every day, tap, enjoy, and buy from again.</p>
-              <p className="campaign-support">Built for DTC brands launching Christmas gifts, holiday bundles, or seasonal products that deserve to stay in the customer’s home — and keep working after the holiday moment.</p>
+              <h1>Turn Your Amazon Holiday Product Into a Repeat Purchase Touchpoint</h1>
+              <p className="campaign-lede">FC turns your Amazon Christmas product into an AI-powered NFC Magnet customers can see every day, tap, and buy from Amazon again.</p>
+              <p className="campaign-support">Built for Amazon brands preparing Christmas bundles, seasonal ASINs, giftable products, or post-purchase holiday campaigns that deserve to stay in the customer’s home — and keep driving action after the first Amazon order.</p>
             </div>
             <div className="campaign-hero-image" role="img" aria-label="Warm, softly blurred Christmas celebration scene" />
             <img className="campaign-hero-overlay" src="/assets/christmas-asin/hero-overlay.png" alt="" />
           </section>
 
+          <section className="campaign-video-section" aria-label="ASIN Plus video">
+            <div className="campaign-wrap">
+              <video className="campaign-video" controls playsInline preload="metadata">
+                <source src="/assets/christmas-asin/asin-plus.mp4" type="video/mp4" />
+                Your browser does not support embedded video.
+              </video>
+            </div>
+          </section>
+
           <section className="campaign-outcomes" id="value" aria-labelledby="outcomes-title">
             <div className="campaign-wrap campaign-section-heading">
-              <p className="campaign-kicker">What FC turns your Amazon Christmas product / gift into</p>
-              <h2 id="outcomes-title">One product. Five new reasons to come back.</h2>
+              <h2 id="outcomes-title">What FC Turns Your Amazon<br />Christmas Product / Gift Into</h2>
             </div>
             <div className="campaign-wrap campaign-outcome-list">
               {outcomes.map((outcome) => (
@@ -234,7 +242,7 @@ export function ChristmasAsinCampaign() {
                   <SingleSelect legend="ASIN Q5 — What is your estimated budget per FC Magnet unit?" name="budget" options={budgetOptions} />
                 </section>
 
-                <button className="campaign-submit" type="submit">Apply &amp; Book <span aria-hidden="true">→</span></button>
+                <button className="campaign-submit" type="submit">Apply &amp; Book</button>
                 <p className="campaign-form-note">Your application is reviewed before the fit call. This page does not charge or place an order.</p>
               </form>
             </div>

@@ -51,3 +51,18 @@
 .campaign-outcome h3{padding-bottom:10px}
 .campaign-submit{position:relative;display:grid;place-items:center}
 .campaign-submit span{position:absolute;right:8px;float:none}
+.campaign-lede,.campaign-support{transform:translateY(30px)}
+.campaign-hero-copy,.campaign-hero-copy h1,.campaign-hero-copy p{font-family:'Playfair Display',Georgia,serif!important}
+.campaign-hero h1{font-size:clamp(3rem,6vw,6.5rem);font-weight:500;line-height:.94;letter-spacing:-.04em}
+@media(max-width:600px){.campaign-hero h1{font-size:clamp(3rem,15vw,4.6rem)}}
+.campaign-offer .campaign-kicker{font-size:24px}
+.campaign-fields label{position:relative}
+.campaign-fields label::after,.campaign-question::before{content:'*';position:absolute;color:var(--red);font-size:18px;font-weight:600;line-height:1}
+.campaign-fields label::after{top:0;right:0}
+.campaign-question{position:relative}
+.campaign-question::before{top:24px;right:0}
+.campaign-hero h1,.campaign-section-heading h2,.campaign-offer h2{width:min(1100px,calc(100vw - 48px));max-width:none!important}
+@media(max-width:600px){.campaign-hero h1,.campaign-section-heading h2,.campaign-offer h2{width:100%}}
+.campaign-video-section{background:var(--cream);padding:96px 0}
+.campaign-video{display:block;width:min(1080px,100%);margin:0 auto;aspect-ratio:16/9;background:var(--deep);object-fit:contain}
+@media(max-width:600px){.campaign-video-section{padding:64px 0}}
