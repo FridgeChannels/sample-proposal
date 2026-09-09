@@ -48,6 +48,8 @@
 .campaign-radio{color:var(--deep)}
 .campaign-outcome:nth-child(3) .campaign-outcome-icon{width:112px;height:104px}
 .campaign-outcome:nth-child(3) .campaign-outcome-icon img{width:112px!important;height:104px!important}
+.campaign-outcome:nth-child(5) .campaign-outcome-icon{width:112px;height:104px;overflow:hidden}
+.campaign-outcome:nth-child(5) .campaign-outcome-icon img{width:112px!important;height:104px!important}
 .campaign-outcome h3{padding-bottom:10px}
 .campaign-submit{position:relative;display:grid;place-items:center}
 .campaign-submit span{position:absolute;right:8px;float:none}

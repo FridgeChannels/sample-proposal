@@ -216,6 +216,14 @@ async function serveChristmasAsinCampaign(res) {
   );
 }
 
+async function serveChristmasDtcCampaign(res) {
+  await serveDistHtml(
+    res,
+    'christmas-dtc-campaign.html',
+    'Failed to load Christmas DTC Campaign (run `npm run build` to generate dist/)',
+  );
+}
+
 async function servePilotPlan(res) {
   await serveDistHtml(
     res,
@@ -956,6 +964,15 @@ async function handleRequest(req, res) {
     || requestUrl.pathname === '/christmas-asin-campaign.html'
   ) {
     await serveChristmasAsinCampaign(res);
+    return;
+  }
+
+  if (
+    requestUrl.pathname === '/christmas-dtc-campaign'
+    || requestUrl.pathname === '/christmas-dtc-campaign/'
+    || requestUrl.pathname === '/christmas-dtc-campaign.html'
+  ) {
+    await serveChristmasDtcCampaign(res);
     return;
   }
 
