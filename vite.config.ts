@@ -120,6 +120,12 @@ export default defineConfig({
             return
           }
 
+          if (url.pathname === '/christmas-asin-campaign' || url.pathname === '/christmas-asin-campaign/') {
+            req.url = `/christmas-asin-campaign.html${url.search}`
+            next()
+            return
+          }
+
           if (url.pathname === '/pilot-plan' || url.pathname === '/pilot-plan/') {
             req.url = `/pilot-plan-prep.html${url.search}`
             next()
@@ -157,6 +163,7 @@ export default defineConfig({
         qualifiedMeetingDoc: resolve(projectRoot, 'qualified-meeting-doc.html'),
         fitMeetingSample: resolve(projectRoot, 'fit-meeting-sample.html'),
         fcAsinPlusSample: resolve(projectRoot, 'fc-asin-plus-sample.html'),
+        christmasAsinCampaign: resolve(projectRoot, 'christmas-asin-campaign.html'),
         pilotPlan: resolve(projectRoot, 'pilot-plan.html'),
         pilotPlanPrep: resolve(projectRoot, 'pilot-plan-prep.html'),
       },

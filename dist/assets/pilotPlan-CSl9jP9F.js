@@ -630,7 +630,7 @@ import{n as e,r as t,t as n}from"./jsx-runtime-M5tw2uBi.js";var r=t(),i=e(),a=`<
       <div class="wrap hero-grid">
         <div class="hero-copy reveal">
           <div class="eyebrow">Pilot Design Meeting</div>
-          <h1>Configure your pilot. Leave with a live plan.</h1>
+          <h1>Subscription turns repeat purchases into a predictable system</h1>
           <ol class="meeting-outcomes">
             <li><span>01</span><p>How to configure</p></li>
             <li><span>02</span><p>Brand-specific live page</p></li>

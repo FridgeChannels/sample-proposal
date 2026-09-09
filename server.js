@@ -208,6 +208,14 @@ async function serveFcAsinPlusSample(res) {
   );
 }
 
+async function serveChristmasAsinCampaign(res) {
+  await serveDistHtml(
+    res,
+    'christmas-asin-campaign.html',
+    'Failed to load Christmas ASIN Campaign (run `npm run build` to generate dist/)',
+  );
+}
+
 async function servePilotPlan(res) {
   await serveDistHtml(
     res,
@@ -939,6 +947,15 @@ async function handleRequest(req, res) {
     || requestUrl.pathname === '/fc-asin-plus-sample.html'
   ) {
     await serveFcAsinPlusSample(res);
+    return;
+  }
+
+  if (
+    requestUrl.pathname === '/christmas-asin-campaign'
+    || requestUrl.pathname === '/christmas-asin-campaign/'
+    || requestUrl.pathname === '/christmas-asin-campaign.html'
+  ) {
+    await serveChristmasAsinCampaign(res);
     return;
   }
 
