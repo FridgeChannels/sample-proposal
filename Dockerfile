@@ -7,8 +7,8 @@ RUN npm ci
 
 COPY vite.config.ts tsconfig.json tsconfig.app.json tsconfig.node.json ./
 COPY pilot-ops-auth.js ./
-COPY gift-challenge-react.html post-meeting.html qualified-meeting-doc.html fit-meeting-sample.html \
-     fc-asin-plus-sample.html pilot-plan.html pilot-plan-prep.html ./
+# All Vite multi-page HTML entries (see vite.config.ts build.rollupOptions.input)
+COPY *.html ./
 COPY public ./public
 COPY src ./src
 
@@ -32,7 +32,8 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm ci --omit=dev
 
-COPY server.js pilot-commerce.js pilot-session.js pilot-ops-auth.js ./
+COPY server.js pilot-commerce.js pilot-session.js pilot-ops-auth.js \
+     christmas-campaign-notion.js christmas-campaign-security.js ./
 COPY public/pilot-plan-login.html ./public/pilot-plan-login.html
 COPY sql ./sql
 COPY proposal-template.md ./
