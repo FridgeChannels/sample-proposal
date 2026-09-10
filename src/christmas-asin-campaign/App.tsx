@@ -207,8 +207,13 @@ export function ChristmasAsinCampaign() {
       <div className="christmas-campaign">
         <main>
           <section className="campaign-video-section" aria-label="ASIN Plus video">
-            <video className="campaign-video" controls playsInline preload="metadata">
-              <source src="/assets/christmas-asin/asin-plus.mp4" type="video/mp4" />
+            <video
+              className="campaign-video"
+              controls
+              playsInline
+              preload="metadata"
+              src="https://amzn-s3-fc-bucket.s3.sa-east-1.amazonaws.com/images/videos/asin-plus.mp4"
+            >
               Your browser does not support embedded video.
             </video>
           </section>
