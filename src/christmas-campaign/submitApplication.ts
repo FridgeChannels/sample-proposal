@@ -15,7 +15,6 @@ export type ChristmasCampaignApplicationPayload = {
   delivery: string
   budget: string
   formToken: string
-  company_website?: string
 }
 
 function collectMulti(form: FormData, name: string): string[] {
@@ -50,7 +49,6 @@ export function buildChristmasCampaignPayload(
     delivery: String(data.get('delivery') || '').trim(),
     budget: String(data.get('budget') || '').trim(),
     formToken,
-    company_website: String(data.get('company_website') || ''),
   }
 
   if (channel === 'ASIN') {
@@ -100,7 +98,6 @@ export async function submitChristmasCampaignApplication(
     pageId?: string
     url?: string | null
     alreadyApplied?: boolean
-    honeypot?: boolean
   }
 
   if (!response.ok) {
@@ -114,7 +111,7 @@ export async function submitChristmasCampaignApplication(
     )
   }
 
-  if (result.honeypot || !result.ok || !isNotionPageId(result.pageId)) {
+  if (!result.ok || !isNotionPageId(result.pageId)) {
     throw new Error(SAVE_FAILED_MESSAGE)
   }
 

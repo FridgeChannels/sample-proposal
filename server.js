@@ -43,11 +43,9 @@ const {
   assertTokenRateLimit,
   issueFormToken,
   assertFormToken,
-  isHoneypotTripped,
   normalizeEmail,
   getRecentApplication,
   rememberApplication,
-  fakeHoneypotSuccess,
 } = require('./christmas-campaign-security');
 
 const ROOT = __dirname;
@@ -851,12 +849,6 @@ async function handleRequest(req, res) {
       assertAllowedOrigin(req);
       const ip = clientIp(req);
       const body = await readJsonBody(req);
-
-      if (isHoneypotTripped(body)) {
-        console.warn('[api/christmas-campaign/apply] honeypot tripped', { ip });
-        await sendJson(res, 201, fakeHoneypotSuccess());
-        return;
-      }
 
       assertFormToken(body.formToken);
       const emailHint = normalizeEmail(body.email);

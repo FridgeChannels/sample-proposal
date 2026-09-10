@@ -1,6 +1,6 @@
 /**
  * P0+P1 guards for Christmas campaign apply:
- * rate limits, origin check, form timing token, honeypot, dedupe.
+ * rate limits, origin check, form timing token, dedupe.
  */
 
 const crypto = require('crypto')
@@ -183,11 +183,6 @@ function assertFormToken(token) {
   return issuedAt
 }
 
-function isHoneypotTripped(body) {
-  const bait = String(body?.company_website ?? body?.companyWebsite ?? '').trim()
-  return Boolean(bait)
-}
-
 function normalizeEmail(email) {
   return String(email || '').trim().toLowerCase()
 }
@@ -215,16 +210,6 @@ function rememberApplication(email, channel, result) {
   })
 }
 
-function fakeHoneypotSuccess() {
-  return {
-    ok: true,
-    pageId: 'blocked',
-    url: null,
-    channel: null,
-    honeypot: true,
-  }
-}
-
 module.exports = {
   clientIp,
   assertAllowedOrigin,
@@ -232,11 +217,9 @@ module.exports = {
   assertTokenRateLimit,
   issueFormToken,
   assertFormToken,
-  isHoneypotTripped,
   normalizeEmail,
   getRecentApplication,
   rememberApplication,
-  fakeHoneypotSuccess,
   LIMITS,
   MIN_FILL_MS,
   MAX_FILL_MS,

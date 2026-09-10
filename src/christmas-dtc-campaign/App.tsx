@@ -268,12 +268,6 @@ export function ChristmasDtcCampaign() {
               </header>
 
               <form className="campaign-form" onSubmit={handleSubmit} noValidate>
-                <div className="campaign-honeypot" aria-hidden="true">
-                  <label>
-                    <span>Company website</span>
-                    <input name="company_website" type="text" tabIndex={-1} autoComplete="off" />
-                  </label>
-                </div>
                 <section className="campaign-form-section" aria-labelledby="contact-title">
                   <div className="campaign-form-section-heading">
                     <span>01</span>
