@@ -167,7 +167,7 @@ export function ChristmasDtcCampaign() {
               <h1>Turn Your Christmas Gift Into a Smart Customer Touchpoint</h1>
               <p className="campaign-lede">FC turns your Christmas gift into an AI-powered NFC Magnet customers can see every day, tap, enjoy, and buy from again.</p>
               <p className="campaign-support">Built for DTC brands launching Christmas gifts, holiday bundles, or seasonal products that deserve to stay in the customer’s home — and keep working after the holiday moment.</p>
-              <a className="campaign-primary-action" href={calendlyUrl}>Apply and book your fit call<span aria-hidden="true">→</span></a>
+              <a className="campaign-primary-action" href="#apply">Apply and book your fit call<span aria-hidden="true">→</span></a>
             </div>
             <div className="campaign-hero-image" role="img" aria-label="Warm, softly blurred Christmas celebration scene" />
             <img className="campaign-hero-overlay" src="/assets/christmas-asin/hero-overlay.png" alt="" />

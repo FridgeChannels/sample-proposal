@@ -166,7 +166,7 @@ export function ChristmasAsinCampaign() {
               <h1>Turn Your Amazon Holiday Product Into a Repeat Purchase Touchpoint</h1>
               <p className="campaign-lede">FC turns your Amazon Christmas product into an AI-powered NFC Magnet customers can see every day, tap, and buy from Amazon again.</p>
               <p className="campaign-support">Built for Amazon brands preparing Christmas bundles, seasonal ASINs, giftable products, or post-purchase holiday campaigns that deserve to stay in the customer’s home — and keep driving action after the first Amazon order.</p>
-              <a className="campaign-primary-action" href={calendlyUrl}>Apply and book your fit call<span aria-hidden="true">→</span></a>
+              <a className="campaign-primary-action" href="#apply">Apply and book your fit call<span aria-hidden="true">→</span></a>
             </div>
             <div className="campaign-hero-image" role="img" aria-label="Warm, softly blurred Christmas celebration scene" />
             <img className="campaign-hero-overlay" src="/assets/christmas-asin/hero-overlay.png" alt="" />
