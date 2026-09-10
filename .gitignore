@@ -1,6 +1,7 @@
 .env
 node_modules/
 node_modules
+dist/
 .playwright-cli/
 .preview/
 .DS_Store
