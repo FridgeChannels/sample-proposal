@@ -367,7 +367,7 @@ async function notionFetch(pathname, { method = 'GET', body } = {}) {
 function buildNotionProperties(application) {
   const submittedAt = new Date().toISOString()
   const properties = {
-    Name: {
+    'Application Title': {
       title: [{ type: 'text', text: { content: `${application.brand} — ${application.fullName}`.slice(0, 200) } }],
     },
     Channel: { select: { name: application.channel } },

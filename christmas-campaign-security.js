@@ -5,7 +5,8 @@
 
 const crypto = require('crypto')
 
-const MIN_FILL_MS = 5_000
+// TEMP: set to 0 to disable min-fill guard locally; restore to 5_000 before ship
+const MIN_FILL_MS = 0
 const MAX_FILL_MS = 2 * 60 * 60 * 1000
 const DEDUPE_TTL_MS = 24 * 60 * 60 * 1000
 
