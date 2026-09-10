@@ -1,5 +1,9 @@
 import { FormEvent, useState } from 'react'
 import campaignCss from './styles.css?raw'
+import {
+  buildChristmasCampaignPayload,
+  submitChristmasCampaignApplication,
+} from '../christmas-campaign/submitApplication'
 
 const calendlyUrl = 'https://calendly.com/billy-fridgechannels/fridge-channel-pilot-meeting'
 
@@ -127,12 +131,14 @@ export function ChristmasAsinCampaign() {
   const [productSelection, setProductSelection] = useState<string[]>([])
   const [goalSelection, setGoalSelection] = useState<string[]>([])
   const [selectionErrors, setSelectionErrors] = useState({ product: false, goal: false })
+  const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState('')
 
   const toggle = (value: string, values: string[], setter: (next: string[]) => void) => {
     setter(values.includes(value) ? values.filter((item) => item !== value) : [...values, value])
   }
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const form = event.currentTarget
     if (!form.reportValidity()) return
@@ -143,7 +149,20 @@ export function ChristmasAsinCampaign() {
       window.requestAnimationFrame(() => invalidGroup?.scrollIntoView({ behavior: 'smooth', block: 'center' }))
       return
     }
-    if (calendlyUrl) window.location.assign(calendlyUrl)
+
+    setSubmitting(true)
+    setSubmitError('')
+    try {
+      const payload = buildChristmasCampaignPayload(form, 'ASIN', {
+        productTypes: productSelection,
+        campaignGoals: goalSelection,
+      })
+      await submitChristmasCampaignApplication(payload)
+      if (calendlyUrl) window.location.assign(calendlyUrl)
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : 'Unable to save your application.')
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -240,7 +259,10 @@ export function ChristmasAsinCampaign() {
                   <SingleSelect legend="ASIN Q5 — What is your estimated budget per FC Magnet unit?" name="budget" options={budgetOptions} />
                 </section>
 
-                <button className="campaign-submit" type="submit">Apply &amp; Book</button>
+                <button className="campaign-submit" type="submit" disabled={submitting}>
+                  {submitting ? 'Saving…' : 'Apply & Book'}
+                </button>
+                {submitError && <p className="campaign-field-error" role="alert">{submitError}</p>}
                 <p className="campaign-form-note">Your application is reviewed before the fit call. This page does not charge or place an order.</p>
               </form>
             </div>

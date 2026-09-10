@@ -35,6 +35,7 @@ const {
   handleAuthLogin,
   handleAuthLogout,
 } = require('./pilot-ops-auth');
+const { createChristmasCampaignApplication } = require('./christmas-campaign-notion');
 
 const ROOT = __dirname;
 const DIST_ROOT = path.join(__dirname, 'dist');
@@ -808,6 +809,21 @@ async function handleRequest(req, res) {
     const sn = requestUrl.searchParams.get('sn') || '';
     const result = await lookupSamplePhase(sn);
     await sendJson(res, 200, result);
+    return;
+  }
+
+  if (requestUrl.pathname === '/api/christmas-campaign/apply' && req.method === 'POST') {
+    try {
+      const body = await readJsonBody(req);
+      const result = await createChristmasCampaignApplication(body);
+      await sendJson(res, 201, result);
+    } catch (error) {
+      console.error('[api/christmas-campaign/apply]', error && error.message, error && error.code);
+      await sendJson(res, error.status || 500, {
+        error: error.message || 'Unable to save application.',
+        code: error.code || 'christmas_campaign_apply_failed',
+      });
+    }
     return;
   }
 
