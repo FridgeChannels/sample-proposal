@@ -99,3 +99,72 @@
 }
 
 .campaign-submit:disabled{opacity:.65;cursor:wait}
+
+/* Mobile-first layout polish for 365–430px screens */
+@media (max-width:600px){
+  .christmas-campaign{font-size:16px}
+  .campaign-wrap{width:calc(100% - 32px)}
+
+  .campaign-video{width:100%;max-height:72svh;object-fit:contain}
+
+  .campaign-nav{top:20px}
+  .campaign-holly{width:72px;height:36px}
+  .campaign-hero{height:auto;min-height:0;padding:104px 0 0}
+  .campaign-hero-copy{width:calc(100% - 32px)}
+  .campaign-hero h1{width:100%;max-width:none!important;font-size:44px;line-height:1;letter-spacing:-.045em}
+  .campaign-lede,.campaign-support{width:100%;max-width:100%;transform:none}
+  .campaign-lede{margin-top:24px!important;font-size:18px;line-height:1.35}
+  .campaign-support{margin-top:16px!important;font-size:16px;line-height:1.45}
+  .campaign-hero-copy .campaign-primary-action{width:100%;min-height:56px;justify-content:space-between;margin-top:28px;padding:12px 20px;transform:none;font-size:16px}
+  .campaign-primary-action>span{font-size:24px}
+  .campaign-hero-image{display:none}
+  .campaign-hero-overlay{position:relative;top:auto;left:50%;display:block;width:760px;max-width:none;margin-top:36px;transform:translateX(-50%)}
+
+  .campaign-outcomes{padding:88px 0}
+  .campaign-section-heading{text-align:left}
+  .campaign-section-heading h2{width:100%;margin:0;font-size:44px;line-height:1;letter-spacing:-.045em}
+  .campaign-outcome-list{margin-top:56px;gap:56px}
+  .campaign-outcome{gap:12px}
+  .campaign-outcome-number{font-size:13px}
+  .campaign-outcome-icon,.campaign-outcome:nth-child(3) .campaign-outcome-icon,.campaign-outcome:nth-child(5) .campaign-outcome-icon{width:112px;height:104px;margin-bottom:8px}
+  .campaign-outcome:nth-child(3) .campaign-outcome-icon img,.campaign-outcome:nth-child(5) .campaign-outcome-icon img{width:112px!important;height:104px!important}
+  .campaign-outcome h3{padding-bottom:8px;font-size:32px;line-height:1.02}
+  .campaign-outcome p{font-size:17px;line-height:1.55}
+
+  .campaign-offer{padding:96px 0 88px}
+  .campaign-offer .campaign-kicker{font-size:16px;line-height:1.35;letter-spacing:.1em}
+  .campaign-offer h2{width:100%;margin:20px auto 28px;font-size:48px;line-height:.96;letter-spacing:-.045em}
+  .campaign-offer-detail p{font-size:17px;line-height:1.5}
+  .campaign-offer-detail strong{margin-top:16px;font-size:19px}
+
+  .campaign-application{padding:88px 0 72px;scroll-margin-top:0}
+  .campaign-application-layout{gap:56px}
+  .campaign-form-intro h2{margin-top:0;font-size:44px;line-height:1;letter-spacing:-.045em}
+  .campaign-form-intro>p:last-of-type{margin-top:20px;font-size:17px;line-height:1.55}
+  .campaign-form{gap:56px}
+  .campaign-form-section-heading{gap:12px;margin-bottom:32px}
+  .campaign-form-section-heading>span{font-size:13px}
+  .campaign-form-section-heading h3{font-size:32px;line-height:1.05}
+  .campaign-form-section-heading p{margin-top:8px;font-size:15px;line-height:1.45}
+  .campaign-fields{gap:32px}
+  .campaign-fields label{gap:8px;font-size:14px}
+  .campaign-fields input{height:52px;font-size:16px}
+  .campaign-question{padding:32px 0}
+  .campaign-question::before{top:32px}
+  .campaign-question legend{padding-right:24px;font-size:28px;line-height:1.1}
+  .campaign-input-type{margin-top:12px!important;font-size:13px}
+  .campaign-choice-grid{gap:12px;margin-top:20px}
+  .campaign-choice{min-height:56px;padding:14px 16px;font-size:16px;line-height:1.35}
+  .campaign-radio-list{gap:4px;margin-top:20px}
+  .campaign-radio{min-height:48px;font-size:16px;line-height:1.4}
+  .campaign-radio input{width:18px;height:18px}
+  .campaign-submit{min-height:56px;height:auto;padding:14px 18px;font-size:17px}
+  .campaign-form-note{font-size:13px;line-height:1.5}
+}
+
+@media (max-width:374px){
+  .campaign-hero h1,.campaign-section-heading h2,.campaign-form-intro h2{font-size:40px}
+  .campaign-offer h2{font-size:44px}
+  .campaign-form-section-heading h3{font-size:30px}
+  .campaign-question legend{font-size:26px}
+}
