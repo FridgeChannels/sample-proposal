@@ -64,9 +64,9 @@
 .campaign-question::before{top:24px;right:0}
 .campaign-hero h1,.campaign-section-heading h2,.campaign-offer h2{width:min(1100px,calc(100vw - 48px));max-width:none!important}
 @media(max-width:600px){.campaign-hero h1,.campaign-section-heading h2,.campaign-offer h2{width:100%}}
-.campaign-video-section{background:var(--cream);padding:96px 0}
-.campaign-video{display:block;width:min(1080px,100%);margin:0 auto;aspect-ratio:16/9;background:var(--deep);object-fit:contain}
-@media(max-width:600px){.campaign-video-section{padding:64px 0}}
+.campaign-video-section{background:#000;padding:0;width:100%}
+.campaign-video{display:block;width:100%;height:auto;aspect-ratio:auto;background:#000;object-fit:contain}
+@media(max-width:600px){.campaign-video-section{padding:0}}
 
 @media (min-width:901px) and (max-width:1440px){
   .campaign-nav nav a{font-size:20px;line-height:38px}

@@ -150,12 +150,18 @@ export function ChristmasAsinCampaign() {
     <>
       <style>{campaignCss}</style>
       <div className="christmas-campaign">
-        <header className="campaign-nav">
-          <img className="campaign-holly" src="/assets/christmas-asin/wix-holly-clean.png" alt="" />
-        </header>
-
         <main>
+          <section className="campaign-video-section" aria-label="ASIN Plus video">
+            <video className="campaign-video" controls playsInline preload="metadata">
+              <source src="/assets/christmas-asin/asin-plus.mp4" type="video/mp4" />
+              Your browser does not support embedded video.
+            </video>
+          </section>
+
           <section className="campaign-hero" id="top">
+            <header className="campaign-nav">
+              <img className="campaign-holly" src="/assets/christmas-asin/wix-holly-clean.png" alt="" />
+            </header>
             <div className="campaign-wrap campaign-hero-copy">
               <h1>Turn Your Amazon Holiday Product Into a Repeat Purchase Touchpoint</h1>
               <p className="campaign-lede">FC turns your Amazon Christmas product into an AI-powered NFC Magnet customers can see every day, tap, and buy from Amazon again.</p>
@@ -164,15 +170,6 @@ export function ChristmasAsinCampaign() {
             </div>
             <div className="campaign-hero-image" role="img" aria-label="Warm, softly blurred Christmas celebration scene" />
             <img className="campaign-hero-overlay" src="/assets/christmas-asin/hero-overlay.png" alt="" />
-          </section>
-
-          <section className="campaign-video-section" aria-label="ASIN Plus video">
-            <div className="campaign-wrap">
-              <video className="campaign-video" controls playsInline preload="metadata">
-                <source src="/assets/christmas-asin/asin-plus.mp4" type="video/mp4" />
-                Your browser does not support embedded video.
-              </video>
-            </div>
           </section>
 
           <section className="campaign-outcomes" id="value" aria-labelledby="outcomes-title">
