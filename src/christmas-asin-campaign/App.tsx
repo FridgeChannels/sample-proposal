@@ -1,7 +1,9 @@
-import { FormEvent, useState } from 'react'
+import { FormEvent, useEffect, useState } from 'react'
 import campaignCss from './styles.css?raw'
 import {
+  buildCalendlyPrefillUrl,
   buildChristmasCampaignPayload,
+  fetchChristmasCampaignFormToken,
   submitChristmasCampaignApplication,
 } from '../christmas-campaign/submitApplication'
 
@@ -133,6 +135,23 @@ export function ChristmasAsinCampaign() {
   const [selectionErrors, setSelectionErrors] = useState({ product: false, goal: false })
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
+  const [formToken, setFormToken] = useState('')
+
+  useEffect(() => {
+    let cancelled = false
+    fetchChristmasCampaignFormToken()
+      .then((token) => {
+        if (!cancelled) setFormToken(token)
+      })
+      .catch((error) => {
+        if (!cancelled) {
+          setSubmitError(error instanceof Error ? error.message : 'Unable to prepare the form.')
+        }
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const toggle = (value: string, values: string[], setter: (next: string[]) => void) => {
     setter(values.includes(value) ? values.filter((item) => item !== value) : [...values, value])
@@ -149,6 +168,10 @@ export function ChristmasAsinCampaign() {
       window.requestAnimationFrame(() => invalidGroup?.scrollIntoView({ behavior: 'smooth', block: 'center' }))
       return
     }
+    if (!formToken) {
+      setSubmitError('Please wait a moment for the form to finish loading, then try again.')
+      return
+    }
 
     setSubmitting(true)
     setSubmitError('')
@@ -156,12 +179,22 @@ export function ChristmasAsinCampaign() {
       const payload = buildChristmasCampaignPayload(form, 'ASIN', {
         productTypes: productSelection,
         campaignGoals: goalSelection,
-      })
+      }, formToken)
       await submitChristmasCampaignApplication(payload)
-      if (calendlyUrl) window.location.assign(calendlyUrl)
+      if (calendlyUrl) {
+        window.location.assign(
+          buildCalendlyPrefillUrl(calendlyUrl, {
+            fullName: payload.fullName,
+            email: payload.email,
+          }),
+        )
+      }
     } catch (error) {
       setSubmitError(error instanceof Error ? error.message : 'Unable to save your application.')
       setSubmitting(false)
+      fetchChristmasCampaignFormToken()
+        .then(setFormToken)
+        .catch(() => undefined)
     }
   }
 
@@ -231,13 +264,19 @@ export function ChristmasAsinCampaign() {
               </header>
 
               <form className="campaign-form" onSubmit={handleSubmit} noValidate>
+                <div className="campaign-honeypot" aria-hidden="true">
+                  <label>
+                    <span>Company website</span>
+                    <input name="company_website" type="text" tabIndex={-1} autoComplete="off" />
+                  </label>
+                </div>
                 <section className="campaign-form-section" aria-labelledby="contact-title">
                   <div className="campaign-form-section-heading">
                     <span>01</span>
                     <div><h3 id="contact-title">Basic contact info</h3><p>Required contact and Amazon product details.</p></div>
                   </div>
                   <div className="campaign-fields">
-                    <label><span>Full Name</span><input name="fullName" type="text" autoComplete="name" placeholder="Your name" required /></label>
+                    <label><span>Full Name</span><input name="fullName" type="text" autoComplete="name" placeholder="Your name" required minLength={2} maxLength={80} /></label>
                     <label><span>Title</span><input name="title" type="text" autoComplete="organization-title" placeholder="Your role" required /></label>
                     <label><span>Phone</span><input name="phone" type="tel" autoComplete="tel" placeholder="Phone number" required /></label>
                     <label><span>Work Email</span><input name="email" type="email" autoComplete="email" placeholder="you@brand.com" required /></label>

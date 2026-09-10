@@ -36,6 +36,19 @@ const {
   handleAuthLogout,
 } = require('./pilot-ops-auth');
 const { createChristmasCampaignApplication } = require('./christmas-campaign-notion');
+const {
+  clientIp,
+  assertAllowedOrigin,
+  assertRateLimits,
+  assertTokenRateLimit,
+  issueFormToken,
+  assertFormToken,
+  isHoneypotTripped,
+  normalizeEmail,
+  getRecentApplication,
+  rememberApplication,
+  fakeHoneypotSuccess,
+} = require('./christmas-campaign-security');
 
 const ROOT = __dirname;
 const DIST_ROOT = path.join(__dirname, 'dist');
@@ -812,13 +825,69 @@ async function handleRequest(req, res) {
     return;
   }
 
+  if (requestUrl.pathname === '/api/christmas-campaign/form-token' && req.method === 'GET') {
+    try {
+      assertAllowedOrigin(req);
+      assertTokenRateLimit(clientIp(req));
+      await sendJson(res, 200, issueFormToken());
+    } catch (error) {
+      if (error.retryAfter) res.setHeader('Retry-After', String(error.retryAfter));
+      await sendJson(res, error.status || 500, {
+        error: error.message || 'Unable to issue form token.',
+        code: error.code || 'form_token_failed',
+      });
+    }
+    return;
+  }
+
   if (requestUrl.pathname === '/api/christmas-campaign/apply' && req.method === 'POST') {
     try {
+      const contentType = String(req.headers['content-type'] || '');
+      if (!contentType.toLowerCase().includes('application/json')) {
+        await sendJson(res, 415, { error: 'Content-Type must be application/json.', code: 'unsupported_media_type' });
+        return;
+      }
+
+      assertAllowedOrigin(req);
+      const ip = clientIp(req);
       const body = await readJsonBody(req);
+
+      if (isHoneypotTripped(body)) {
+        console.warn('[api/christmas-campaign/apply] honeypot tripped', { ip });
+        await sendJson(res, 201, fakeHoneypotSuccess());
+        return;
+      }
+
+      assertFormToken(body.formToken);
+      const emailHint = normalizeEmail(body.email);
+      assertRateLimits({ ip, email: emailHint });
+
+      const channelHint = String(body.channel || '').trim().toUpperCase();
+      if (emailHint && (channelHint === 'ASIN' || channelHint === 'DTC')) {
+        const existing = getRecentApplication(emailHint, channelHint);
+        if (existing) {
+          await sendJson(res, 200, {
+            ok: true,
+            alreadyApplied: true,
+            pageId: existing.pageId,
+            url: existing.url,
+            channel: channelHint,
+          });
+          return;
+        }
+      }
+
       const result = await createChristmasCampaignApplication(body);
-      await sendJson(res, 201, result);
+      rememberApplication(result.email || emailHint, result.channel, result);
+      await sendJson(res, 201, {
+        ok: true,
+        pageId: result.pageId,
+        url: result.url,
+        channel: result.channel,
+      });
     } catch (error) {
       console.error('[api/christmas-campaign/apply]', error && error.message, error && error.code);
+      if (error.retryAfter) res.setHeader('Retry-After', String(error.retryAfter));
       await sendJson(res, error.status || 500, {
         error: error.message || 'Unable to save application.',
         code: error.code || 'christmas_campaign_apply_failed',
