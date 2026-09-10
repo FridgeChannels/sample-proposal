@@ -208,8 +208,8 @@ export function ChristmasDtcCampaign() {
           <section className="campaign-application" id="apply" aria-labelledby="apply-title">
             <div className="campaign-wrap campaign-application-layout">
               <header className="campaign-form-intro">
-                <h2 id="apply-title">Apply + Book</h2>
-                <a className="campaign-primary-action" href={calendlyUrl}>Apply and book your fit call<span aria-hidden="true">→</span></a>
+                <h2 id="apply-title">Tell us what you’re planning.</h2>
+                <p>Complete the guided input below. Every field is required and your answers prepare the fit call.</p>
               </header>
 
               <form className="campaign-form" onSubmit={handleSubmit} noValidate>
