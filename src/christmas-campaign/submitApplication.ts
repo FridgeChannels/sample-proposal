@@ -72,9 +72,22 @@ export async function fetchChristmasCampaignFormToken(): Promise<string> {
   return result.token
 }
 
+const NOTION_PAGE_ID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+function isNotionPageId(value: unknown): value is string {
+  return typeof value === 'string' && NOTION_PAGE_ID_RE.test(value)
+}
+
+const SAVE_FAILED_MESSAGE =
+  "We couldn't save your application. Please try again — booking opens only after it is saved successfully."
+
+/**
+ * Submits the campaign application. Resolves only when Notion created a new page.
+ * Never treat soft/partial responses as success — callers must not open Calendly otherwise.
+ */
 export async function submitChristmasCampaignApplication(
   payload: ChristmasCampaignApplicationPayload,
-): Promise<{ pageId?: string; url?: string | null; alreadyApplied?: boolean }> {
+): Promise<{ pageId: string; url: string | null }> {
   const response = await fetch('/api/christmas-campaign/apply', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -82,17 +95,30 @@ export async function submitChristmasCampaignApplication(
   })
 
   const result = (await response.json().catch(() => ({}))) as {
+    ok?: boolean
     error?: string
     pageId?: string
     url?: string | null
     alreadyApplied?: boolean
+    honeypot?: boolean
   }
 
   if (!response.ok) {
-    throw new Error(result.error || 'Unable to save your application. Please try again.')
+    throw new Error(result.error || SAVE_FAILED_MESSAGE)
   }
 
-  return result
+  if (result.alreadyApplied) {
+    throw new Error(
+      result.error
+      || 'This work email already submitted an application. Please wait for our follow-up, or use a different work email.',
+    )
+  }
+
+  if (result.honeypot || !result.ok || !isNotionPageId(result.pageId)) {
+    throw new Error(SAVE_FAILED_MESSAGE)
+  }
+
+  return { pageId: result.pageId, url: result.url ?? null }
 }
 
 /** Split "Full Name" into Calendly first_name / last_name. */

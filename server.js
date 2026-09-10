@@ -866,18 +866,31 @@ async function handleRequest(req, res) {
       if (emailHint && (channelHint === 'ASIN' || channelHint === 'DTC')) {
         const existing = getRecentApplication(emailHint, channelHint);
         if (existing) {
-          await sendJson(res, 200, {
-            ok: true,
+          // Do not look like a fresh save — client must not open Calendly.
+          await sendJson(res, 409, {
+            ok: false,
             alreadyApplied: true,
             pageId: existing.pageId,
             url: existing.url,
             channel: channelHint,
+            code: 'already_applied',
+            error:
+              'This work email already submitted an application. Please wait for our follow-up, or use a different work email.',
           });
           return;
         }
       }
 
       const result = await createChristmasCampaignApplication(body);
+      if (!result?.pageId) {
+        await sendJson(res, 502, {
+          ok: false,
+          code: 'notion_save_failed',
+          error:
+            "We couldn't save your application. Please try again — booking opens only after it is saved successfully.",
+        });
+        return;
+      }
       rememberApplication(result.email || emailHint, result.channel, result);
       await sendJson(res, 201, {
         ok: true,
@@ -888,8 +901,15 @@ async function handleRequest(req, res) {
     } catch (error) {
       console.error('[api/christmas-campaign/apply]', error && error.message, error && error.code);
       if (error.retryAfter) res.setHeader('Retry-After', String(error.retryAfter));
+      const notionFailed =
+        error.code === 'notion_api_error'
+        || error.code === 'notion_token_missing'
+        || error.status === 502;
       await sendJson(res, error.status || 500, {
-        error: error.message || 'Unable to save application.',
+        ok: false,
+        error: notionFailed
+          ? "We couldn't save your application right now. Please try again in a moment — booking opens only after it is saved successfully."
+          : (error.message || "We couldn't save your application. Please try again."),
         code: error.code || 'christmas_campaign_apply_failed',
       });
     }

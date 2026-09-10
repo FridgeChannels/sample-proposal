@@ -182,17 +182,20 @@ export function ChristmasDtcCampaign() {
         productTypes: productSelection,
         campaignGoals: goalSelection,
       }, formToken)
+      // Only redirect after Notion confirms a new page id.
       await submitChristmasCampaignApplication(payload)
-      if (calendlyUrl) {
-        window.location.assign(
-          buildCalendlyPrefillUrl(calendlyUrl, {
-            fullName: payload.fullName,
-            email: payload.email,
-          }),
-        )
-      }
+      window.location.assign(
+        buildCalendlyPrefillUrl(calendlyUrl, {
+          fullName: payload.fullName,
+          email: payload.email,
+        }),
+      )
     } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : 'Unable to save your application.')
+      setSubmitError(
+        error instanceof Error
+          ? error.message
+          : "We couldn't save your application. Please try again — booking opens only after it is saved successfully.",
+      )
       setSubmitting(false)
       fetchChristmasCampaignFormToken()
         .then(setFormToken)
