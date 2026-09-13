@@ -68,28 +68,9 @@ const bodyMarkup = `
     <section class="asin-value asin-slide">
       <div class="asin-wrap asin-value__layout asin-reveal">
         <p class="asin-value__number">04</p>
-        <h2>Build a Permission-Based Customer Learning Channel</h2>
-        <p class="asin-value__statement">Use selected taps to collect voluntary feedback, preferences, and replenishment signals.</p>
-        <div class="asin-commerce-visual asin-consent" aria-label="Voluntary customer signals"><span>Customer shared</span><p><i>✓</i> Replenishment need</p><p><i>✓</i> Preference</p><p><i>✓</i> Feedback</p></div>
-        <p class="asin-disclosure">Information is collected only with appropriate customer consent.</p>
-      </div>
-    </section>
-
-    <section class="asin-value asin-slide">
-      <div class="asin-wrap asin-value__layout asin-reveal">
-        <p class="asin-value__number">05</p>
         <h2>Stay Editable After Delivery—and Portable Beyond Amazon</h2>
         <p class="asin-value__statement">Amazon today. A new product, DTC, Walmart, or another destination tomorrow.</p>
         <div class="asin-commerce-visual asin-destinations" aria-label="One magnet can route to many destinations"><span class="is-active">Amazon Store</span><span>DTC</span><span>Walmart</span><span>Next channel</span></div>
-      </div>
-    </section>
-
-    <section class="asin-value asin-slide">
-      <div class="asin-wrap asin-value__layout asin-reveal">
-        <p class="asin-value__number">06</p>
-        <h2>Make Every Authorized Channel Expand the Brand Network</h2>
-        <p class="asin-value__statement">Each participating shipment can install the same brand-owned entry point in another home.</p>
-        <div class="asin-commerce-visual asin-network" aria-label="Participating shipments expand the household network"><div><span>Brand</span><span>Authorized seller</span><span>Participating channel</span></div><b></b><p><i>Home</i><i>Home</i><i>Home</i><i>Home</i></p></div>
       </div>
     </section>
 
@@ -163,18 +144,9 @@ const pageCss = `
   .asin-attribution>span{display:block;margin-bottom:14px;color:#757575;font-size:13px}
   .asin-attribution dl{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin:0}
   .asin-attribution dl div{min-width:0}.asin-attribution dt{color:#757575;font-size:12px}.asin-attribution dd{margin:5px 0 0;color:var(--amazon-navy);font-size:16.4px;font-weight:500}
-  .asin-consent{display:flex;flex-wrap:wrap;gap:12px 22px;align-items:center}
-  .asin-consent>span{width:100%;color:#757575;font-size:13px}
-  .asin-consent p{margin:0;color:var(--amazon-navy);font-size:16.4px}.asin-consent i{display:inline-grid;width:22px;height:22px;margin-right:7px;place-items:center;border-radius:50%;background:#E8F5E9;color:#2E7D32;font-size:12px;font-style:normal}
   .asin-destinations{display:flex;flex-wrap:wrap;gap:10px}
   .asin-destinations span{padding:10px 16px;border-radius:999px;background:var(--amazon-surface);color:#424242;font-size:14px}
   .asin-destinations .is-active{background:var(--amazon-navy);color:#fff;box-shadow:inset 0 -4px 0 var(--amazon-orange)}
-  .asin-network{display:grid;gap:18px}
-  .asin-network>div,.asin-network>p{display:flex;justify-content:space-between;gap:10px;margin:0}
-  .asin-network>div span{color:#424242;font-size:13px;text-align:center}
-  .asin-network>b{display:block;height:3px;background:linear-gradient(90deg,transparent,var(--amazon-orange) 10%,var(--amazon-orange) 90%,transparent);position:relative}
-  .asin-network>b:after{content:"";position:absolute;left:12%;right:12%;top:3px;height:28px;border-right:2px solid var(--amazon-orange);border-bottom:2px solid var(--amazon-orange);border-left:2px solid var(--amazon-orange);border-radius:0 0 20px 20px}
-  .asin-network>p{padding-top:24px}.asin-network>p i{padding:8px 12px;border-radius:4px;background:var(--amazon-navy);color:#fff;font-size:12px;font-style:normal}
   .asin-disclosure{grid-area:disclosure;max-width:620px;margin:18px 0 0;color:var(--leg-muted-foreground);font-size:12px;line-height:1.45}
 
   .asin-fit{padding:clamp(88px,10vw,128px) 0!important}
@@ -290,21 +262,14 @@ const pageCss = `
     .asin-value h2{max-width:14ch;margin:12px auto 0;font-size:clamp(1.85rem,7.6vw,2.25rem)!important;line-height:1.14!important}
     .asin-value__statement{max-width:28ch;margin:16px auto 0;font-size:17px;line-height:1.47;letter-spacing:0}
     .asin-commerce-visual{width:100%;margin-top:28px}
-    .asin-value .asin-consent,
     .asin-value .asin-destinations,
-    .asin-value .asin-search-path p,
-    .asin-value .asin-network>div,
-    .asin-value .asin-network>p{justify-content:center}
+    .asin-value .asin-search-path p{justify-content:center}
     .asin-delivery-tag{padding:20px;border-radius:12px}
     .asin-search-shell{grid-template-columns:1fr 48px;min-height:48px}
     .asin-search-shell b{min-height:48px}
     .asin-attribution{padding:20px;border-radius:12px}
     .asin-attribution dl{grid-template-columns:1fr;gap:16px}
-    .asin-consent{gap:12px 16px}
     .asin-destinations span{min-height:44px;display:inline-flex;align-items:center;padding:12px 16px}
-    .asin-network>div,.asin-network>p{flex-wrap:wrap;justify-content:center}
-    .asin-network>div span{font-size:12px}
-    .asin-network>p i{min-height:32px;padding:8px 12px;font-size:12px}
     .asin-disclosure{display:none}
     .asin-fit.asin-slide{align-items:flex-start;overflow-y:auto;-webkit-overflow-scrolling:touch}
     .asin-fit .asin-wrap{max-width:38ch;padding:4px 0 12px}
