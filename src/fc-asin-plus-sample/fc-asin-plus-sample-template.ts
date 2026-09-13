@@ -137,8 +137,8 @@ const pageCss = `
   .asin-how h2{max-width:860px;font-size:clamp(2.75rem,4.4vw,4.25rem)!important}
   .asin-steps{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:32px;margin-top:72px}
   .asin-step article,.asin-steps article{position:relative;padding-top:64px}
-  .asin-steps article:before{content:"";position:absolute;left:0;right:-24px;top:38px;height:2px;background:var(--amazon-orange)}
-  .asin-steps article:last-child:before{right:0}
+  .asin-steps article:before{content:"→";position:absolute;left:34px;right:-32px;top:0;height:30px;display:grid;place-items:center;color:var(--amazon-orange);font-size:18px;font-weight:500;line-height:1}
+  .asin-steps article:last-child:before{display:none}
   .asin-steps span{position:absolute;left:0;top:0;display:grid;width:30px;height:30px;place-items:center;border-radius:50%;background:var(--amazon-navy);color:#fff;font-size:11px;font-weight:600}
   .asin-steps h3{margin:0 0 8px;font-size:1.15rem;letter-spacing:-.025em}
   .asin-steps p{max-width:24ch;margin:0;color:#6b7280;font-size:15px;line-height:1.5;font-weight:400}
@@ -279,8 +279,9 @@ const pageCss = `
     .asin-how__layout{width:min(100% - 40px,1280px);margin:0 auto;padding:4px 0 12px}
     .asin-how h2{max-width:16ch;margin:12px 0 0;font-size:clamp(1.7rem,7.2vw,2.1rem)!important;line-height:1.14!important}
     .asin-steps{display:grid;grid-template-columns:1fr;gap:0;margin-top:20px}
-    .asin-steps article{display:grid;grid-template-columns:32px minmax(0,1fr);grid-template-areas:"num title" "num copy";column-gap:12px;row-gap:2px;padding:14px 0;box-shadow:inset 0 1px 0 rgba(19,25,33,.06)}
-    .asin-steps article:before{display:none}
+    .asin-steps article{display:grid;grid-template-columns:32px minmax(0,1fr);grid-template-areas:"num title" "num copy";column-gap:12px;row-gap:2px;padding:8px 0 26px;box-shadow:none}
+    .asin-steps article:last-child{padding-bottom:8px}
+    .asin-steps article:before{display:grid;content:"↓";left:0;right:auto;top:auto;bottom:2px;width:28px;height:18px;color:var(--amazon-orange);font-size:14px;font-weight:600}
     .asin-steps span{position:static;grid-area:num;width:28px;height:28px;margin:2px 0 0;font-size:11px}
     .asin-steps h3{grid-area:title;margin:0;font-size:16px;letter-spacing:-.015em;line-height:1.3}
     .asin-steps p{grid-area:copy;max-width:none;margin:0;font-size:14px;line-height:1.4;letter-spacing:0}
