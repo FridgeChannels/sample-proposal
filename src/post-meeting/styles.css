@@ -848,6 +848,13 @@ body:has(.post-meeting-app.is-about){max-width:100%;overflow-x:hidden;overscroll
 .about-fridgechannel-view.is-asin-about,.about-fridgechannel-view.is-asin-about iframe{background:#f3f3f3}
 .post-meeting-app.is-about.is-asin-about{background:#f3f3f3}
 body:has(.post-meeting-app.is-about.is-asin-about){background:#f3f3f3}
+@media(max-width:760px){
+  html:has(.post-meeting-app.is-about.is-asin-about),
+  body:has(.post-meeting-app.is-about.is-asin-about){height:100%;overflow:hidden}
+  .post-meeting-app.is-about.is-asin-about{height:100dvh;min-height:100dvh;overflow:hidden}
+  .about-fridgechannel-view.is-asin-about{height:100dvh!important;overflow:hidden!important}
+  .about-fridgechannel-view.is-asin-about iframe{height:100%;min-height:100%}
+}
 .live-demo-view.has-flow-cta iframe{height:calc(100% - 64px)}
 .live-demo-view .flow-cta-bar{padding:0}
 .live-demo-view .flow-cta-button{position:relative;justify-content:center;text-align:center}
