@@ -45,7 +45,7 @@ async function resolveSamplePhaseHtml(pathname: string): Promise<string | null> 
     const response = await fetch(`${API_ORIGIN}/api/sample-phase?sn=${encodeURIComponent(sn)}`)
     if (!response.ok) return '/gift-challenge-react.html'
     const data = (await response.json()) as { phase?: string }
-    return data.phase === 'live' ? '/post-meeting.html' : '/gift-challenge-react.html'
+    return data.phase === 'live' ? '/dtc-sample.html' : '/gift-challenge-react.html'
   } catch {
     // API server may not be up yet; default to sample deck.
     return '/gift-challenge-react.html'
@@ -58,7 +58,7 @@ export default defineConfig({
     {
       name: 'inject-post-meeting-public-config',
       transformIndexHtml(html, ctx) {
-        if (!ctx.filename.endsWith('post-meeting.html')) return html
+        if (!ctx.filename.endsWith('dtc-sample.html') && !ctx.filename.endsWith('asin-sample.html') && !ctx.filename.endsWith('post-meeting-backup.html')) return html
         const legalBase = String(process.env.VITE_LEGAL_DOCS_BASE_URL || '').replace(/\/$/, '')
         if (!legalBase) return html
         const injection = `<script>window.__FC_LEGAL_DOCS_BASE_URL__=${JSON.stringify(legalBase)};</script>`
@@ -150,6 +150,37 @@ export default defineConfig({
             return
           }
 
+          if (url.pathname === '/dtc-sample' || url.pathname === '/dtc-sample/') {
+            req.url = `/dtc-sample.html${url.search}`
+            next()
+            return
+          }
+
+          if (url.pathname === '/asin-sample' || url.pathname === '/asin-sample/') {
+            req.url = `/asin-sample.html${url.search}`
+            next()
+            return
+          }
+
+          if (url.pathname === '/post-meeting.html' || url.pathname === '/post-meeting' || url.pathname === '/post-meeting/') {
+            res.statusCode = 302
+            res.setHeader('Location', `/dtc-sample.html${url.search}`)
+            res.end()
+            return
+          }
+
+          if (url.pathname === '/post-meeting-backup' || url.pathname === '/post-meeting-backup/') {
+            req.url = `/post-meeting-backup.html${url.search}`
+            next()
+            return
+          }
+
+          if (url.pathname === '/about-fridgechannel' || url.pathname === '/about-fridgechannel/') {
+            req.url = `/about-fridgechannel.html${url.search}`
+            next()
+            return
+          }
+
           const rewritten = await resolveSamplePhaseHtml(url.pathname)
           if (rewritten) {
             // Keep path semantics for the client (sn still comes from the browser URL);
@@ -165,7 +196,10 @@ export default defineConfig({
     rollupOptions: {
       input: {
         reactGiftChallenge: resolve(projectRoot, 'gift-challenge-react.html'),
-        postMeeting: resolve(projectRoot, 'post-meeting.html'),
+        dtcSample: resolve(projectRoot, 'dtc-sample.html'),
+        asinSample: resolve(projectRoot, 'asin-sample.html'),
+        postMeetingBackup: resolve(projectRoot, 'post-meeting-backup.html'),
+        aboutFridgechannel: resolve(projectRoot, 'about-fridgechannel.html'),
         qualifiedMeetingDoc: resolve(projectRoot, 'qualified-meeting-doc.html'),
         fitMeetingSample: resolve(projectRoot, 'fit-meeting-sample.html'),
         fcAsinPlusSample: resolve(projectRoot, 'fc-asin-plus-sample.html'),

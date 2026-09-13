@@ -1,4 +1,4 @@
-export type ViewKey = 'demo' | 'about' | 'plan' | 'content' | 'order' | 'address' | 'finance'
+export type ViewKey = 'demo' | 'plan' | 'content' | 'order' | 'address' | 'finance'
 
 export type OrderStatus =
   | 'draft'

@@ -190,8 +190,17 @@ async function serveGiftChallenge(res) {
 async function servePostMeeting(res) {
   await serveDistHtml(
     res,
-    'post-meeting.html',
-    'Failed to load post-meeting deal room (run `npm run build` to generate dist/)',
+    'dtc-sample.html',
+    'Failed to load DTC sample deal room (run `npm run build` to generate dist/)',
+    { injectPublicConfig: true },
+  );
+}
+
+async function serveAsinSample(res) {
+  await serveDistHtml(
+    res,
+    'asin-sample.html',
+    'Failed to load ASIN sample deal room (run `npm run build` to generate dist/)',
     { injectPublicConfig: true },
   );
 }
@@ -414,7 +423,7 @@ function paymentUrlForHandoff(hostBase, handoff) {
   const sn = handoff.magnetSn || '';
   return sn
     ? `${hostBase}/p/${encodeURIComponent(sn)}?finance=${handoff.token}#finance`
-    : `${hostBase}/post-meeting.html?finance=${handoff.token}#finance`;
+    : `${hostBase}/dtc-sample.html?finance=${handoff.token}#finance`;
 }
 
 function placesHttpError(message, status = 500, code = 'places_error') {
@@ -1023,8 +1032,40 @@ async function handleRequest(req, res) {
     return;
   }
 
-  if (requestUrl.pathname === '/post-meeting.html') {
+  if (
+    requestUrl.pathname === '/dtc-sample'
+    || requestUrl.pathname === '/dtc-sample/'
+    || requestUrl.pathname === '/dtc-sample.html'
+  ) {
     await servePostMeeting(res);
+    return;
+  }
+
+  if (
+    requestUrl.pathname === '/asin-sample'
+    || requestUrl.pathname === '/asin-sample/'
+    || requestUrl.pathname === '/asin-sample.html'
+  ) {
+    await serveAsinSample(res);
+    return;
+  }
+
+  if (
+    requestUrl.pathname === '/post-meeting.html'
+    || requestUrl.pathname === '/post-meeting'
+    || requestUrl.pathname === '/post-meeting/'
+  ) {
+    res.writeHead(302, { Location: `/dtc-sample.html${requestUrl.search}` });
+    res.end();
+    return;
+  }
+
+  if (
+    requestUrl.pathname === '/about-fridgechannel'
+    || requestUrl.pathname === '/about-fridgechannel/'
+    || requestUrl.pathname === '/about-fridgechannel.html'
+  ) {
+    await serveDistHtml(res, 'about-fridgechannel.html', 'Failed to load About FridgeChannel (run `npm run build` to generate dist/)');
     return;
   }
 

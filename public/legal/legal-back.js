@@ -36,6 +36,6 @@
       window.history.back()
       return
     }
-    window.location.href = '/post-meeting.html#plan'
+    window.location.href = '/dtc-sample.html#plan'
   })
 })()

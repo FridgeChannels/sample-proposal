@@ -3,7 +3,6 @@ import { captureEvent } from '../analytics'
 import { applyQuoteToOrder, defaultOrder, FIXED_MAGNET_QUANTITY, PILOT_OFFER_DURATION_MS, readApiJson, snFromLocation, type PilotQuoteApiResponse } from './config'
 import type { OrderState, ViewKey } from './types'
 import { LiveDemoView } from './components/LiveDemoView'
-import { AboutFridgeChannelView } from './components/AboutFridgeChannelView'
 import { SampleContentView } from './components/SampleContentView'
 import { PilotPlanView } from './components/PilotPlanView'
 import { FinanceView } from './components/FinanceView'
@@ -14,7 +13,7 @@ import './styles.css'
 const viewFromHash = (): ViewKey => {
   const value = window.location.hash.replace('#', '')
   if (value === 'order') return 'plan'
-  return value === 'about' || value === 'plan' || value === 'content' || value === 'address' || value === 'finance' ? value : 'demo'
+  return value === 'plan' || value === 'content' || value === 'address' || value === 'finance' ? value : 'demo'
 }
 
 const STORAGE_KEY = 'fc-order-preview-v1'
@@ -86,7 +85,6 @@ export function App() {
   const magnetSn = snFromLocation()
   const [view, setView] = useState<ViewKey>(viewFromHash)
   const [demoMounted, setDemoMounted] = useState(view === 'demo')
-  const [aboutMounted, setAboutMounted] = useState(view === 'about')
   const [order, setOrder] = useState<OrderState>(loadOrder)
   const [now, setNow] = useState(Date.now)
   const [handoffError, setHandoffError] = useState('')
@@ -95,7 +93,7 @@ export function App() {
   const [quoteError, setQuoteError] = useState('')
   const offerNow = previewOfferNow(order, now)
   const paymentComplete = order.status === 'paid' || order.financeHandoff?.status === 'paid'
-  const showGlobalUrgency = !financeToken && !paymentComplete && order.pricing.loaded && view !== 'demo' && view !== 'about'
+  const showGlobalUrgency = !financeToken && !paymentComplete && order.pricing.loaded && view !== 'demo'
 
   useEffect(() => {
     const syncView = () => setView(viewFromHash())
@@ -105,7 +103,6 @@ export function App() {
 
   useEffect(() => {
     if (view === 'demo') setDemoMounted(true)
-    if (view === 'about') setAboutMounted(true)
   }, [view])
 
   useEffect(() => {
@@ -222,13 +219,12 @@ export function App() {
   const blockingLoading = handoffLoading || (quoteLoading && !financeToken)
 
   return (
-    <div className={`post-meeting-app${view === 'demo' ? ' is-live-demo' : ''}${view === 'about' ? ` is-about${window.location.pathname.includes('asin-sample') ? ' is-asin-about' : ''}` : ''}${view === 'plan' ? ' has-plan-dock' : ''}${financeToken ? ' is-finance-handoff' : showGlobalUrgency ? ' has-global-urgency' : ''}`}>
+    <div className={`post-meeting-app${view === 'demo' ? ' is-live-demo' : ''}${view === 'plan' ? ' has-plan-dock' : ''}${financeToken ? ' is-finance-handoff' : showGlobalUrgency ? ' has-global-urgency' : ''}`}>
       {blockingLoading && <main className="finance-empty" aria-label="Loading" />}
       {blockingError && <main className="finance-empty"><h1>Proposal unavailable.</h1><p>{blockingError}</p></main>}
       {!blockingLoading && !blockingError && <>
       {showGlobalUrgency && <GlobalUrgencyRail order={order} now={offerNow} onNavigate={openView} />}
-      {demoMounted && !financeToken && <LiveDemoView active={view === 'demo'} onAboutFridgeChannel={() => openView('about')} />}
-      {aboutMounted && !financeToken && <AboutFridgeChannelView active={view === 'about'} />}
+      {demoMounted && !financeToken && <LiveDemoView active={view === 'demo'} onSeePlan={() => openView('plan')} />}
       {view === 'content' && !financeToken && <SampleContentView onBack={() => openView('plan')} />}
       {view === 'plan' && !financeToken && order.pricing.loaded && (
         <PilotPlanView
