@@ -14,10 +14,8 @@ const bodyMarkup = `
           <h1>Make the next purchase happen <em>without search</em>.</h1>
         <p>Every equipped shipment leaves a brand-owned, editable touchpoint in the customer’s home.</p>
       </div>
-    </section>
-    <section class="asin-hero-media asin-slide">
       <div class="asin-wrap asin-hero__visual asin-reveal" aria-label="A customer opens and uses a Fridge Channel magnet">
-        <video class="hero-video" src="/videos/fc-amazon-brb.mp4" autoplay muted loop playsinline preload="metadata"></video>
+        <video class="hero-video" src="https://amzn-s3-fc-bucket.s3.sa-east-1.amazonaws.com/images/videos/fc-amazon-brb.mp4" autoplay muted loop playsinline preload="metadata"></video>
       </div>
     </section>
 
@@ -79,11 +77,8 @@ const bodyMarkup = `
         <h2>Is FC ASIN+ a fit?</h2>
         <div class="asin-fit__groups">
           <div class="asin-fit__group">
-            <p class="asin-fit__label">Strong fit</p>
             <ol>
               <li>Your product has a clear replenishment or repeat-purchase cycle.</li>
-              <li>Amazon is an important revenue channel.</li>
-              <li>Customer acquisition is expensive relative to repeat-purchase value.</li>
               <li>You can influence production or packaging.</li>
               <li>You have an Amazon Store or Seller Storefront.</li>
               <li>You want attributable engagement beyond the initial transaction.</li>
@@ -106,13 +101,13 @@ const pageCss = `
   .asin-page h1,.asin-page h2{margin:0;letter-spacing:-.03em;line-height:1.06}
   .asin-label,.asin-value__number{margin:0;color:var(--amazon-orange);font-size:13px;font-weight:600;letter-spacing:.14em;text-transform:uppercase}
 
-  .asin-hero,.asin-hero-media{min-height:100svh!important;display:flex;align-items:center;padding:72px 0 96px!important;background:var(--leg-background)!important}
+  .asin-hero{min-height:100svh!important;display:grid;align-content:center;justify-items:center;gap:40px;padding:96px 0!important;background:var(--leg-background)!important}
   .asin-hero__copy{display:grid;max-width:960px;margin:0 auto;justify-items:center;text-align:center}
   .asin-hero h1{max-width:16ch;margin:0;font-size:clamp(3rem,5.2vw,4.1rem)!important}
   .asin-hero h1 em{font-style:normal;color:var(--amazon-orange)}
   .asin-hero__copy>p{max-width:60ch;margin:28px auto 0;color:#6b7280;font-size:clamp(1.05rem,1.6vw,1.25rem);font-weight:400;line-height:1.55}
   .asin-hero__visual{width:min(1180px,100%);margin:0 auto;overflow:hidden;border-radius:20px;background:#fff;box-shadow:0 1px 2px rgba(19,25,33,.05),0 18px 40px rgba(19,25,33,.08)}
-  .asin-hero__visual video{display:block;width:100%;max-height:78svh;aspect-ratio:16/9;object-fit:cover;background:#000}
+  .asin-hero__visual video{display:block;width:100%;max-height:52svh;aspect-ratio:16/9;object-fit:cover;background:#000}
 
   .asin-how{padding:clamp(88px,10vw,128px) 0!important}
   .asin-how h2{max-width:860px;font-size:clamp(2.75rem,4.4vw,4.25rem)!important}
@@ -156,7 +151,7 @@ const pageCss = `
   .asin-fit__label{margin:0 0 28px;color:#6b7280;font-size:13px;font-weight:600;letter-spacing:.14em;text-transform:uppercase}
   .asin-fit__group ol{counter-reset:fit;display:grid;gap:18px;margin:0;padding:0;list-style:none}
   .asin-fit__group li{counter-increment:fit;display:grid;grid-template-columns:30px 1fr;gap:12px;color:#131921;font-size:16px;font-weight:400;line-height:1.45}
-  .asin-fit__group li:before{content:"✓";display:grid;width:22px;height:22px;place-items:center;border-radius:50%;background:var(--amazon-orange);color:var(--amazon-navy);font-size:12px;font-weight:700}
+  .asin-fit__group li:before{content:"✓";display:grid;width:22px;height:22px;box-sizing:border-box;place-items:center;border:2px solid var(--amazon-orange);border-radius:50%;background:var(--amazon-orange);color:var(--amazon-navy);font-size:12px;font-weight:700;line-height:1}
 
   .asin-page>section.asin-cta.asin-cta{min-height:100svh!important;display:flex;align-items:center;background:var(--leg-brand-dark)!important;color:var(--leg-brand-foreground)!important;text-align:center}
   .asin-cta__inner{display:flex;flex-direction:column;align-items:center}
@@ -242,7 +237,8 @@ const pageCss = `
     .asin-page h1,.asin-page h2{letter-spacing:-.03em;line-height:1.1}
     .asin-label,.asin-value__number{font-size:12px;letter-spacing:.14em;text-transform:uppercase}
     .asin-slide.is-active .asin-label,.asin-slide.is-active .asin-value__number{animation:asin-breathe 5.8s ease-in-out infinite}
-    .asin-hero,.asin-hero-media{background:var(--leg-background)!important}
+    .asin-hero{background:var(--leg-background)!important}
+    .asin-hero.asin-slide{display:grid;align-content:center;justify-items:center;gap:28px;min-height:100dvh!important;padding:72px 0 40px!important}
     .asin-hero h1{max-width:14ch;margin:0;font-size:clamp(2.15rem,8.4vw,2.6rem)!important;line-height:1.1!important}
     .asin-hero__copy>p{max-width:28ch;margin-top:20px;font-size:17px;line-height:1.47;letter-spacing:0}
     .asin-hero__visual{width:min(100% - 40px,1280px);border-radius:16px;box-shadow:0 1px 2px rgba(19,25,33,.06),0 12px 32px rgba(19,25,33,.08)}

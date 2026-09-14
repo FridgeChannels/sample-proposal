@@ -39,6 +39,7 @@
 
 .asin-apply__hero h2 {
   margin: 0;
+  text-align: center;
   max-width: 16ch;
   font-size: clamp(2.4rem, 5vw, 3.6rem);
   line-height: 1.08;
@@ -48,7 +49,7 @@
 .asin-apply__section {
   margin: 12px 0 0;
   padding-top: 8px;
-  border-top: 1px solid var(--asin-line);
+  border-top: 0;
   font-size: clamp(1.4rem, 2.4vw, 1.85rem);
   font-weight: 600;
   letter-spacing: -.02em;
@@ -91,6 +92,25 @@
   line-height: 1.35;
 }
 
+.asin-question legend {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.asin-question-number {
+  flex: 0 0 auto;
+  color: #c2410c;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  line-height: 1.35;
+}
+
+.asin-question-label {
+  min-width: 0;
+}
+
 .asin-req {
   margin-left: 4px;
   color: #c2410c;
@@ -127,7 +147,9 @@
 }
 
 .asin-field textarea {
-  min-height: 96px;
+  min-height: 48px;
+  padding-top: 12px;
+  padding-bottom: 12px;
   resize: vertical;
 }
 
@@ -151,7 +173,7 @@
 
 .asin-choice-list {
   display: grid;
-  gap: 8px;
+  gap: 2px;
 }
 
 .asin-choice-list--split {
@@ -167,15 +189,15 @@
 
 .asin-choice {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 12px;
   width: 100%;
   height: auto;
-  min-height: 48px;
-  padding: 12px 14px;
-  border: 1px solid var(--asin-line);
-  border-radius: 12px;
-  background: #fff;
+  min-height: 44px;
+  padding: 10px 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   color: var(--asin-ink);
   font-size: 15px;
   font-weight: 500;
@@ -185,15 +207,33 @@
 }
 
 .asin-choice[aria-pressed='true'] {
-  border-color: #ff9900;
-  background: #ff9900;
-  color: #131921;
+  background: transparent;
+  color: var(--asin-ink);
 }
 
 .asin-choice-mark {
   flex: 0 0 16px;
   width: 16px;
+  height: 16px;
+  display: grid;
+  place-items: center;
   margin-top: 2px;
+  border: 1.5px solid rgba(19, 25, 33, .42);
+  border-radius: 50%;
+  color: var(--asin-ink);
+  font-size: 11px;
+  line-height: 1;
+}
+
+.asin-choice[aria-pressed='true'] .asin-choice-mark {
+  border-color: #ff9900;
+  background: #ff9900;
+  color: var(--asin-ink);
+}
+
+.asin-choice:focus-visible .asin-choice-mark {
+  outline: 2px solid rgba(255, 153, 0, .45);
+  outline-offset: 3px;
 }
 
 .asin-product-list,
@@ -205,7 +245,7 @@
 
 .asin-product {
   padding: 16px 0 4px;
-  border-top: 1px solid var(--asin-line);
+  border-top: 0;
 }
 
 .asin-units > p {
@@ -321,7 +361,7 @@
   .asin-apply__form {
     width: min(100% - 40px, 760px);
     padding-bottom: 24px;
-    gap: 24px;
+    gap: 32px;
   }
 
   .asin-apply__hero h2 {

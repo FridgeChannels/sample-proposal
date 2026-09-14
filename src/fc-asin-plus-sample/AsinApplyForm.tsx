@@ -160,7 +160,7 @@ export function AsinApplyForm() {
     <section className="asin-apply asin-slide" aria-labelledby="asin-apply-title">
       <form className="asin-apply__form asin-reveal" onSubmit={handleSubmit} noValidate>
         <header className="asin-apply__hero">
-          <h2 id="asin-apply-title">Contact and Amazon Identity</h2>
+          <h2 id="asin-apply-title">Book a meeting</h2>
         </header>
 
         <div className="asin-apply__grid" aria-labelledby="asin-apply-title">
@@ -186,9 +186,8 @@ export function AsinApplyForm() {
           </label>
         </div>
 
-        <h3 className="asin-apply__section">Amazon Business Goals (prioritize)</h3>
         <fieldset className="asin-question" aria-invalid={fieldErrors.goals || undefined}>
-          <legend>Select up to 3 primary goals for FC to help you achieve<RequiredMark /></legend>
+          <legend><span className="asin-question-number" aria-hidden="true">01</span><span className="asin-question-label">Select up to 3 primary goals for FC to help you achieve<RequiredMark /></span></legend>
           <div className="asin-choice-list">
             {businessGoals.map((goal) => (
               <Choice key={goal} pressed={goals.includes(goal)} onClick={() => { setGoals((current) => toggleValue(current, goal, 3)); clearError('goals') }}>{goal}</Choice>
@@ -196,9 +195,8 @@ export function AsinApplyForm() {
           </div>
         </fieldset>
 
-        <h3 className="asin-apply__section">Product & Amazon Business Profile</h3>
         <fieldset className="asin-question" aria-invalid={fieldErrors.products || undefined}>
-          <legend>Primary products / ASIN (up to 5)<RequiredMark /></legend>
+          <legend><span className="asin-question-number" aria-hidden="true">02</span><span className="asin-question-label">Primary products / ASIN (up to 5)<RequiredMark /></span></legend>
           <p className="asin-apply__hint">Please list each product as one line so we can match metrics correctly.</p>
           <div className="asin-product-list">
             {products.map((product, index) => (
@@ -235,7 +233,7 @@ export function AsinApplyForm() {
         </fieldset>
 
         <fieldset className="asin-question" aria-invalid={fieldErrors.sellers || undefined}>
-          <legend>Are other sellers currently selling your products on Amazon?<RequiredMark /></legend>
+          <legend><span className="asin-question-number" aria-hidden="true">03</span><span className="asin-question-label">Are other sellers currently selling your products on Amazon?<RequiredMark /></span></legend>
           <div className="asin-choice-list">
             {sellerSituations.map((option) => (
               <Choice key={option} pressed={sellers === option} onClick={() => { setSellers(option); clearError('sellers') }}>{option}</Choice>
@@ -244,7 +242,7 @@ export function AsinApplyForm() {
         </fieldset>
 
         <fieldset className="asin-question" aria-invalid={fieldErrors.registry || undefined}>
-          <legend>Are you enrolled in Amazon Brand Registry?<RequiredMark /></legend>
+          <legend><span className="asin-question-number" aria-hidden="true">04</span><span className="asin-question-label">Are you enrolled in Amazon Brand Registry?<RequiredMark /></span></legend>
           <div className="asin-choice-list asin-choice-list--split">
             {brandRegistry.map((option) => (
               <Choice key={option} pressed={registry === option} onClick={() => { setRegistry(option); clearError('registry') }}>{option}</Choice>
@@ -253,8 +251,7 @@ export function AsinApplyForm() {
         </fieldset>
 
         <fieldset className="asin-question" aria-invalid={fieldErrors.inserts || undefined}>
-          <legend>Do you currently use package inserts (QR / NFC / other)?</legend>
-          <p className="asin-apply__hint">Optional. Select all that apply.</p>
+          <legend><span className="asin-question-number" aria-hidden="true">05</span><span className="asin-question-label">Do you currently use package inserts (QR / NFC / other)?</span></legend>
           <div className="asin-choice-list">
             {inserts.map((option) => (
               <Choice key={option} pressed={insertTypes.includes(option)} onClick={() => toggleInsert(option)}>{option}</Choice>
@@ -268,19 +265,17 @@ export function AsinApplyForm() {
           )}
         </fieldset>
 
-        <h3 className="asin-apply__section">Packaging & Distribution Feasibility</h3>
         <fieldset className="asin-question">
-          <legend>Where are your products manufactured or packaged?</legend>
-          <p className="asin-apply__hint">FC magnets are inserted during the product manufacturing or packaging stage. Please provide the country/region and, if known, the facility or partner.</p>
+          <legend><span className="asin-question-number" aria-hidden="true">06</span><span className="asin-question-label">Where are your products manufactured or packaged?</span></legend>
+          <p className="asin-apply__hint">FC magnets are inserted during the product manufacturing or packaging stage. Please provide the country/region.</p>
           <label className="asin-field">
             <span className="sr-only">Manufacturing or packaging location</span>
-            <textarea name="manufacturing" rows={3} placeholder="Country / region, facility or partner" value={manufacturing} onChange={(event) => { setManufacturing(event.target.value); clearError('manufacturing') }} />
+            <textarea name="manufacturing" rows={1} placeholder="Country / region, facility or partner" value={manufacturing} onChange={(event) => { setManufacturing(event.target.value); clearError('manufacturing') }} />
           </label>
         </fieldset>
 
         <fieldset className="asin-question" aria-invalid={fieldErrors.fulfillment || undefined}>
-          <legend>How are your Amazon orders fulfilled?<RequiredMark /></legend>
-          <p className="asin-apply__hint">Select all that apply.</p>
+          <legend><span className="asin-question-number" aria-hidden="true">07</span><span className="asin-question-label">How are your Amazon orders fulfilled?<RequiredMark /></span></legend>
           <div className="asin-choice-list">
             {fulfillmentOptions.map((option) => (
               <Choice key={option} pressed={fulfillment.includes(option)} onClick={() => { setFulfillment((current) => toggleValue(current, option)); clearError('fulfillment') }}>{option}</Choice>
