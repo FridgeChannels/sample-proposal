@@ -39,7 +39,23 @@ const bodyMarkup = `
         <p class="asin-value__number">01</p>
         <h2>Turn Every Product into a Lasting Brand Asset</h2>
         <p class="asin-value__statement">The sale ends. Your brand’s presence in the home does not.</p>
-        <div class="asin-commerce-visual asin-delivery-tag" aria-label="Product delivered, brand presence remains"><span>Order status</span><strong>Delivered</strong><i>Brand presence remains active</i></div>
+        <div class="asin-value-art asin-value-art--asset" role="img" aria-label="A delivered product becomes a lasting brand asset">
+          <svg viewBox="0 0 720 320" aria-hidden="true" focusable="false">
+            <rect width="720" height="320" rx="28" fill="#eaf3ff"/>
+            <circle cx="574" cy="160" r="112" fill="#dceafa"/>
+            <rect x="478" y="46" width="164" height="226" rx="18" fill="#fff" stroke="#c8d8e8" stroke-width="3"/>
+            <rect x="500" y="76" width="120" height="168" rx="10" fill="#f3f7fb"/>
+            <path d="M560 106v112M524 162h72" stroke="#c8d8e8" stroke-width="3" stroke-linecap="round"/>
+            <rect x="539" y="132" width="42" height="58" rx="8" fill="#ff9900"/>
+            <text x="560" y="168" text-anchor="middle" fill="#131921" font-size="15" font-weight="700">FC</text>
+            <path d="M96 202 142 86l92 28 24 114-116 18z" fill="#fff" stroke="#131921" stroke-width="3"/>
+            <path d="m142 86 72 22-28 104-90-10z" fill="#ff9900" opacity=".9"/>
+            <path d="m250 168 112-8" stroke="#ff9900" stroke-width="6" stroke-linecap="round"/>
+            <path d="m340 146 26 14-26 14" fill="none" stroke="#ff9900" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+            <text x="94" y="278" fill="#6b7280" font-size="16" font-weight="600">Delivered</text>
+            <text x="478" y="298" fill="#131921" font-size="16" font-weight="600">Brand stays present</text>
+          </svg>
+        </div>
       </div>
     </section>
 
@@ -48,7 +64,28 @@ const bodyMarkup = `
         <p class="asin-value__number">02</p>
         <h2>Create a Zero-Search Reorder Path</h2>
         <p class="asin-value__statement">One tap takes the customer back to your Amazon Store—before category search begins.</p>
-        <div class="asin-commerce-visual asin-search-path" aria-label="Tap goes directly to the Brand Store"><div class="asin-search-shell"><span>Search Amazon</span><b aria-hidden="true">⌕</b></div><p><strong>Tap</strong><i>→</i><strong>Your Brand Store</strong><i>→</i><strong>Reorder</strong></p></div>
+        <div class="asin-value-art asin-value-art--reorder" role="img" aria-label="A tap takes the customer directly to the Brand Store and reorder path">
+          <svg viewBox="0 0 720 320" aria-hidden="true" focusable="false">
+            <rect width="720" height="320" rx="28" fill="#fff7e8"/>
+            <rect x="76" y="42" width="168" height="238" rx="28" fill="#131921"/>
+            <rect x="94" y="76" width="132" height="166" rx="12" fill="#fff"/>
+            <circle cx="160" cy="58" r="5" fill="#ff9900"/>
+            <rect x="112" y="98" width="96" height="12" rx="6" fill="#e0e0e0"/>
+            <rect x="112" y="126" width="74" height="50" rx="8" fill="#ff9900" opacity=".88"/>
+            <rect x="112" y="190" width="96" height="10" rx="5" fill="#d7dde3"/>
+            <path d="M278 160c56-68 124-68 182 0" fill="none" stroke="#ff9900" stroke-width="6" stroke-linecap="round" stroke-dasharray="10 12"/>
+            <path d="m438 146 24 14-24 14" fill="none" stroke="#ff9900" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="490" y="78" width="156" height="164" rx="20" fill="#fff" stroke="#e0e0e0" stroke-width="3"/>
+            <rect x="512" y="106" width="112" height="30" rx="8" fill="#131921"/>
+            <text x="568" y="126" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">Brand Store</text>
+            <rect x="512" y="154" width="112" height="12" rx="6" fill="#d7dde3"/>
+            <rect x="512" y="180" width="78" height="12" rx="6" fill="#d7dde3"/>
+            <rect x="512" y="208" width="88" height="18" rx="9" fill="#ff9900"/>
+            <text x="568" y="221" text-anchor="middle" fill="#131921" font-size="11" font-weight="700">Reorder</text>
+            <text x="76" y="304" fill="#6b7280" font-size="16" font-weight="600">Tap once</text>
+            <text x="490" y="270" fill="#131921" font-size="16" font-weight="600">No search detour</text>
+          </svg>
+        </div>
         <p class="asin-disclosure">Competition may still appear on Amazon product detail pages.</p>
       </div>
     </section>
@@ -58,7 +95,22 @@ const bodyMarkup = `
         <p class="asin-value__number">03</p>
         <h2>Unlock Attributable, BRB-Supported Traffic</h2>
         <p class="asin-value__statement">Route taps through Amazon Attribution to measure Store visits, conversions, and eligible BRB value.</p>
-        <div class="asin-commerce-visual asin-attribution" aria-label="Attribution event receipt"><span>Attribution event</span><dl><div><dt>Source</dt><dd>FC ASIN+</dd></div><div><dt>Destination</dt><dd>Brand Store</dd></div><div><dt>Outcome</dt><dd>Measurable</dd></div></dl></div>
+        <div class="asin-value-art asin-value-art--attribution" role="img" aria-label="A measurable attribution event connects a tap to a Brand Store outcome">
+          <svg viewBox="0 0 720 320" aria-hidden="true" focusable="false">
+            <rect width="720" height="320" rx="28" fill="#eef8f4"/>
+            <path d="M78 238h564M78 188h564M78 138h564M78 88h564" stroke="#d7e8e1" stroke-width="2"/>
+            <path d="M92 228c62-18 78-12 126-46 48-34 68 8 112-18 44-26 72-78 116-54 44 24 58-28 86-38 28-10 50 12 88-26" fill="none" stroke="#0c3d32" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="218" cy="182" r="9" fill="#ff6a1a" stroke="#fff" stroke-width="4"/>
+            <circle cx="446" cy="110" r="9" fill="#ff6a1a" stroke="#fff" stroke-width="4"/>
+            <circle cx="620" cy="58" r="9" fill="#ff6a1a" stroke="#fff" stroke-width="4"/>
+            <rect x="78" y="254" width="126" height="34" rx="17" fill="#0c3d32"/>
+            <text x="141" y="276" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">Tap event</text>
+            <rect x="296" y="254" width="142" height="34" rx="17" fill="#ff6a1a"/>
+            <text x="367" y="276" text-anchor="middle" fill="#131921" font-size="14" font-weight="700">Store visit</text>
+            <rect x="526" y="254" width="116" height="34" rx="17" fill="#fff" stroke="#c4ded3" stroke-width="2"/>
+            <text x="584" y="276" text-anchor="middle" fill="#0c3d32" font-size="14" font-weight="700">Measured</text>
+          </svg>
+        </div>
         <p class="asin-disclosure">BRB credits depend on Amazon eligibility and attribution rules.</p>
       </div>
     </section>
@@ -68,7 +120,21 @@ const bodyMarkup = `
         <p class="asin-value__number">04</p>
         <h2>Stay Editable After Delivery—and Portable Beyond Amazon</h2>
         <p class="asin-value__statement">Amazon today. A new product, DTC, Walmart, or another destination tomorrow.</p>
-        <div class="asin-commerce-visual asin-destinations" aria-label="One magnet can route to many destinations"><span class="is-active">Amazon Store</span><span>DTC</span><span>Walmart</span><span>Next channel</span></div>
+        <div class="asin-value-art asin-value-art--portable" role="img" aria-label="One editable magnet can connect to Amazon Store, DTC, Walmart, or another channel">
+          <svg viewBox="0 0 720 320" aria-hidden="true" focusable="false">
+            <rect width="720" height="320" rx="28" fill="#fff1e9"/>
+            <path d="M360 160 160 82M360 160l198-78M360 160l-198 82M360 160l198 78" stroke="#f6c7b0" stroke-width="4" stroke-linecap="round"/>
+            <circle cx="360" cy="160" r="58" fill="#ff9900"/>
+            <rect x="326" y="128" width="68" height="64" rx="14" fill="#131921"/>
+            <text x="360" y="167" text-anchor="middle" fill="#fff" font-size="20" font-weight="700">FC</text>
+            <g>
+              <circle cx="160" cy="82" r="42" fill="#131921"/><text x="160" y="87" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">Amazon</text>
+              <circle cx="558" cy="82" r="42" fill="#fff" stroke="#f6c7b0" stroke-width="3"/><text x="558" y="87" text-anchor="middle" fill="#131921" font-size="15" font-weight="700">DTC</text>
+              <circle cx="162" cy="242" r="42" fill="#fff" stroke="#f6c7b0" stroke-width="3"/><text x="162" y="247" text-anchor="middle" fill="#131921" font-size="14" font-weight="700">Walmart</text>
+              <circle cx="558" cy="242" r="42" fill="#ff6a1a"/><text x="558" y="247" text-anchor="middle" fill="#131921" font-size="13" font-weight="700">Next</text>
+            </g>
+          </svg>
+        </div>
       </div>
     </section>
 
@@ -124,6 +190,9 @@ const pageCss = `
   .asin-value__number{grid-area:number;padding-top:12px}
   .asin-value h2{grid-area:title;max-width:860px;font-size:clamp(2.9rem,4.8vw,4.9rem)!important}
   .asin-value__statement{grid-area:statement;max-width:62ch;margin:28px 0 0;color:#6b7280;font-size:clamp(1.05rem,1.6vw,1.3rem);font-weight:400;line-height:1.55}
+  .asin-value-art{grid-area:cue;width:min(100%,720px);margin-top:48px;overflow:hidden;border-radius:24px;background:#fff;box-shadow:0 1px 2px rgba(19,25,33,.04),0 18px 40px rgba(19,25,33,.06)}
+  .asin-value-art svg{display:block;width:100%;height:auto}
+  .asin-value-art text{font-family:var(--leg-font);letter-spacing:0}
   .asin-commerce-visual{grid-area:cue;width:min(100%,680px);margin-top:48px}
   .asin-delivery-tag{display:grid;grid-template-columns:1fr auto;grid-template-areas:"label status" "active active";gap:10px 24px;padding:20px 22px;background:var(--amazon-surface);border-left:6px solid var(--amazon-orange)}
   .asin-delivery-tag span{grid-area:label;color:#757575;font-size:13px}
@@ -149,7 +218,7 @@ const pageCss = `
   .asin-fit h2{font-size:clamp(2.75rem,4.4vw,4.25rem)!important}
   .asin-fit__groups{display:grid;max-width:720px}
   .asin-fit__label{margin:0 0 28px;color:#6b7280;font-size:13px;font-weight:600;letter-spacing:.14em;text-transform:uppercase}
-  .asin-fit__group ol{counter-reset:fit;display:grid;gap:18px;margin:0;padding:0;list-style:none}
+  .asin-fit__group ol{counter-reset:fit;display:grid;gap:24px;margin:0;padding:0;list-style:none}
   .asin-fit__group li{counter-increment:fit;display:grid;grid-template-columns:30px 1fr;gap:12px;color:#131921;font-size:16px;font-weight:400;line-height:1.45}
   .asin-fit__group li:before{content:"✓";display:grid;width:22px;height:22px;box-sizing:border-box;place-items:center;border:2px solid var(--amazon-orange);border-radius:50%;background:var(--amazon-orange);color:var(--amazon-navy);font-size:12px;font-weight:700;line-height:1}
 
@@ -257,6 +326,8 @@ const pageCss = `
     .asin-value .asin-wrap{width:min(36ch,calc(100% - 40px));max-width:36ch;margin-left:auto;margin-right:auto;text-align:center}
     .asin-value h2{max-width:14ch;margin:12px auto 0;font-size:clamp(1.85rem,7.6vw,2.25rem)!important;line-height:1.14!important}
     .asin-value__statement{max-width:28ch;margin:16px auto 0;font-size:17px;line-height:1.47;letter-spacing:0}
+    .asin-value-art{width:100%;margin-top:28px;border-radius:16px;box-shadow:0 1px 2px rgba(19,25,33,.04),0 12px 32px rgba(19,25,33,.07)}
+    .asin-value-art text{font-size:20px}
     .asin-commerce-visual{width:100%;margin-top:28px}
     .asin-value .asin-destinations,
     .asin-value .asin-search-path p{justify-content:center}
@@ -272,7 +343,7 @@ const pageCss = `
     .asin-fit h2{max-width:12ch;font-size:clamp(1.7rem,7.2vw,2.1rem)!important;line-height:1.14!important}
     .asin-fit__layout{gap:18px}
     .asin-fit__label{margin-bottom:12px}
-    .asin-fit__group ol{gap:8px}
+    .asin-fit__group ol{gap:16px}
     .asin-fit__group li{grid-template-columns:28px 1fr;min-height:36px;align-items:flex-start;font-size:15px;line-height:1.35}
     .asin-page>section.asin-cta.asin-cta{min-height:100dvh!important;padding:0!important}
     .asin-cta h2{max-width:12ch;font-size:clamp(2rem,8.4vw,2.5rem)!important;line-height:1.12!important}
