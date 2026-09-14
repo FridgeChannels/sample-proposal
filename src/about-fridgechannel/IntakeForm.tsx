@@ -57,6 +57,7 @@ function normalizeWebsite(value: string) {
 }
 
 function MultiSelect({
+  number,
   legend,
   hint,
   options,
@@ -64,6 +65,7 @@ function MultiSelect({
   onToggle,
   error,
 }: {
+  number?: string
   legend: string
   hint: string
   options: string[]
@@ -73,7 +75,10 @@ function MultiSelect({
 }) {
   return (
     <fieldset className="fc-question" aria-invalid={error} aria-required="true">
-      <legend>{legend}<RequiredMark /></legend>
+      <legend>
+        {number && <span className="fc-question-number" aria-hidden="true">{number}</span>}
+        <span className="fc-question-label">{legend}<RequiredMark /></span>
+      </legend>
       <p className="fc-hint">{hint}</p>
       <div className="fc-choice-grid">
         {options.map((option) => {
@@ -86,7 +91,7 @@ function MultiSelect({
               aria-pressed={active}
               onClick={() => onToggle(option)}
             >
-              <span className="fc-choice-mark" aria-hidden="true">{active ? '✓' : '+'}</span>
+              <span className="fc-choice-mark" aria-hidden="true">{active ? '✓' : ''}</span>
               <span>{option}</span>
             </button>
           )
@@ -98,6 +103,7 @@ function MultiSelect({
 }
 
 function SingleSelect({
+  number,
   legend,
   name,
   options,
@@ -106,6 +112,7 @@ function SingleSelect({
   hint,
   error,
 }: {
+  number?: string
   legend: string
   name: string
   options: string[]
@@ -116,7 +123,10 @@ function SingleSelect({
 }) {
   return (
     <fieldset className="fc-question" aria-required="true" aria-invalid={error || undefined}>
-      <legend>{legend}<RequiredMark /></legend>
+      <legend>
+        {number && <span className="fc-question-number" aria-hidden="true">{number}</span>}
+        <span className="fc-question-label">{legend}<RequiredMark /></span>
+      </legend>
       {hint && <p className="fc-hint">{hint}</p>}
       <div className="fc-radio-list">
         {options.map((option) => (
@@ -282,8 +292,9 @@ export function IntakeForm() {
           />
         </label>
         <MultiSelect
+          number="01"
           legend="What customer retention outcomes do you want FC to help achieve?"
-          hint="Select all that apply."
+          hint="Multi-select"
           options={retentionOutcomes}
           selected={retention}
           error={Boolean(fieldErrors.retention)}
@@ -306,7 +317,8 @@ export function IntakeForm() {
         )}
         <MultiSelect
           legend="What strategic goals do you want FC to help you achieve?"
-          hint="Select all that apply."
+          number="02"
+          hint="Multi-select"
           options={strategicGoals}
           selected={strategic}
           error={Boolean(fieldErrors.strategic)}
@@ -316,6 +328,7 @@ export function IntakeForm() {
           }}
         />
         <SingleSelect
+          number="03"
           legend="How many orders do you receive through DTC each month?"
           name="monthlyOrders"
           options={monthlyOrders}
@@ -327,8 +340,8 @@ export function IntakeForm() {
           error={fieldErrors.monthlyOrder}
         />
         <SingleSelect
-          legend="What is your average DTC order value?"
-          hint="Approximate value in USD."
+          number="04"
+          legend="What is your average DTC order value? (USD)"
           name="aov"
           options={averageOrderValues}
           value={aov}
@@ -339,6 +352,7 @@ export function IntakeForm() {
           error={fieldErrors.aov}
         />
         <SingleSelect
+          number="05"
           legend="What is your DTC fulfillment model?"
           name="fulfillment"
           options={fulfillmentModels}
@@ -364,6 +378,7 @@ export function IntakeForm() {
         )}
         {uses3pl && (
           <SingleSelect
+            number="06"
             legend="If you use a third-party logistics provider, can the provider insert additional materials into outgoing orders?"
             name="insertCapability"
             options={insertCapabilities}
@@ -376,6 +391,7 @@ export function IntakeForm() {
           />
         )}
         <SingleSelect
+          number="07"
           legend="Which business model best describes your DTC business?"
           name="businessModel"
           options={businessModels}
@@ -401,6 +417,7 @@ export function IntakeForm() {
         )}
         {hasSubscription && (
           <SingleSelect
+            number="08"
             legend="Approximately how many active subscribers do you currently have?"
             name="subscribers"
             options={subscriberCounts}

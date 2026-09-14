@@ -380,7 +380,7 @@
     .comparison-legacy{background:color-mix(in oklch,var(--leg-brand-dark) 72%,black)!important;color:color-mix(in oklch,var(--leg-brand-foreground) 68%,transparent)!important}
     .comparison-fc{background:var(--leg-brand-foreground)!important;color:var(--leg-brand-dark)!important}
     .comparison-fc p strong{color:var(--rust)!important}
-    #fulfillment.pilot-section{background:var(--leg-background)!important;padding:clamp(88px,10vw,128px) 0!important}
+    #fulfillment.pilot-section{background:#fff!important;padding:clamp(88px,10vw,128px) 0!important}
     .pilot-module{border-color:var(--leg-border);padding:48px 0}
     .effort-grid{border-color:var(--leg-border)}
     .effort-item{border-color:var(--leg-border)}
@@ -512,7 +512,7 @@
       #moat.comparison-section,
       #fulfillment.pilot-section,
       main>section.pilot-continuation{display:flex;align-items:center}
-      #fulfillment.pilot-section,
+      #fulfillment.pilot-section{padding:32px 0!important;background:#fff!important}
       main>section.pilot-continuation{padding:32px 0!important;background:var(--leg-background)!important}
       #fulfillment .pilot-module{padding:8px 0 0}
       main>section.pilot-continuation .pilot-module{width:100%;padding:0}
@@ -739,47 +739,6 @@
             </article>
           </div>
 
-        </div>
-      </div>
-    </section>
-
-    <section class="comparison-section" id="moat" aria-labelledby="comparison-title">
-      <div class="wrap">
-        <header class="comparison-intro reveal">
-          <h2 id="comparison-title"><span>Email, SMS, and brochures reach the customer.</span><strong>FC stays with them until the next purchase happens.</strong></h2>
-        </header>
-
-        <div class="comparison-carousel reveal" data-comparison-carousel aria-label="Comparison of rented digital channels and Fridge Channel">
-          <div class="comparison-track" data-comparison-track>
-            <article class="comparison-slide">
-              <header class="comparison-axis"><span>01</span><strong>Presence</strong></header>
-              <div class="comparison-pair">
-                <div class="comparison-panel comparison-legacy"><small>Email · SMS · Ads</small><p>Appears when sent. Buried, filtered, or scrolled past.</p></div>
-                <div class="comparison-panel comparison-fc"><small>Fridge Channel</small><p>On the fridge door, seen at every glance. Never needs to be re-sent.</p></div>
-              </div>
-            </article>
-
-            <article class="comparison-slide comparison-slide--memory">
-              <header class="comparison-axis"><span>02</span><strong>Temperature</strong></header>
-              <div class="comparison-pair">
-                <div class="comparison-panel comparison-legacy"><small>Email · SMS · Ads</small><p>Waits for customers to go cold — then pays to win them back. Win-back is the most expensive touch you’ll ever buy.</p></div>
-                <div class="comparison-panel comparison-fc"><small>Fridge Channel</small><p>Keeps customers warm between orders. No cooling, no rescue mission.</p></div>
-              </div>
-            </article>
-
-            <article class="comparison-slide">
-              <header class="comparison-axis"><span>03</span><strong>The reorder moment</strong></header>
-              <div class="comparison-pair">
-                <div class="comparison-panel comparison-legacy"><small>Email · SMS · Ads</small><p>Tries to <em>predict</em> when they’ll run low.</p></div>
-                <div class="comparison-panel comparison-fc"><small>Fridge Channel</small><p>Is already there when they run low. <strong>Tap → next order.</strong></p></div>
-              </div>
-            </article>
-          </div>
-          <div class="comparison-pager" role="tablist" aria-label="Comparison topics">
-            <button type="button" class="is-active" data-comparison-dot="0" aria-label="Show presence comparison" aria-selected="true"></button>
-            <button type="button" data-comparison-dot="1" aria-label="Show temperature comparison" aria-selected="false"></button>
-            <button type="button" data-comparison-dot="2" aria-label="Show reorder moment comparison" aria-selected="false"></button>
-          </div>
         </div>
       </div>
     </section>

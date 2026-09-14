@@ -176,7 +176,9 @@ main > section.fc-intake.footer-slide.demo-slide,
 }
 
 .fc-intake .fc-question legend {
-  display: block;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
   width: 100%;
   max-width: 100%;
   padding: 0;
@@ -186,6 +188,19 @@ main > section.fc-intake.footer-slide.demo-slide,
   line-height: 1.35;
   white-space: normal;
   overflow-wrap: anywhere;
+}
+
+.fc-intake .fc-question-label {
+  min-width: 0;
+}
+
+.fc-intake .fc-question-number {
+  flex: 0 0 auto;
+  color: var(--fc-orange);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  line-height: 1.35;
 }
 
 .fc-intake .fc-required {
@@ -206,7 +221,7 @@ main > section.fc-intake.footer-slide.demo-slide,
 .fc-intake .fc-choice-grid,
 .fc-intake .fc-radio-list {
   display: grid;
-  gap: 6px;
+  gap: 2px;
   margin-top: 8px;
 }
 
@@ -220,9 +235,9 @@ main > section.fc-intake.footer-slide.demo-slide,
   min-width: 0;
   height: auto !important;
   min-height: 40px;
-  padding: 8px 12px;
-  border: 1px solid var(--fc-line);
-  border-radius: 16px;
+  padding: 8px 0;
+  border: 0;
+  border-radius: 0;
   background: transparent;
   color: var(--fc-ink);
   font: 500 14px/1.4 Manrope, sans-serif;
@@ -242,14 +257,36 @@ main > section.fc-intake.footer-slide.demo-slide,
 
 .fc-intake .fc-choice[aria-pressed='true'],
 .fc-intake .fc-radio:has(input:checked) {
-  background: var(--fc-paper);
-  border-color: var(--fc-paper);
+  background: transparent;
+  border-color: transparent;
   color: var(--fc-forest);
 }
 
+.fc-intake .fc-choice:focus-visible,
+.fc-intake .fc-radio:has(input:focus-visible) {
+  outline: 2px solid color-mix(in srgb, var(--fc-orange) 55%, transparent);
+  outline-offset: 3px;
+}
+
 .fc-intake .fc-choice-mark {
-  flex: 0 0 auto;
-  width: 16px;
+  display: inline-flex;
+  flex: 0 0 18px;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid rgba(32, 23, 18, .35);
+  border-radius: 50%;
+  color: var(--fc-forest);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.fc-intake .fc-choice[aria-pressed='true'] .fc-choice-mark {
+  border-color: var(--fc-forest);
+  background: var(--fc-forest);
+  color: #fff;
 }
 
 .fc-intake .fc-radio input {
