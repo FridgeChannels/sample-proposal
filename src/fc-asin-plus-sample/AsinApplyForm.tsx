@@ -1,5 +1,10 @@
 import { FormEvent, useState } from 'react'
-import { buildCalendlyPrefillUrl } from '../christmas-campaign/submitApplication'
+import {
+  buildCalendlyPrefillUrl,
+  fetchAboutPilotFormToken,
+  snFromSearchParams,
+  submitAboutPilotApplication,
+} from '../about-pilot/submitApplication'
 
 const calendlyUrl = 'https://calendly.com/billy-fridgechannels/fridge-channel-pilot-meeting'
 
@@ -136,7 +141,7 @@ export function AsinApplyForm() {
     return !Object.values(next).some(Boolean)
   }
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setSubmitError('')
     if (!validateAll()) {
@@ -148,12 +153,43 @@ export function AsinApplyForm() {
       return
     }
     setSubmitting(true)
-    const nextUrl = buildCalendlyPrefillUrl(calendlyUrl, {
-      fullName: fullName.trim(),
-      email: email.trim(),
-    })
-    const dest = window.top ?? window
-    dest.location.assign(nextUrl)
+    try {
+      const formToken = await fetchAboutPilotFormToken()
+      await submitAboutPilotApplication({
+        channel: 'Amazon',
+        fullName: fullName.trim(),
+        title: title.trim(),
+        email: email.trim(),
+        website: normalizeWebsite(website),
+        magnetSn: snFromSearchParams(),
+        amazonStorefront: normalizeWebsite(storefront),
+        businessGoals: goals,
+        products: products
+          .filter((product) => product.asin.trim() && product.unitMode)
+          .map((product) => ({
+            asin: product.asin.trim(),
+            unitMode: product.unitMode as 'exact' | 'range',
+            exactUnits: product.exactUnits.trim() || undefined,
+            rangeUnits: product.rangeUnits || undefined,
+          })),
+        otherSellers: sellers,
+        brandRegistry: registry,
+        packageInserts: insertTypes,
+        insertOther: insertOther.trim() || undefined,
+        manufacturingLocation: manufacturing.trim() || undefined,
+        amazonFulfillment: fulfillment,
+        formToken,
+      })
+      const nextUrl = buildCalendlyPrefillUrl(calendlyUrl, {
+        fullName: fullName.trim(),
+        email: email.trim(),
+      })
+      const dest = window.top ?? window
+      dest.location.assign(nextUrl)
+    } catch (error) {
+      setSubmitting(false)
+      setSubmitError(error instanceof Error ? error.message : "We couldn't save your application. Please try again.")
+    }
   }
 
   return (
@@ -287,7 +323,7 @@ export function AsinApplyForm() {
 
         <div className="asin-apply__dock">
           <button className="asin-button" type="submit" disabled={submitting}>
-            {submitting ? 'Opening calendar…' : 'Apply & Book a meeting'}
+            {submitting ? 'Saving & opening calendar…' : 'Apply & Book a meeting'}
             <span aria-hidden="true">→</span>
           </button>
         </div>

@@ -1,19 +1,37 @@
+import { useEffect, useState } from 'react'
 import { snFromLocation } from '../config'
+import {
+  aboutPageUrlForSn,
+  fetchMagnetExperience,
+  type MagnetExperience,
+} from '../../shared/magnetExperience'
 
-function aboutPageSrc() {
-  const path = window.location.pathname
-  if (path.includes('asin-sample')) return '/fc-asin-plus-sample.html'
-  return '/about-fridgechannel.html'
-}
-
-export function AboutFridgeChannelView({ active }: { active: boolean }) {
+export function AboutFridgeChannelView({
+  active,
+  experience,
+}: {
+  active: boolean
+  experience: MagnetExperience | null
+}) {
   const sn = snFromLocation()
-  const params = new URLSearchParams(window.location.search)
-  if (sn && !params.get('sn') && !params.get('id')) params.set('sn', sn)
-  const query = params.toString()
-  const pageSrc = aboutPageSrc()
-  const src = `${pageSrc}${query ? `?${query}` : ''}`
-  const isAsinAbout = pageSrc.includes('fc-asin-plus-sample')
+  const [resolvedExperience, setResolvedExperience] = useState<MagnetExperience>(experience || 'dtc')
+
+  useEffect(() => {
+    if (experience) {
+      setResolvedExperience(experience)
+      return
+    }
+    let cancelled = false
+    void fetchMagnetExperience(sn).then((next) => {
+      if (!cancelled) setResolvedExperience(next)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [experience, sn])
+
+  const src = aboutPageUrlForSn(resolvedExperience, sn)
+  const isAsinAbout = resolvedExperience === 'asin_plus'
 
   return (
     <main className={`about-fridgechannel-view${isAsinAbout ? ' is-asin-about' : ''}${active ? '' : ' is-preserved-hidden'}`} aria-hidden={!active}>

@@ -335,22 +335,44 @@ async function loadSampleProposalBySn(sn) {
   }
 }
 
+function normalizeMagnetExperience(value) {
+  return String(value || '').trim().toLowerCase() === 'asin_plus' ? 'asin_plus' : 'dtc';
+}
+
 async function lookupSamplePhase(sn) {
   const magnetSn = String(sn || '').trim();
-  if (!magnetSn) return { phase: 'sample', status: null, magnetSn: '', reason: 'missing_sn' };
+  if (!magnetSn) {
+    return { phase: 'sample', status: null, experience: 'dtc', magnetSn: '', reason: 'missing_sn' };
+  }
+
+  const selectWithExperience = 'magnet_sn,status,sample,brand_name,customer_id,magnet_id,experience';
+  const selectLegacy = 'magnet_sn,status,sample,brand_name,customer_id,magnet_id';
 
   try {
-    const rows = await supabaseSelect('magnet_brand_param', {
-      select: 'magnet_sn,status,sample,brand_name,customer_id,magnet_id',
-      magnet_sn: `eq.${magnetSn}`,
-      limit: '1',
-    });
+    let rows;
+    try {
+      rows = await supabaseSelect('magnet_brand_param', {
+        select: selectWithExperience,
+        magnet_sn: `eq.${magnetSn}`,
+        limit: '1',
+      });
+    } catch (error) {
+      if (!String(error.message || '').toLowerCase().includes('experience')) throw error;
+      rows = await supabaseSelect('magnet_brand_param', {
+        select: selectLegacy,
+        magnet_sn: `eq.${magnetSn}`,
+        limit: '1',
+      });
+    }
     const row = Array.isArray(rows) ? rows[0] : null;
-    if (!row) return { phase: 'sample', status: null, magnetSn, reason: 'not_found' };
+    if (!row) {
+      return { phase: 'sample', status: null, experience: 'dtc', magnetSn, reason: 'not_found' };
+    }
     const status = Number.parseInt(String(row.status ?? ''), 10);
     return {
       phase: status === SAMPLE_STATUS_LIVE ? 'live' : 'sample',
       status: Number.isFinite(status) ? status : null,
+      experience: normalizeMagnetExperience(row.experience),
       magnetSn,
       brandName: row.brand_name || null,
       customerId: row.customer_id ?? null,
@@ -359,10 +381,10 @@ async function lookupSamplePhase(sn) {
     };
   } catch (error) {
     if (error.code === 'supabase_unconfigured') {
-      return { phase: 'sample', status: null, magnetSn, reason: 'supabase_unconfigured' };
+      return { phase: 'sample', status: null, experience: 'dtc', magnetSn, reason: 'supabase_unconfigured' };
     }
     console.warn(`[sample-phase] lookup failed for sn=${magnetSn}:`, error.message);
-    return { phase: 'sample', status: null, magnetSn, reason: 'lookup_error' };
+    return { phase: 'sample', status: null, experience: 'dtc', magnetSn, reason: 'lookup_error' };
   }
 }
 

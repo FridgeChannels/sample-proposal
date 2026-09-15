@@ -4,7 +4,15 @@ import { liveDemoUrlForSn, LIVE_DEMO_URL, snFromLocation } from '../config'
  * Live demo iframe: same /p/{sn} shape as the customer sample URL,
  * with SN taken from the current path (or ?sn=) instead of a hardcoded value.
  */
-export function LiveDemoView({ active, onAboutFridgeChannel }: { active: boolean; onAboutFridgeChannel: () => void }) {
+export function LiveDemoView({
+  active,
+  aboutLoading = false,
+  onAboutFridgeChannel,
+}: {
+  active: boolean
+  aboutLoading?: boolean
+  onAboutFridgeChannel: () => void
+}) {
   const sn = snFromLocation()
   const src = sn ? liveDemoUrlForSn(sn) : LIVE_DEMO_URL
 
@@ -18,8 +26,8 @@ export function LiveDemoView({ active, onAboutFridgeChannel }: { active: boolean
         allowFullScreen
       />
       <div className="flow-cta-bar">
-        <button type="button" className="flow-cta-button" onClick={onAboutFridgeChannel}>
-          <span>About FridgeChannel</span>
+        <button type="button" className="flow-cta-button" onClick={onAboutFridgeChannel} disabled={aboutLoading}>
+          <span>{aboutLoading ? 'Opening…' : 'About FridgeChannel'}</span>
           <b>→</b>
         </button>
       </div>

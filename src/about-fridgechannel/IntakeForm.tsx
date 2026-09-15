@@ -1,5 +1,10 @@
 import { FormEvent, useState } from 'react'
-import { buildCalendlyPrefillUrl } from '../christmas-campaign/submitApplication'
+import {
+  buildCalendlyPrefillUrl,
+  fetchAboutPilotFormToken,
+  snFromSearchParams,
+  submitAboutPilotApplication,
+} from '../about-pilot/submitApplication'
 
 const calendlyUrl = 'https://calendly.com/billy-fridgechannels/fridge-channel-pilot-meeting'
 const OTHER = 'Other — please specify'
@@ -194,7 +199,7 @@ export function IntakeForm() {
     return !Object.values(next).some(Boolean)
   }
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setSubmitError('')
     if (!validateAll()) {
@@ -208,12 +213,38 @@ export function IntakeForm() {
     }
 
     setSubmitting(true)
-    window.location.assign(
-      buildCalendlyPrefillUrl(calendlyUrl, {
+    try {
+      const formToken = await fetchAboutPilotFormToken()
+      await submitAboutPilotApplication({
+        channel: 'DTC',
         fullName: fullName.trim(),
+        title: title.trim(),
         email: email.trim(),
-      }),
-    )
+        website: normalizeWebsite(website),
+        magnetSn: snFromSearchParams(),
+        retentionOutcomes: retention,
+        retentionOther: retentionOther.trim() || undefined,
+        strategicGoals: strategic,
+        monthlyOrders: monthlyOrder,
+        aov,
+        fulfillmentModel: fulfillment,
+        fulfillmentOther: fulfillmentOther.trim() || undefined,
+        insertCapability: uses3pl ? insertCapability : undefined,
+        businessModel,
+        businessOther: businessOther.trim() || undefined,
+        activeSubscribers: hasSubscription ? subscribers : undefined,
+        formToken,
+      })
+      window.location.assign(
+        buildCalendlyPrefillUrl(calendlyUrl, {
+          fullName: fullName.trim(),
+          email: email.trim(),
+        }),
+      )
+    } catch (error) {
+      setSubmitting(false)
+      setSubmitError(error instanceof Error ? error.message : "We couldn't save your application. Please try again.")
+    }
   }
 
   return (
@@ -435,7 +466,7 @@ export function IntakeForm() {
 
       <div className="fc-dock">
         <button className="fc-submit" type="submit" disabled={submitting}>
-          <span>{submitting ? 'Opening calendar…' : 'Book a meeting'}</span>
+          <span>{submitting ? 'Saving & opening calendar…' : 'Book a meeting'}</span>
           <b aria-hidden="true">→</b>
         </button>
       </div>

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef } from 'react'
 import { extractGiftChallengeConfig } from '../template/gift-challenge-template'
 import giftChallengeDocument from './gift-challenge.html?raw'
 import { IntakeForm } from './IntakeForm'
+import { FloatingBackButton } from '../shared/FloatingBackButton'
 import formCss from './styles.css?raw'
 
 function homepageWithoutFooter(source: string) {
@@ -79,6 +80,7 @@ export function App() {
 
   return (
     <>
+      <FloatingBackButton />
       <style data-proposal-style-config>{template.css}</style>
       <style data-intake-style>{formCss}</style>
       <style>{`

@@ -36,6 +36,7 @@ const {
   handleAuthLogout,
 } = require('./pilot-ops-auth');
 const { createChristmasCampaignApplication } = require('./christmas-campaign-notion');
+const { createAboutPilotApplication } = require('./about-pilot-notion');
 const {
   clientIp,
   assertAllowedOrigin,
@@ -912,6 +913,95 @@ async function handleRequest(req, res) {
           ? "We couldn't save your application right now. Please try again in a moment — booking opens only after it is saved successfully."
           : (error.message || "We couldn't save your application. Please try again."),
         code: error.code || 'christmas_campaign_apply_failed',
+      });
+    }
+    return;
+  }
+
+  if (requestUrl.pathname === '/api/about-pilot/form-token' && req.method === 'GET') {
+    try {
+      assertAllowedOrigin(req);
+      assertTokenRateLimit(clientIp(req));
+      await sendJson(res, 200, issueFormToken());
+    } catch (error) {
+      if (error.retryAfter) res.setHeader('Retry-After', String(error.retryAfter));
+      await sendJson(res, error.status || 500, {
+        error: error.message || 'Unable to issue form token.',
+        code: error.code || 'form_token_failed',
+      });
+    }
+    return;
+  }
+
+  if (requestUrl.pathname === '/api/about-pilot/apply' && req.method === 'POST') {
+    try {
+      const contentType = String(req.headers['content-type'] || '');
+      if (!contentType.toLowerCase().includes('application/json')) {
+        await sendJson(res, 415, { error: 'Content-Type must be application/json.', code: 'unsupported_media_type' });
+        return;
+      }
+
+      assertAllowedOrigin(req);
+      const ip = clientIp(req);
+      const body = await readJsonBody(req);
+
+      assertFormToken(body.formToken);
+      const emailHint = normalizeEmail(body.email);
+      assertRateLimits({ ip, email: emailHint });
+
+      const channelRaw = String(body.channel || '').trim().toUpperCase();
+      const channelHint = channelRaw === 'AMAZON' || channelRaw === 'ASIN' || channelRaw === 'ASIN_PLUS'
+        ? 'AMAZON'
+        : channelRaw === 'DTC'
+          ? 'DTC'
+          : '';
+      if (emailHint && channelHint) {
+        const existing = getRecentApplication(emailHint, `ABOUT:${channelHint}`);
+        if (existing) {
+          await sendJson(res, 409, {
+            ok: false,
+            alreadyApplied: true,
+            pageId: existing.pageId,
+            url: existing.url,
+            channel: channelHint,
+            code: 'already_applied',
+            error:
+              'This work email already submitted an application. Please wait for our follow-up, or use a different work email.',
+          });
+          return;
+        }
+      }
+
+      const result = await createAboutPilotApplication(body);
+      if (!result?.pageId) {
+        await sendJson(res, 502, {
+          ok: false,
+          code: 'notion_save_failed',
+          error:
+            "We couldn't save your application. Please try again — booking opens only after it is saved successfully.",
+        });
+        return;
+      }
+      rememberApplication(result.email || emailHint, `ABOUT:${result.channel}`, result);
+      await sendJson(res, 201, {
+        ok: true,
+        pageId: result.pageId,
+        url: result.url,
+        channel: result.channel,
+      });
+    } catch (error) {
+      console.error('[api/about-pilot/apply]', error && error.message, error && error.code);
+      if (error.retryAfter) res.setHeader('Retry-After', String(error.retryAfter));
+      const notionFailed =
+        error.code === 'notion_api_error'
+        || error.code === 'notion_token_missing'
+        || error.status === 502;
+      await sendJson(res, error.status || 500, {
+        ok: false,
+        error: notionFailed
+          ? "We couldn't save your application right now. Please try again in a moment — booking opens only after it is saved successfully."
+          : (error.message || "We couldn't save your application. Please try again."),
+        code: error.code || 'about_pilot_apply_failed',
       });
     }
     return;

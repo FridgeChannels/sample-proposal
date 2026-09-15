@@ -9,6 +9,11 @@ import { PilotPlanView } from './components/PilotPlanView'
 import { FinanceView } from './components/FinanceView'
 import { AddressView } from './components/AddressView'
 import { GlobalUrgencyRail } from './components/GlobalUrgencyRail'
+import {
+  aboutPageUrlForSn,
+  fetchMagnetExperience,
+  type MagnetExperience,
+} from '../shared/magnetExperience'
 import './styles.css'
 
 const viewFromHash = (): ViewKey => {
@@ -93,6 +98,8 @@ export function App() {
   const [handoffLoading, setHandoffLoading] = useState(Boolean(financeToken))
   const [quoteLoading, setQuoteLoading] = useState(Boolean(magnetSn && !financeToken))
   const [quoteError, setQuoteError] = useState('')
+  const [experience, setExperience] = useState<MagnetExperience | null>(null)
+  const [aboutOpening, setAboutOpening] = useState(false)
   const offerNow = previewOfferNow(order, now)
   const paymentComplete = order.status === 'paid' || order.financeHandoff?.status === 'paid'
   const showGlobalUrgency = !financeToken && !paymentComplete && order.pricing.loaded && view !== 'demo' && view !== 'about'
@@ -115,6 +122,16 @@ export function App() {
       finance_handoff: Boolean(financeToken),
     })
   }, [view, magnetSn, financeToken])
+
+  useEffect(() => {
+    let cancelled = false
+    void fetchMagnetExperience(magnetSn).then((next) => {
+      if (!cancelled) setExperience(next)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [magnetSn])
 
   useEffect(() => {
     window.sessionStorage.setItem('fc-order-summary-draft', JSON.stringify(order))
@@ -218,17 +235,38 @@ export function App() {
     openView('demo')
   }
 
+  const openAboutFridgeChannel = async () => {
+    if (aboutOpening) return
+    setAboutOpening(true)
+    try {
+      const nextExperience = experience || await fetchMagnetExperience(magnetSn)
+      setExperience(nextExperience)
+      const dest = window.top ?? window
+      dest.location.assign(aboutPageUrlForSn(nextExperience, magnetSn))
+    } catch {
+      setAboutOpening(false)
+      openView('about')
+    }
+  }
+
   const blockingError = handoffError || quoteError
   const blockingLoading = handoffLoading || (quoteLoading && !financeToken)
+  const isAsinAbout = (experience || 'dtc') === 'asin_plus'
 
   return (
-    <div className={`post-meeting-app${view === 'demo' ? ' is-live-demo' : ''}${view === 'about' ? ` is-about${window.location.pathname.includes('asin-sample') ? ' is-asin-about' : ''}` : ''}${view === 'plan' ? ' has-plan-dock' : ''}${financeToken ? ' is-finance-handoff' : showGlobalUrgency ? ' has-global-urgency' : ''}`}>
+    <div className={`post-meeting-app${view === 'demo' ? ' is-live-demo' : ''}${view === 'about' ? ` is-about${isAsinAbout ? ' is-asin-about' : ''}` : ''}${view === 'plan' ? ' has-plan-dock' : ''}${financeToken ? ' is-finance-handoff' : showGlobalUrgency ? ' has-global-urgency' : ''}`}>
       {blockingLoading && <main className="finance-empty" aria-label="Loading" />}
       {blockingError && <main className="finance-empty"><h1>Proposal unavailable.</h1><p>{blockingError}</p></main>}
       {!blockingLoading && !blockingError && <>
       {showGlobalUrgency && <GlobalUrgencyRail order={order} now={offerNow} onNavigate={openView} />}
-      {demoMounted && !financeToken && <LiveDemoView active={view === 'demo'} onAboutFridgeChannel={() => openView('about')} />}
-      {aboutMounted && !financeToken && <AboutFridgeChannelView active={view === 'about'} />}
+      {demoMounted && !financeToken && (
+        <LiveDemoView
+          active={view === 'demo'}
+          aboutLoading={aboutOpening}
+          onAboutFridgeChannel={() => { void openAboutFridgeChannel() }}
+        />
+      )}
+      {aboutMounted && !financeToken && <AboutFridgeChannelView active={view === 'about'} experience={experience} />}
       {view === 'content' && !financeToken && <SampleContentView onBack={() => openView('plan')} />}
       {view === 'plan' && !financeToken && order.pricing.loaded && (
         <PilotPlanView

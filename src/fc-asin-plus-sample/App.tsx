@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef } from 'react'
 import { AsinApplyForm } from './AsinApplyForm'
 import { createFcAsinPlusSampleConfig } from './fc-asin-plus-sample-template'
 import { fcAsinPlusSampleContent } from './mock-data'
+import { FloatingBackButton } from '../shared/FloatingBackButton'
 import applyCss from './asin-apply.css?inline'
 
 export const FcAsinPlusSample: React.FC = () => {
@@ -121,6 +122,7 @@ export const FcAsinPlusSample: React.FC = () => {
 
   return (
     <>
+      <FloatingBackButton />
       <style data-fc-asin-plus-sample-styles>{template.css}</style>
       <style data-fc-asin-apply-styles>{applyCss}</style>
       <main className="asin-page" ref={hostRef}>

@@ -27,6 +27,7 @@ const DEFAULT_ALLOWED_ORIGINS = [
   'http://127.0.0.1:4173',
   'http://127.0.0.1:5173',
   'https://dealquest.fridgechannels.com',
+  'https://sample.fridgechannels.com',
 ]
 
 function httpError(status, code, message, extra = {}) {

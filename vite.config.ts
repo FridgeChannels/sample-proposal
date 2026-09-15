@@ -13,7 +13,6 @@ const pilotOpsAuth = require('./pilot-ops-auth.js') as {
   isAuthenticated: (req: import('http').IncomingMessage) => boolean
   redirectToLogin: (res: import('http').ServerResponse, returnUrl?: string) => void
 }
-const API_ORIGIN = 'http://127.0.0.1:4173'
 const SAMPLE_PATH_RE = /^\/(?:gift-proposal|p)\/([^/?#]+)\/?/
 
 function loadPilotOpsEnv() {
@@ -31,6 +30,9 @@ function loadPilotOpsEnv() {
 }
 
 loadPilotOpsEnv()
+
+// Must match server.js PORT (.env). Hardcoding 4173 breaks when PORT=4174.
+const API_ORIGIN = `http://127.0.0.1:${Number(process.env.PORT || 4173)}`
 
 /**
  * In Vite dev, rewrite /p/{sn} to sample or live HTML based on Supabase status
