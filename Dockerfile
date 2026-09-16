@@ -33,7 +33,8 @@ COPY package.json package-lock.json* ./
 RUN npm ci --omit=dev
 
 COPY server.js pilot-commerce.js pilot-session.js pilot-ops-auth.js \
-     christmas-campaign-notion.js christmas-campaign-security.js ./
+     christmas-campaign-notion.js christmas-campaign-security.js \
+     about-pilot-notion.js ./
 COPY public/pilot-plan-login.html ./public/pilot-plan-login.html
 COPY sql ./sql
 COPY proposal-template.md ./
