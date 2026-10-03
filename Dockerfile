@@ -11,6 +11,7 @@ COPY pilot-ops-auth.js ./
 COPY *.html ./
 COPY public ./public
 COPY src ./src
+COPY meeting-intake ./meeting-intake
 
 # Vite inlines VITE_* at build time. Runtime .env on the container does not
 # enable PostHog — pass these as build args (see docker-compose.yml).
@@ -35,6 +36,7 @@ RUN npm ci --omit=dev
 COPY server.js pilot-commerce.js pilot-session.js pilot-ops-auth.js \
      christmas-campaign-notion.js christmas-campaign-security.js \
      about-pilot-notion.js ./
+COPY meeting-intake ./meeting-intake
 COPY public/pilot-plan-login.html ./public/pilot-plan-login.html
 COPY sql ./sql
 COPY proposal-template.md ./
