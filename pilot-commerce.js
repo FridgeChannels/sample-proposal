@@ -450,12 +450,63 @@ function mapPackage(pkg) {
   };
 }
 
+const PACKAGE_CACHE_TTL_MS = 60_000;
+const packageCache = new Map();
+
+async function cachedPackageLookup(key, load, isCacheable) {
+  const hit = packageCache.get(key);
+  if (hit && hit.expiresAt > Date.now()) return hit.promise;
+  const promise = load();
+  packageCache.set(key, { promise, expiresAt: Date.now() + PACKAGE_CACHE_TTL_MS });
+  try {
+    const value = await promise;
+    if (!isCacheable(value)) packageCache.delete(key);
+    return value;
+  } catch (error) {
+    packageCache.delete(key);
+    throw error;
+  }
+}
+
+function loadPackageRowCached(query) {
+  return cachedPackageLookup(`row:${JSON.stringify(query)}`, () => loadPackageRow(query), Boolean);
+}
+
+function loadPackageFeaturesCached(packageId) {
+  return cachedPackageLookup(
+    `features:${packageId}`,
+    () => loadPackageFeatures(packageId),
+    (features) => Array.isArray(features) && features.length > 0,
+  );
+}
+
 async function loadPilotQuote(sn, { includeBilling = true } = {}) {
   const magnetSn = String(sn || '').trim();
   if (!magnetSn) throw httpError('Magnet SN is required', 400);
 
   const brandSelectWithPilot = 'magnet_sn,brand_name,customer_id,magnet_id,status,pilot_kpi,pilot_segment,pilot_duration_days,pilot_confirmed_at';
   const brandSelectBase = 'magnet_sn,brand_name,customer_id,magnet_id,status';
+
+  // Discount -> package -> features only depends on the SN, so it runs alongside the brand/customer lookups.
+  const packageChain = (async () => {
+    const discounts = await supabaseSelect('customer_package_discounts', {
+      select: 'id,customer_id,magnet_sn,package_id,discount_ratio,status,expires_at,notes,updated_at,created_at',
+      magnet_sn: `eq.${magnetSn}`,
+      status: 'eq.active',
+      order: 'updated_at.desc',
+      limit: '5',
+    });
+    const discount = Array.isArray(discounts) ? discounts[0] : null;
+    const pkg = discount?.package_id
+      ? await loadPackageRowCached({ id: `eq.${discount.package_id}` })
+      : await loadPackageRowCached({ code: `eq.${DEFAULT_PACKAGE_CODE}` });
+    if (!pkg || pkg.is_active === false) {
+      throw httpError('Configured package is missing or inactive', 404, 'package_missing');
+    }
+    const includedServices = await loadPackageFeaturesCached(pkg.id);
+    return { discount, pkg, includedServices };
+  })();
+  packageChain.catch(() => {});
 
   let brandRows;
   try {
@@ -480,39 +531,21 @@ async function loadPilotQuote(sn, { includeBilling = true } = {}) {
   let customerBilling = null;
   const customerId = brand.customer_id ?? null;
   if (customerId != null) {
-    const customers = await supabaseSelect('customer', {
-      select: 'id,created_at,email',
-      id: `eq.${customerId}`,
-      limit: '1',
-    });
+    const [customers, billing] = await Promise.all([
+      supabaseSelect('customer', {
+        select: 'id,created_at,email',
+        id: `eq.${customerId}`,
+        limit: '1',
+      }),
+      includeBilling ? loadCustomerBilling(customerId) : null,
+    ]);
     const customer = Array.isArray(customers) ? customers[0] : null;
     customerCreatedAt = customer?.created_at || null;
     customerEmail = customer?.email || null;
-    if (includeBilling) {
-      customerBilling = await loadCustomerBilling(customerId);
-    }
+    customerBilling = billing;
   }
 
-  const discounts = await supabaseSelect('customer_package_discounts', {
-    select: 'id,customer_id,magnet_sn,package_id,discount_ratio,status,expires_at,notes,updated_at,created_at',
-    magnet_sn: `eq.${magnetSn}`,
-    status: 'eq.active',
-    order: 'updated_at.desc',
-    limit: '5',
-  });
-  const discount = Array.isArray(discounts) ? discounts[0] : null;
-
-  let pkg;
-  if (discount?.package_id) {
-    pkg = await loadPackageRow({ id: `eq.${discount.package_id}` });
-  } else {
-    pkg = await loadPackageRow({ code: `eq.${DEFAULT_PACKAGE_CODE}` });
-  }
-  if (!pkg || pkg.is_active === false) {
-    throw httpError('Configured package is missing or inactive', 404, 'package_missing');
-  }
-
-  const includedServices = await loadPackageFeatures(pkg.id);
+  const { discount, pkg, includedServices } = await packageChain;
   const packageInfo = mapPackage(pkg);
 
   let discountInfo;

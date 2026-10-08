@@ -252,20 +252,22 @@ export function App() {
   const blockingError = handoffError || quoteError
   const blockingLoading = handoffLoading || (quoteLoading && !financeToken)
   const isAsinAbout = (experience || 'dtc') === 'asin_plus'
+  // The live demo iframe only needs the SN, so it starts loading without waiting for the quote.
+  const demoVisible = demoMounted && !financeToken && !blockingError
 
   return (
     <div className={`post-meeting-app${view === 'demo' ? ' is-live-demo' : ''}${view === 'about' ? ` is-about${isAsinAbout ? ' is-asin-about' : ''}` : ''}${view === 'plan' ? ' has-plan-dock' : ''}${financeToken ? ' is-finance-handoff' : showGlobalUrgency ? ' has-global-urgency' : ''}`}>
-      {blockingLoading && <main className="finance-empty" aria-label="Loading" />}
+      {blockingLoading && !(view === 'demo' && demoVisible) && <main className="finance-empty" aria-label="Loading" />}
       {blockingError && <main className="finance-empty"><h1>Proposal unavailable.</h1><p>{blockingError}</p></main>}
-      {!blockingLoading && !blockingError && <>
-      {showGlobalUrgency && <GlobalUrgencyRail order={order} now={offerNow} onNavigate={openView} />}
-      {demoMounted && !financeToken && (
+      {demoVisible && (
         <LiveDemoView
           active={view === 'demo'}
           aboutLoading={aboutOpening}
           onAboutFridgeChannel={() => { void openAboutFridgeChannel() }}
         />
       )}
+      {!blockingLoading && !blockingError && <>
+      {showGlobalUrgency && <GlobalUrgencyRail order={order} now={offerNow} onNavigate={openView} />}
       {aboutMounted && !financeToken && <AboutFridgeChannelView active={view === 'about'} experience={experience} />}
       {view === 'content' && !financeToken && <SampleContentView onBack={() => openView('plan')} />}
       {view === 'plan' && !financeToken && order.pricing.loaded && (

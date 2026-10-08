@@ -1,6 +1,8 @@
 const http = require('http');
 const fs = require('fs/promises');
 const path = require('path');
+const zlib = require('zlib');
+const { promisify } = require('util');
 const {
   lookupSamplePhase,
   loadSampleProposalBySn,
@@ -113,6 +115,75 @@ async function sendJson(res, status, payload) {
   res.end(JSON.stringify(payload));
 }
 
+const brotliCompress = promisify(zlib.brotliCompress);
+const gzipCompress = promisify(zlib.gzip);
+const COMPRESSIBLE_EXTS = new Set(['.html', '.js', '.css', '.json', '.svg', '.md', '.txt']);
+const COMPRESS_MIN_BYTES = 1024;
+const HASHED_ASSET_RE = /-[A-Za-z0-9_-]{8}\.(?:js|css|png|jpe?g|webp|svg|woff2?)$/;
+// Hashed dist files never change for a given path, so their compressed bytes can be reused.
+const compressedAssetCache = new Map();
+const COMPRESSED_ASSET_CACHE_MAX = 300;
+
+function pickEncoding(req) {
+  const accept = String(req.headers['accept-encoding'] || '');
+  if (/\bbr\b/.test(accept)) return 'br';
+  if (/\bgzip\b/.test(accept)) return 'gzip';
+  return null;
+}
+
+async function compressBody(body, encoding, cacheKey) {
+  const key = cacheKey ? `${encoding}:${cacheKey}` : null;
+  if (key && compressedAssetCache.has(key)) return compressedAssetCache.get(key);
+  const compressed = encoding === 'br'
+    ? await brotliCompress(body, {
+      params: {
+        [zlib.constants.BROTLI_PARAM_QUALITY]: key ? 11 : 5,
+        [zlib.constants.BROTLI_PARAM_SIZE_HINT]: body.length,
+      },
+    })
+    : await gzipCompress(body, { level: key ? 9 : 6 });
+  if (key) {
+    if (compressedAssetCache.size >= COMPRESSED_ASSET_CACHE_MAX) {
+      compressedAssetCache.delete(compressedAssetCache.keys().next().value);
+    }
+    compressedAssetCache.set(key, compressed);
+  }
+  return compressed;
+}
+
+function staticCacheControl(filePath) {
+  if (filePath.startsWith(path.join(DIST_ROOT, 'assets') + path.sep) && HASHED_ASSET_RE.test(filePath)) {
+    return 'public, max-age=31536000, immutable';
+  }
+  return 'public, max-age=3600, stale-while-revalidate=86400';
+}
+
+// The project root holds server code; only built output under dist/ may serve these types.
+const PRIVATE_ROOT_EXTS = new Set(['.js', '.cjs', '.mjs', '.ts', '.json', '.sql', '.env']);
+
+function isPrivateRootFile(filePath) {
+  const relative = path.relative(ROOT, filePath);
+  if (relative.split(path.sep).some((part) => part.startsWith('.'))) return true;
+  if (relative.startsWith(`dist${path.sep}`)) return false;
+  return PRIVATE_ROOT_EXTS.has(path.extname(filePath).toLowerCase());
+}
+
+async function sendStaticBody(req, res, filePath, body, headers) {
+  const ext = path.extname(filePath).toLowerCase();
+  const out = { ...headers, 'Cache-Control': headers['Cache-Control'] || staticCacheControl(filePath) };
+  const encoding = COMPRESSIBLE_EXTS.has(ext) && body.length >= COMPRESS_MIN_BYTES ? pickEncoding(req) : null;
+  let payload = body;
+  if (encoding) {
+    const cacheKey = out['Cache-Control'].includes('immutable') ? filePath : null;
+    payload = await compressBody(body, encoding, cacheKey);
+    out['Content-Encoding'] = encoding;
+    out.Vary = 'Accept-Encoding';
+  }
+  out['Content-Length'] = payload.length;
+  res.writeHead(200, out);
+  res.end(req.method === 'HEAD' ? undefined : payload);
+}
+
 async function serveStatic(req, res) {
   const requestUrl = new URL(req.url, `http://${req.headers.host}`);
   const pathname = decodeURIComponent(requestUrl.pathname);
@@ -140,19 +211,21 @@ async function serveStatic(req, res) {
   }
 
   const ext = path.extname(filePath);
-  for (const candidate of [filePath, path.normalize(path.join(DIST_ROOT, pathname))]) {
+  const candidates = [path.normalize(path.join(DIST_ROOT, pathname))];
+  if (!isPrivateRootFile(filePath)) candidates.unshift(filePath);
+  for (const candidate of candidates) {
+    let body;
     try {
-      const body = await fs.readFile(candidate);
-      const headers = { 'Content-Type': MIME_TYPES[ext] || 'application/octet-stream' };
-      if (ext === '.pdf') {
-        headers['Content-Disposition'] = 'inline';
-      }
-      res.writeHead(200, headers);
-      res.end(body);
-      return;
+      body = await fs.readFile(candidate);
     } catch (error) {
-      // try next
+      continue;
     }
+    const headers = { 'Content-Type': MIME_TYPES[ext] || 'application/octet-stream' };
+    if (ext === '.pdf') {
+      headers['Content-Disposition'] = 'inline';
+    }
+    await sendStaticBody(req, res, candidate, body, headers);
+    return;
   }
   res.writeHead(404);
   res.end('Not found');
@@ -160,18 +233,27 @@ async function serveStatic(req, res) {
 
 const GIFT_PROPOSAL_ROUTE_RE = /^\/(?:gift-proposal|p)(?:\/([^/?#]+))?\/?$/;
 
-async function serveDistHtml(res, fileName, missingMessage, { injectPublicConfig = false } = {}) {
+function inlineScriptJson(value) {
+  return JSON.stringify(value).replace(/</g, '\\u003c');
+}
+
+async function serveDistHtml(res, fileName, missingMessage, { injectPublicConfig = false, samplePhase = null } = {}) {
   try {
+    const needsInjection = injectPublicConfig || samplePhase;
     let body = await fs.readFile(
       path.join(DIST_ROOT, fileName),
-      injectPublicConfig ? 'utf8' : undefined,
+      needsInjection ? 'utf8' : undefined,
     );
-    if (injectPublicConfig && typeof body === 'string') {
+    if (needsInjection && typeof body === 'string') {
+      let injection = '';
       const legalBase = String(process.env.VITE_LEGAL_DOCS_BASE_URL || process.env.LEGAL_DOCS_BASE_URL || '').replace(/\/$/, '');
-      if (legalBase) {
-        const injection = `<script>window.__FC_LEGAL_DOCS_BASE_URL__=${JSON.stringify(legalBase)};</script>`;
-        body = body.replace('</head>', `${injection}</head>`);
+      if (injectPublicConfig && legalBase && !body.includes('__FC_LEGAL_DOCS_BASE_URL__')) {
+        injection += `<script>window.__FC_LEGAL_DOCS_BASE_URL__=${inlineScriptJson(legalBase)};</script>`;
       }
+      if (samplePhase) {
+        injection += `<script>window.__FC_SAMPLE_PHASE__=${inlineScriptJson(samplePhase)};</script>`;
+      }
+      if (injection) body = body.replace('</head>', `${injection}</head>`);
     }
     res.writeHead(200, {
       'Content-Type': MIME_TYPES['.html'],
@@ -188,12 +270,12 @@ async function serveGiftChallenge(res) {
   await serveDistHtml(res, 'gift-challenge-react.html', 'Failed to load gift challenge proposal (run `npm run build` to generate dist/)');
 }
 
-async function servePostMeeting(res) {
+async function servePostMeeting(res, { samplePhase = null } = {}) {
   await serveDistHtml(
     res,
     'dtc-sample.html',
     'Failed to load DTC sample deal room (run `npm run build` to generate dist/)',
-    { injectPublicConfig: true },
+    { injectPublicConfig: true, samplePhase },
   );
 }
 
@@ -277,9 +359,9 @@ async function servePilotPlanLogin(res) {
 }
 
 async function serveSampleOrLiveBySn(res, sn) {
-  const { phase } = await lookupSamplePhase(sn);
-  if (phase === 'live') {
-    await servePostMeeting(res);
+  const samplePhase = await lookupSamplePhase(sn);
+  if (samplePhase.phase === 'live') {
+    await servePostMeeting(res, { samplePhase: { magnetSn: samplePhase.magnetSn, experience: samplePhase.experience } });
     return;
   }
   await serveGiftChallenge(res);

@@ -28,6 +28,10 @@ export function aboutPageUrlForSn(experience: MagnetExperience, sn: string | nul
 
 export async function fetchMagnetExperience(sn: string | null): Promise<MagnetExperience> {
   if (!sn) return 'dtc'
+  const injected = window.__FC_SAMPLE_PHASE__
+  if (injected?.magnetSn === sn && injected.experience) {
+    return normalizeMagnetExperience(injected.experience)
+  }
   try {
     const response = await fetch(`/api/sample-phase?sn=${encodeURIComponent(sn)}`, {
       headers: { Accept: 'application/json' },
