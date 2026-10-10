@@ -853,21 +853,25 @@ body:has(.post-meeting-app.is-about.is-asin-about){background:#f3f3f3}
   .about-fridgechannel-view.is-asin-about{height:100dvh!important;overflow:hidden!important}
   .about-fridgechannel-view.is-asin-about iframe{height:100%;min-height:100%}
 }
-.live-demo-view.has-flow-cta iframe{height:calc(100% - 147px)}
-.live-demo-view .flow-cta-bar{display:grid;gap:10px;padding:0 0 calc(12px + env(safe-area-inset-bottom))}
+.live-demo-view.has-flow-cta iframe{height:calc(100% - 76px)}
+.live-demo-view .flow-cta-bar{display:grid;gap:10px;padding:0 0 calc(12px + env(safe-area-inset-bottom));background:var(--leg-brand)}
 .live-demo-view .flow-cta-button{position:relative;justify-content:center;text-align:center}
 .live-demo-view .flow-cta-button>span{display:block}
 .live-demo-view .flow-cta-button>b{position:absolute;right:20px}
-.flow-contact-row{display:grid;justify-items:center;gap:4px;margin:0 max(16px,calc((100% - 960px)/2))}
-.flow-copyright{flex:0 1 auto;margin:0;color:var(--leg-muted-foreground);font-size:15px;line-height:1.3;white-space:nowrap}
-.flow-contact-options{display:grid;flex:0 0 auto;grid-template-columns:repeat(3,44px);gap:18px;width:max-content;margin:0}
-.flow-contact-option{display:grid;place-items:center;width:44px;height:44px;border:0;background:transparent;color:var(--leg-foreground);text-decoration:none;transition:transform 100ms ease-out,opacity .16s ease}
+.flow-contact-fab{position:fixed;z-index:71;right:-30px;bottom:calc(92px + env(safe-area-inset-bottom));display:grid;justify-items:end;gap:10px;transition:right 180ms ease-out}
+.flow-contact-fab.is-open{right:max(16px,calc((100% - 960px)/2))}
+.flow-contact-fab-button,.flow-contact-option{display:grid;place-items:center;border:0;border-radius:50%;text-decoration:none;transition:transform 100ms ease-out,opacity .16s ease}
+.flow-contact-fab-button{width:52px;height:52px;background:var(--leg-brand);box-shadow:0 8px 20px color-mix(in oklch,var(--leg-brand) 28%,transparent)}
+.flow-contact-fab-button img{display:block;width:25px;height:25px;object-fit:contain;filter:brightness(0) invert(1)}
+.flow-contact-options{display:grid;grid-template-columns:44px;gap:10px;width:max-content;margin:0;animation:flow-contact-menu-in 160ms ease-out both}
+.flow-contact-option{width:44px;height:44px;background:var(--leg-background);box-shadow:0 6px 16px rgba(18,31,27,.16);color:var(--leg-foreground)}
 .flow-contact-option img{display:block;width:28px;height:28px;object-fit:contain}
-.flow-contact-option:hover{opacity:.72}
-.flow-contact-option:active{transform:scale(.96)}
-.flow-contact-option:focus-visible{outline:2px solid var(--leg-brand);outline-offset:3px}
-@media(max-width:700px){.live-demo-view.has-flow-cta iframe{height:calc(100% - 148px)}.flow-contact-row{gap:4px}.flow-copyright{font-size:14px}.flow-contact-options{grid-row:auto}}
-@media(max-width:420px){.live-demo-view.has-flow-cta iframe{height:calc(100% - 126px);transform:translateY(-16px)}.flow-contact-row{gap:6px}.flow-copyright{font-size:13px}.flow-contact-options{grid-template-columns:repeat(3,36px);gap:10px}.flow-contact-option{width:36px;height:36px}.flow-contact-option img{width:24px;height:24px}}
+.flow-contact-fab-button:hover,.flow-contact-option:hover{opacity:.78}
+.flow-contact-fab-button:active,.flow-contact-option:active{transform:scale(.96)}
+.flow-contact-fab-button:focus-visible,.flow-contact-option:focus-visible{outline:2px solid var(--leg-brand);outline-offset:3px}
+@keyframes flow-contact-menu-in{from{opacity:0;transform:translateY(8px) scale(.96)}to{opacity:1;transform:none}}
+@media(max-width:700px){.live-demo-view.has-flow-cta iframe{height:calc(100% - 72px)}.flow-contact-fab{right:-26px;bottom:calc(84px + env(safe-area-inset-bottom))}.flow-contact-fab.is-open{right:16px}.flow-contact-fab-button{width:48px;height:48px}.flow-contact-options{grid-template-columns:40px;gap:8px}.flow-contact-option{width:40px;height:40px}.flow-contact-option img{width:25px;height:25px}}
+@media(max-width:420px){.live-demo-view.has-flow-cta iframe{height:calc(100% - 56px);transform:translateY(-16px)}.flow-contact-fab{right:-24px;bottom:calc(80px + env(safe-area-inset-bottom))}.flow-contact-fab.is-open{right:12px}.flow-contact-options{grid-template-columns:38px}.flow-contact-option{width:38px;height:38px}.flow-contact-option img{width:23px;height:23px}}
 .pilot-plan-view .flow-cta-button{position:relative;justify-content:center;text-align:center}
 .pilot-plan-view .flow-cta-button>span{display:block}
 .pilot-plan-view .flow-cta-button>b{position:absolute;right:20px}

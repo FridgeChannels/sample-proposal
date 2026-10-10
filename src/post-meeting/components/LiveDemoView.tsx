@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { liveDemoUrlForSn, LIVE_DEMO_URL, snFromLocation } from '../config'
 
 /**
@@ -15,6 +16,7 @@ export function LiveDemoView({
 }) {
   const sn = snFromLocation()
   const src = sn ? liveDemoUrlForSn(sn) : LIVE_DEMO_URL
+  const [contactMenuOpen, setContactMenuOpen] = useState(false)
 
   return (
     <main className={`live-demo-view has-flow-cta${active ? '' : ' is-preserved-hidden'}`} aria-hidden={!active}>
@@ -30,7 +32,9 @@ export function LiveDemoView({
           <span>{aboutLoading ? 'Opening…' : 'About FridgeChannel'}</span>
           <b>→</b>
         </button>
-        <div className="flow-contact-row">
+      </div>
+      <div className={`flow-contact-fab${contactMenuOpen ? ' is-open' : ''}`}>
+        {contactMenuOpen && (
           <nav className="flow-contact-options" aria-label="Contact FridgeChannel directly">
             <a className="flow-contact-option" href="sms:+16208941711" aria-label="Send an SMS to FridgeChannel">
               <img src="/assets/contact/sms.svg" alt="" />
@@ -42,8 +46,16 @@ export function LiveDemoView({
               <img src="/assets/contact/gmail.svg" alt="" />
             </a>
           </nav>
-          <p className="flow-copyright">© 2026 FridgeChannel, All rights reserved</p>
-        </div>
+        )}
+        <button
+          type="button"
+          className="flow-contact-fab-button"
+          aria-label={contactMenuOpen ? 'Close contact options' : 'Contact FridgeChannel'}
+          aria-expanded={contactMenuOpen}
+          onClick={() => setContactMenuOpen((isOpen) => !isOpen)}
+        >
+          <img src="/assets/contact/contact.svg" alt="" />
+        </button>
       </div>
     </main>
   )
