@@ -30,6 +30,20 @@ export function LiveDemoView({
           <span>{aboutLoading ? 'Opening…' : 'About FridgeChannel'}</span>
           <b>→</b>
         </button>
+        <div className="flow-contact-row">
+          <p className="flow-copyright">© 2026 FridgeChannel, All rights reserved</p>
+          <nav className="flow-contact-options" aria-label="Contact FridgeChannel directly">
+            <a className="flow-contact-option" href="sms:+16208941711" aria-label="Send an SMS to FridgeChannel">
+              <img src="/assets/contact/sms.svg" alt="" />
+            </a>
+            <a className="flow-contact-option" href="https://wa.me/16208941711" aria-label="Message FridgeChannel on WhatsApp">
+              <img src="/assets/contact/whatsapp.svg" alt="" />
+            </a>
+            <a className="flow-contact-option" href="mailto:ella@fridgechannels.com" aria-label="Email FridgeChannel">
+              <img src="/assets/contact/gmail.svg" alt="" />
+            </a>
+          </nav>
+        </div>
       </div>
     </main>
   )
