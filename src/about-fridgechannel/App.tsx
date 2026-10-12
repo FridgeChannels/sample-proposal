@@ -3,6 +3,7 @@ import { extractGiftChallengeConfig } from '../template/gift-challenge-template'
 import giftChallengeDocument from './gift-challenge.html?raw'
 import { DtcMeetingForm } from '../../meeting-intake/client/DtcMeetingForm'
 import { FloatingBackButton } from '../shared/FloatingBackButton'
+import { FloatingContactButton } from '../shared/FloatingContactButton'
 import formCss from '../../meeting-intake/styles/dtc.css?raw'
 
 function homepageWithoutFooter(source: string) {
@@ -81,6 +82,7 @@ export function App() {
   return (
     <>
       <FloatingBackButton />
+      <FloatingContactButton />
       <style data-proposal-style-config>{template.css}</style>
       <style data-intake-style>{formCss}</style>
       <style>{`
