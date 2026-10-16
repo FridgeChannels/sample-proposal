@@ -762,6 +762,8 @@
     .channel-plays-grid .channel-play>*{position:relative}
     .channel-play-icon{display:flex;width:120px;height:58px;align-items:center;justify-content:flex-start}
     .channel-play-icon img{display:block;width:82px;height:58px;object-fit:contain;object-position:left center}
+    .channel-play-icon-retail{width:min(230px,100%);gap:12px}
+    .channel-play-icon-retail img{width:calc(50% - 6px);height:58px;object-fit:contain;object-position:center}
     .channel-play-icon svg{display:block;width:108px;height:54px;overflow:visible}
     .channel-plays-grid .package-option:nth-child(n+2)::before{content:none}
     .channel-plays-grid .channel-play h3{margin-top:24px;font-family:Georgia,"Times New Roman",serif;font-size:clamp(1.7rem,2.35vw,2.35rem);font-weight:400;line-height:1.06;letter-spacing:-.025em}
@@ -777,8 +779,8 @@
     @media(max-width:760px){.channel-plays-head p,.channel-plays-takeaway{text-align:left}}
     .channel-detail-panel{min-height:0;margin-top:48px;padding:40px 0 0;border-top:1px solid rgba(32,23,18,.2);border-bottom:0;scroll-margin-top:32px}
     .channel-detail-panel[hidden]{display:none!important}
-    .channel-detail-head{position:relative;padding-right:130px}
-    .channel-detail-head h3{margin-top:20px;font-size:clamp(2rem,3.5vw,3.4rem);line-height:1.1;letter-spacing:-.035em}
+    .channel-detail-head{position:relative;text-align:center}
+    .channel-detail-head h3{max-width:1100px;margin:20px auto 0;font-size:clamp(2rem,3.5vw,3.4rem);line-height:1.1;letter-spacing:-.035em}
     .channel-detail-close{position:absolute;top:0;right:0;padding:6px 0;border:0;background:none;color:var(--rust);font:inherit;font-size:.85rem;cursor:pointer}
     .channel-detail-block{margin-top:32px;min-width:0}
     .channel-detail-block h4{margin:0 0 14px;font-size:1.15rem;line-height:1.3}
@@ -1081,7 +1083,10 @@
             </div>
           </article>
           <article class="package-option channel-play" aria-labelledby="channel-play-retail">
-            <span class="channel-play-icon channel-play-icon-empty" aria-hidden="true"></span>
+            <span class="channel-play-icon channel-play-icon-retail" aria-hidden="true">
+              <img src="/pilot-design-copy/retailers/walmart.png" alt="">
+              <img src="/pilot-design-copy/retailers/walgreens.png" alt="">
+            </span>
             <h3 id="channel-play-retail">Offline retail</h3>
             <p class="channel-play-lead">Turn retail purchases into Ambient Connected Households. Use deliveries from Walmart, Walgreens, and other retailers to establish Ambient Connected Households and guide the next tap back to the relevant retail destination.</p>
             <div class="channel-play-details">
