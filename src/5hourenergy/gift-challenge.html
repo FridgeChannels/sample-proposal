@@ -644,7 +644,7 @@
     .presentation-video-figure{margin:0;text-align:center}
     .presentation-video-figure video{display:block;width:100%;height:auto;aspect-ratio:16/9;margin:0 auto;object-fit:contain;border-radius:18px;background:#171411;box-shadow:0 24px 70px rgba(37,27,22,.16)}
     .presentation-video-figure figcaption{margin-top:16px;color:var(--muted);font-family:"Roboto Mono",monospace;font-size:.76rem;letter-spacing:.1em;text-transform:uppercase}
-    .presentation-outline{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(5,auto);grid-auto-flow:column;column-gap:64px;margin:0;padding:0;list-style:none}
+    .presentation-outline{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(6,auto);grid-auto-flow:column;column-gap:64px;margin:0;padding:0;list-style:none}
     .presentation-outline li{min-width:0;border-top:1px solid var(--line)}
     .presentation-outline a{display:grid;grid-template-columns:28px minmax(0,1fr);align-items:center;gap:16px;min-height:72px;padding:15px 24px;font-size:1rem;line-height:1.45;text-align:left;text-decoration:none;transition:color .2s ease}
     .presentation-outline-number{font-family:"Roboto Mono",monospace;font-size:.83rem;color:var(--rust)}
@@ -669,6 +669,13 @@
     .foundation-vision-statement p{max-width:48ch;margin-top:22px;color:#74675e;font-size:clamp(1rem,1.35vw,1.12rem);line-height:1.75}
     .foundation-vision-keywords{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0 0;padding:0;list-style:none}
     .foundation-vision-keywords li{padding:9px 13px;border:1px solid rgba(236,221,10,.2);border-radius:999px;background:rgba(236,221,10,.055);color:#74675e;font-size:.9rem;line-height:1.3}
+    .foundation-vision-toggle{display:flex;width:38px;height:38px;align-items:center;justify-content:center;margin:18px 0 0 auto;padding:0;border:1px solid rgba(32,23,18,.24);border-radius:50%;background:#fff;color:#201712;font-family:inherit;font-size:1.35rem;font-weight:600!important;line-height:1;text-align:left;cursor:pointer;transition:background .2s ease,border-color .2s ease}
+    .foundation-vision-toggle:hover{border-color:#ecdd0a;background:#ecdd0a}
+    .foundation-vision-toggle:focus-visible{outline:2px solid #ecdd0a;outline-offset:4px}
+    .foundation-vision-toggle-icon{color:#201712;font-size:1.35rem;line-height:1}
+    .foundation-vision-toggle-label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;clip-path:inset(50%)}
+    .foundation-vision-detail{max-width:48ch;margin-top:14px;color:#74675e;font-size:1rem;line-height:1.7}
+    .foundation-vision-detail[hidden]{display:none}
     .foundation-vision-copy.reveal{opacity:0;transform:translateY(18px);transition:opacity .55s ease-out,transform .55s ease-out}
     .foundation-vision-copy.reveal.visible{opacity:1;transform:none}
     @media(prefers-reduced-motion:reduce){.foundation-vision-copy.reveal{opacity:1;transform:none;transition:none}}
@@ -761,6 +768,8 @@
     .channel-plays-grid .channel-play>*{position:relative}
     .channel-play-icon{display:flex;width:120px;height:58px;align-items:center;justify-content:flex-start}
     .channel-play-icon img{display:block;width:82px;height:58px;object-fit:contain;object-position:left center}
+    .channel-play-icon-retail{width:100%;max-width:260px;gap:16px}
+    .channel-play-icon-retail img{width:calc((100% - 16px)/2);min-width:0}
     .channel-play-icon svg{display:block;width:108px;height:54px;overflow:visible}
     .channel-plays-grid .channel-play h3{margin-top:24px;font-family:Georgia,"Times New Roman",serif;font-size:clamp(1.7rem,2.35vw,2.35rem);font-weight:400;line-height:1.06;letter-spacing:-.025em}
     .channel-play-lead{min-height:0;flex:1;margin-top:14px;color:#57534e;font-size:1rem;line-height:1.55}
@@ -823,23 +832,31 @@
     }
     .timeline-roadmap .swim-card-top:before{content:none}
     .channel-reassignment .pilot-intake-head h2{margin-top:18px;font-size:var(--slide-title)}
-    .reassignment-copy{max-width:860px;margin:36px auto 0;text-align:center}
-    .reassignment-copy p{color:#74675e;font-size:clamp(1rem,1.5vw,1.15rem);line-height:1.65}
-    .reassignment-copy p+p{margin-top:24px}
-    .reassignment-copy .reassignment-fee{color:var(--rust)}
-    .reassignment-copy .reassignment-note{font-size:.95rem}
-    @media(max-width:760px){.channel-reassignment .pilot-intake-head,.reassignment-copy{text-align:left}}
-    .value-added-growth-services .pilot-intake-head{max-width:1000px;margin-bottom:72px}
-    .value-added-growth-services .pilot-intake-head h2{margin-top:18px;font-size:clamp(2rem,3.5vw,3.5rem);line-height:1.08;letter-spacing:-.035em}
-    .value-added-services-grid{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:center;gap:20px;width:min(1080px,100%);margin:0 auto}
-    .value-added-service{display:flex;flex:0 1 auto;width:fit-content;max-width:calc(50% - 10px);min-height:0;flex-direction:column;align-items:center;justify-content:center;padding:28px 32px;border:0;border-radius:18px;background:#fff;text-align:center}
-    .value-added-service-number{color:var(--rust);font-family:"Roboto Mono",monospace;font-size:.75rem;letter-spacing:.1em}
-    .value-added-service h3{margin-top:18px;font-size:clamp(1.25rem,2vw,1.65rem);line-height:1.25;letter-spacing:-.025em}
-    .value-added-service p{max-width:38ch;margin-top:10px;color:#74675e;font-size:clamp(1rem,1.35vw,1.12rem);line-height:1.65}
-    .value-added-service:first-child p{max-width:32ch}
-    .value-added-service p strong{color:#201712}
-    .value-added-service-price{color:#ecdd0a!important}
-    @media(max-width:760px){.value-added-growth-services .pilot-intake-head{margin-bottom:48px;text-align:left}.value-added-services-grid{flex-direction:column;align-items:center;gap:14px}.value-added-service{width:100%;max-width:520px;padding:26px 22px}.value-added-service h3{margin-top:18px}}
+    .reassignment-copy{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(260px,.8fr);align-items:stretch;gap:18px 48px;width:min(1040px,100%);margin:36px auto 0}
+    .reassignment-copy p{margin:0;color:#74675e;font-size:clamp(1rem,1.5vw,1.15rem);line-height:1.65}
+    .reassignment-copy .reassignment-intro,.reassignment-copy .reassignment-example{grid-column:1}
+    .reassignment-copy .reassignment-example{margin-top:2px}
+    .reassignment-copy .reassignment-fee{grid-column:2;grid-row:1/3;align-self:center;padding:26px 28px;border-left:3px solid #ecdd0a;background:rgba(236,221,10,.08);color:#201712;font-size:clamp(1.15rem,1.7vw,1.4rem);font-weight:600}
+    .reassignment-copy .reassignment-fee strong{color:#9d9200;font-weight:700!important}
+    .reassignment-copy .reassignment-example strong{color:#201712;font-weight:700!important}
+    .reassignment-copy .reassignment-note{grid-column:1/-1;padding-top:20px;border-top:1px solid rgba(32,23,18,.12);font-size:.98rem}
+    .quarterly-advisory .pilot-intake-head{max-width:1060px;margin:0 auto 18px;text-align:center}
+    .quarterly-advisory .pilot-intake-head h2{margin-top:16px;font-size:clamp(2rem,3.3vw,3.4rem);line-height:1.08;letter-spacing:-.035em}
+    .advisory-lead{max-width:1000px;margin:0 auto 30px;color:#74675e;font-size:clamp(1rem,1.4vw,1.12rem);line-height:1.6;text-align:center}
+    .advisory-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(18px,3vw,36px);width:min(1120px,100%);margin:0 auto}
+    .advisory-grid article{padding-top:18px;border-top:2px solid rgba(236,221,10,.65)}
+    .advisory-grid h3{margin:0;font-size:clamp(1.1rem,1.55vw,1.35rem);line-height:1.3;letter-spacing:-.02em}
+    .advisory-grid p{display:-webkit-box;overflow:hidden;margin:10px 0 0;color:#74675e;font-size:.96rem;line-height:1.55;-webkit-box-orient:vertical;-webkit-line-clamp:4}
+    .advisory-grid p.is-expanded{display:block;overflow:visible;-webkit-line-clamp:unset}
+    #quarterly-growth-advisory .advisory-toggle{display:flex;width:38px;height:38px;align-items:center;justify-content:center;margin:10px 0 0;padding:0;border:1px solid rgba(32,23,18,.24);border-radius:50%;background:#fff;color:#201712;font-family:inherit;font-size:1.35rem;font-weight:600!important;line-height:1;cursor:pointer;transition:background .2s ease,border-color .2s ease}
+    #quarterly-growth-advisory .advisory-toggle:hover{border-color:#ecdd0a;background:#ecdd0a}
+    .advisory-toggle:focus-visible{outline:2px solid #ecdd0a;outline-offset:4px;border-radius:2px}
+    .advisory-toggle[hidden]{display:none!important}
+    .advisory-toggle-label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;clip-path:inset(50%)}
+    .advisory-footer{margin:26px auto 0;text-align:center}
+    .advisory-takeaway{margin:0;font-size:clamp(1.08rem,1.6vw,1.3rem);line-height:1.4}
+    .advisory-note{max-width:1000px;margin:10px auto 0;color:#74675e;font-size:.9rem;line-height:1.5}
+    @media(max-width:760px){.channel-reassignment .pilot-intake-head,.reassignment-copy{text-align:left}.reassignment-copy{grid-template-columns:1fr;gap:18px;margin-top:28px}.reassignment-copy .reassignment-fee{grid-column:1;grid-row:auto;padding:20px}.reassignment-copy .reassignment-note{grid-column:1}.quarterly-advisory .pilot-intake-head{text-align:left}.advisory-lead{text-align:left}.advisory-grid{grid-template-columns:1fr;gap:20px}.advisory-grid article{padding-top:14px}.advisory-footer{text-align:left}}
     .next-steps .wrap{width:min(1080px,calc(100% - 40px))}
     .next-steps .presentation-chapter-label{color:#ecdd0a}
     .next-steps .working-head{margin-bottom:56px;text-align:center}
@@ -916,8 +933,7 @@
     <section class="hero meeting-hero" id="meeting-outcome">
       <div class="wrap hero-grid">
         <div class="hero-copy reveal">
-          <div class="eyebrow">Pilot Design Meeting</div>
-          <h1><span class="presentation-cover-brands">5-hour ENERGY × FridgeChannel</span><span class="presentation-cover-type">Presentation</span></h1>
+          <h1><span class="presentation-cover-brands">5-hour ENERGY × FridgeChannel</span></h1>
         </div>
       </div>
       <div class="cover-product-confetti" aria-hidden="true">
@@ -949,15 +965,16 @@
         <nav aria-label="Presentation chapters">
           <ol class="presentation-outline">
             <li><a href="#foundation-vision"><span class="presentation-outline-number">01</span><span>Foundation &amp; Vision</span></a></li>
-                        <li><a href="#rewards"><span class="presentation-outline-number">02</span><span>A New Growth Unit</span></a></li>
-            <li><a href="#growth-metric"><span class="presentation-outline-number">03</span><span>Measuring the Growth Unit</span></a></li>
+            <li><a href="#rewards"><span class="presentation-outline-number">02</span><span>Ambient Connected Household</span></a></li>
+            <li><a href="#growth-metric"><span class="presentation-outline-number">03</span><span>Ambient Connected Household Rate</span></a></li>
             <li><a href="#introducing-fridge-channels"><span class="presentation-outline-number">04</span><span>Introducing Fridge Channels</span></a></li>
             <li><a href="#package-options"><span class="presentation-outline-number">05</span><span>Three Channel Plays</span></a></li>
             <li><a href="#dtc-how-it-works"><span class="presentation-outline-number">06</span><span>DTC: How It Works</span></a></li>
             <li><a href="#amazon-how-it-works"><span class="presentation-outline-number">07</span><span>Amazon: How It Works</span></a></li>
             <li><a href="#offline-retail-how-it-works"><span class="presentation-outline-number">08</span><span>Offline Retail: How It Works</span></a></li>
-            <li><a href="#value-added-growth-services"><span class="presentation-outline-number">09</span><span>Value-Added Growth Services</span></a></li>
-            <li><a href="#next-steps"><span class="presentation-outline-number">10</span><span>Next Steps</span></a></li>
+            <li><a href="#strategic-channel-reassignment"><span class="presentation-outline-number">09</span><span>Strategic Channel Reassignment</span></a></li>
+            <li><a href="#quarterly-growth-advisory"><span class="presentation-outline-number">10</span><span>Complimentary Quarterly Growth Advisory—First Year</span></a></li>
+            <li><a href="#next-steps"><span class="presentation-outline-number">11</span><span>Next Steps</span></a></li>
           </ol>
         </nav>
       </div>
@@ -979,6 +996,8 @@
                 <li>Customer retention</li>
                 <li>Repeat orders</li>
               </ul>
+              <button class="foundation-vision-toggle" type="button" aria-label="Expand full context" aria-expanded="false" aria-controls="foundation-vision-detail-acquisition" data-show-label="Expand full context" data-hide-label="Collapse full context"><span class="foundation-vision-toggle-label">Expand full context</span><span class="foundation-vision-toggle-icon" aria-hidden="true">↓</span></button>
+              <p class="foundation-vision-detail" id="foundation-vision-detail-acquisition" hidden>Winning new customers is getting more expensive, and AI adds another layer of pressure. As AI assistants and personal agents absorb more discovery and shopping into fewer interfaces, the routes brands rely on to reach new customers could narrow further. We expect acquisition costs to rise substantially-making it even more important to retain the customers already won and earn their next order.</p>
             </div>
           </article>
           <article class="foundation-vision-statement">
@@ -990,6 +1009,8 @@
                 <li>Weaker digital channels</li>
                 <li>Higher re-engagement costs</li>
               </ul>
+              <button class="foundation-vision-toggle" type="button" aria-label="Expand full context" aria-expanded="false" aria-controls="foundation-vision-detail-fatigue" data-show-label="Expand full context" data-hide-label="Collapse full context"><span class="foundation-vision-toggle-label">Expand full context</span><span class="foundation-vision-toggle-icon" aria-hidden="true">↓</span></button>
+              <p class="foundation-vision-detail" id="foundation-vision-detail-fatigue" hidden>Customers are overwhelmed by smartphone notifications and digital messages, from texts and email to video. As attention and response decline, these channels become less effective—and more expensive-for bringing customers back for another purchase.</p>
             </div>
           </article>
         </div>
@@ -1081,7 +1102,7 @@
             </div>
           </article>
           <article class="package-option channel-play" aria-labelledby="channel-play-retail">
-            <span class="channel-play-icon channel-play-icon-empty" aria-hidden="true"></span>
+            <span class="channel-play-icon channel-play-icon-retail" aria-hidden="true"><img src="/5hourenergy/retailers/walmart.png" alt=""><img src="/5hourenergy/retailers/walgreens.png" alt=""></span>
             <h3 id="channel-play-retail">Offline retail</h3>
             <p class="channel-play-lead">Turn retail purchases into Ambient Connected Households. Use deliveries from Walmart, Walgreens, and other retailers to establish Ambient Connected Households and guide the next tap back to the relevant retail destination.</p>
             <div class="channel-play-details">
@@ -1279,24 +1300,49 @@
     </section>
 
     <section class="pilot-plan" id="process">
-      <div class="pilot-intake demo-slide value-added-growth-services" id="value-added-growth-services" aria-labelledby="value-added-growth-title">
+      <div class="pilot-intake demo-slide channel-reassignment" id="strategic-channel-reassignment" aria-labelledby="strategic-channel-reassignment-title">
         <div class="wrap">
           <header class="pilot-intake-head reveal">
-            <div class="presentation-chapter-label">09 · Value-Added Growth Services</div>
-            <h2 id="value-added-growth-title">Strategic Advice and Flexible Channel Routing</h2>
+            <div class="presentation-chapter-label">09 · Strategic Channel Reassignment</div>
+            <h2 id="strategic-channel-reassignment-title">Same Touchpoint. New Channel.</h2>
           </header>
-          <div class="value-added-services-grid reveal">
-            <article class="value-added-service">
-              <span class="value-added-service-number">01</span>
-              <h3>Quarterly growth advisory</h3>
-              <p><strong>Complimentary in year one.</strong> Brand-specific recommendations based on in-home commerce data and retention models.</p>
+          <div class="reassignment-copy reveal">
+            <p class="reassignment-intro">Fridge Channels supports the brand’s channel strategy by remotely reassigning selected FC touchpoints to a different sales channel—without replacing the magnet.</p>
+            <p class="reassignment-example"><strong>Example: Offline retail → DTC.</strong> Redirect selected touchpoints distributed with retail purchases so future taps lead to the brand’s DTC experience.</p>
+            <p class="reassignment-fee"><strong>Channel reassignment fee:</strong> US$0.50 per touchpoint reassigned to a different sales channel.</p>
+            <p class="reassignment-note">Retailer-matched routing remains the default. Cross-channel reassignment is an intentional strategic change, subject to applicable retailer and distribution arrangements.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="pilot-intake demo-slide quarterly-advisory" id="quarterly-growth-advisory" aria-labelledby="quarterly-growth-advisory-title">
+        <div class="wrap">
+          <header class="pilot-intake-head reveal">
+            <div class="presentation-chapter-label">10 · Complimentary Quarterly Growth Advisory—First Year</div>
+            <h2 id="quarterly-growth-advisory-title">In-Home Intelligence. Strategic Advice. Every Quarter.</h2>
+          </header>
+          <p class="advisory-lead reveal">Every quarter during the first year, Fridge Channels combines its in-home commerce habits data and retention models to provide brand-specific strategic consulting—at no additional consulting fee.</p>
+          <div class="advisory-grid reveal">
+            <article>
+              <h3>Understand what happens in the home.</h3>
+              <p>Analyze available household habit, replenishment, and post-tap engagement data to identify patterns and opportunities for your brand.</p>
+              <button class="advisory-toggle" type="button" data-advisory-toggle data-show-label="Expand full text" data-hide-label="Collapse full text" aria-label="Expand full text" aria-expanded="false" hidden><span class="advisory-toggle-label">Expand full text</span><span aria-hidden="true">↓</span></button>
             </article>
-            <article class="value-added-service">
-              <span class="value-added-service-number">02</span>
-              <h3>Channel reassignment</h3>
-              <p><strong class="value-added-service-price">US$0.50 per touchpoint.</strong> Remotely switch selected touchpoints to another sales channel without replacing the magnet. Retailer-matched routing remains the default; changes are subject to applicable retailer and distribution arrangements.</p>
+            <article>
+              <h3>Turn insight into improvement.</h3>
+              <p>Get practical recommendations on customer segments, touchpoint deployment, content, and offers to strengthen personalized experiences, increase the Ambient Connected Household Rate, and support repeat orders, subscriptions, and cross-sell.</p>
+              <button class="advisory-toggle" type="button" data-advisory-toggle data-show-label="Expand full text" data-hide-label="Collapse full text" aria-label="Expand full text" aria-expanded="false" hidden><span class="advisory-toggle-label">Expand full text</span><span aria-hidden="true">↓</span></button>
+            </article>
+            <article>
+              <h3>Make smarter channel decisions.</h3>
+              <p>Get advice on which household segments to consider for channel reassignment, when to act, and how to align the experience with the brand’s strategic goals and applicable channel arrangements.</p>
+              <button class="advisory-toggle" type="button" data-advisory-toggle data-show-label="Expand full text" data-hide-label="Collapse full text" aria-label="Expand full text" aria-expanded="false" hidden><span class="advisory-toggle-label">Expand full text</span><span aria-hidden="true">↓</span></button>
             </article>
           </div>
+          <footer class="advisory-footer reveal">
+            <p class="advisory-takeaway"><strong>Not just data. A clearer plan for what your brand should do next.</strong></p>
+            <p class="advisory-note">Quarterly advisory is complimentary during the first year. Implemented channel reassignments remain subject to the stated reassignment fee.</p>
+          </footer>
         </div>
       </div>
 
@@ -1343,7 +1389,7 @@
     <section class="working-slide demo-slide next-steps" id="next-steps" aria-labelledby="next-steps-title">
       <div class="wrap">
         <header class="working-head reveal">
-          <div class="presentation-chapter-label">10 · Next Steps</div>
+          <div class="presentation-chapter-label">11 · Next Steps</div>
           <h2 id="next-steps-title">Brand: Choose a Channel, Set a Goal, and Agree on Budget</h2>
         </header>
         <ol class="next-steps-grid reveal">
@@ -2003,6 +2049,47 @@
     });
 
     applyData({});
+    document.querySelectorAll('.foundation-vision-toggle').forEach(button => {
+      const card = button.closest('.foundation-vision-statement');
+      const detail = card?.querySelector('.foundation-vision-detail');
+      const label = button.querySelector('span:first-child');
+      const icon = button.querySelector('.foundation-vision-toggle-icon');
+      if (!card || !detail || !label || !icon) return;
+      button.addEventListener('click', () => {
+        const expanded = button.getAttribute('aria-expanded') !== 'true';
+        button.setAttribute('aria-expanded', String(expanded));
+        button.setAttribute('aria-label', expanded ? button.dataset.hideLabel : button.dataset.showLabel);
+        detail.hidden = !expanded;
+        label.textContent = expanded ? button.dataset.hideLabel : button.dataset.showLabel;
+        icon.textContent = expanded ? '↑' : '↓';
+      });
+    });
+
+    const advisoryToggles = Array.from(document.querySelectorAll('[data-advisory-toggle]'));
+    const updateAdvisoryToggleVisibility = () => {
+      advisoryToggles.forEach(button => {
+        const copy = button.previousElementSibling;
+        if (!copy || button.getAttribute('aria-expanded') === 'true') return;
+        button.hidden = copy.scrollHeight <= copy.clientHeight + 1;
+      });
+    };
+    advisoryToggles.forEach(button => {
+      const copy = button.previousElementSibling;
+      const label = button.querySelector('span:first-child');
+      const icon = button.querySelector('span:last-child');
+      if (!copy || !label || !icon) return;
+      button.addEventListener('click', () => {
+        const expanded = button.getAttribute('aria-expanded') !== 'true';
+        button.setAttribute('aria-expanded', String(expanded));
+        button.setAttribute('aria-label', expanded ? button.dataset.hideLabel : button.dataset.showLabel);
+        copy.classList.toggle('is-expanded', expanded);
+        label.textContent = expanded ? button.dataset.hideLabel : button.dataset.showLabel;
+        icon.textContent = expanded ? '↑' : '↓';
+      });
+    });
+    updateAdvisoryToggleVisibility();
+    window.addEventListener('resize', updateAdvisoryToggleVisibility);
+
     updatePilotDiscountDeadline();
 
     const fridgeChannelLead = document.querySelector('.fridge-channel-text-effect');
