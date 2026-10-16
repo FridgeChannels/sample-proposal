@@ -1232,6 +1232,11 @@ async function handleRequest(req, res) {
     return;
   }
 
+  if (requestUrl.pathname === '/5hourenergy.html') {
+    await serveDistHtml(res, '5hourenergy.html', 'Failed to load 5hourenergy proposal (run `npm run build` to generate dist/)');
+    return;
+  }
+
   const proposalRouteMatch = requestUrl.pathname.match(GIFT_PROPOSAL_ROUTE_RE);
   if (proposalRouteMatch) {
     const sn = proposalRouteMatch[1] ? decodeURIComponent(proposalRouteMatch[1]) : '';
