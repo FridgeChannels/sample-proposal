@@ -208,6 +208,7 @@ export default defineConfig({
         christmasAsinCampaign: resolve(projectRoot, 'christmas-asin-campaign.html'),
         christmasDtcCampaign: resolve(projectRoot, 'christmas-dtc-campaign.html'),
         pilotPlan: resolve(projectRoot, 'pilot-plan.html'),
+        pilotDesignCopy: resolve(projectRoot, 'pilot-design-copy.html'),
         pilotPlanPrep: resolve(projectRoot, 'pilot-plan-prep.html'),
       },
     },
