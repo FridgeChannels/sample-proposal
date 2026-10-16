@@ -183,6 +183,18 @@ export default defineConfig({
             return
           }
 
+          if (url.pathname === '/LuckyEnergy' || url.pathname === '/LuckyEnergy/') {
+            req.url = `/pilot-design-copy.html${url.search}`
+            next()
+            return
+          }
+
+          if (url.pathname === '/5hourenergy' || url.pathname === '/5hourenergy/') {
+            req.url = `/5hourenergy.html${url.search}`
+            next()
+            return
+          }
+
           const rewritten = await resolveSamplePhaseHtml(url.pathname)
           if (rewritten) {
             // Keep path semantics for the client (sn still comes from the browser URL);

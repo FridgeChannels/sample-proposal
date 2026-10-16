@@ -344,6 +344,14 @@ async function servePilotPlanPrep(res) {
   );
 }
 
+async function serveLuckyEnergy(res) {
+  await serveDistHtml(
+    res,
+    'pilot-design-copy.html',
+    'Failed to load Lucky Energy presentation (run `npm run build` to generate dist/)',
+  );
+}
+
 async function servePilotPlanLogin(res) {
   try {
     const body = await fs.readFile(path.join(ROOT, 'public', 'pilot-plan-login.html'));
@@ -1232,8 +1240,21 @@ async function handleRequest(req, res) {
     return;
   }
 
-  if (requestUrl.pathname === '/5hourenergy.html') {
+  if (
+    requestUrl.pathname === '/5hourenergy'
+    || requestUrl.pathname === '/5hourenergy/'
+    || requestUrl.pathname === '/5hourenergy.html'
+  ) {
     await serveDistHtml(res, '5hourenergy.html', 'Failed to load 5hourenergy proposal (run `npm run build` to generate dist/)');
+    return;
+  }
+
+  if (
+    requestUrl.pathname === '/LuckyEnergy'
+    || requestUrl.pathname === '/LuckyEnergy/'
+    || requestUrl.pathname === '/pilot-design-copy.html'
+  ) {
+    await serveLuckyEnergy(res);
     return;
   }
 
