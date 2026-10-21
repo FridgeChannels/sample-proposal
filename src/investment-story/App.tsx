@@ -294,13 +294,13 @@ function App() {
               ['NACS Show 2026', '42'],
               ['LongevityFest 2026', '47'],
               ['Winter FancyFaire 2027', '31'],
-              ['2027 KeHE Summer Show', '112', 'Prior-edition reference'],
+              ['2027 KeHE Summer Show', '112'],
               ['Natural Products Expo West 2027', '227'],
               ['Global Pet Expo 2027', '47'],
-              ['COOC/OOCC 2027 Annual Olive Oil Conference', 'TBD', 'Current-edition list not yet public'],
+              ['COOC/OOCC 2027 Annual Olive Oil Conference', 'TBD'],
               ['Sweets & Snacks Expo 2027', '33'],
-              ['Summer Fancy Food Show 2027', '53', 'Prior-edition reference'],
-            ].map(([name, value, note]) => <div className="story-exhibition" key={name}><span>{name}{note && <small>{note}</small>}</span><strong>{value}</strong></div>)}
+              ['Summer Fancy Food Show 2027', '53'],
+            ].map(([name, value]) => <div className="story-exhibition" key={name}><span>{name}</span><strong>{value}</strong></div>)}
             <p className="story-market-close">One brand relationship opens the door to <em>thousands</em> of household connections.</p>
           </StoryScreen>
         </section>
