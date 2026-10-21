@@ -108,7 +108,6 @@ function App() {
               <span className="story-brand__mark">
                 <img src="/investment-story/fridgechannel-mark.png" alt="" />
               </span>
-              <span>FridgeChannel</span>
             </div>
             <h2 className="story-display"><AnimatedText text="Fridge Channel" animationType="letters" staggerDelay={0.035} duration={0.55} /></h2>
             <p className="story-deck"><AnimatedText text="In-Home Retention Intelligence for CPG" animationType="words" staggerDelay={0.08} duration={0.55} delay={0.25} /></p>
