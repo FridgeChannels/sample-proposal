@@ -76,15 +76,6 @@ function App() {
 
   return (
     <div className="story-page">
-      <header className="story-header">
-        <a className="story-brand" href="#top" aria-label="FridgeChannel investment story, back to top">
-          <span className="story-brand__mark" aria-hidden="true">
-            <img src="/investment-story/fridgechannel-mark.png" alt="" />
-          </span>
-          <span>FridgeChannel</span>
-        </a>
-      </header>
-
       <main id="top">
         <section className="story-opening story-opening--image-01" id="story-intro" aria-labelledby="investment-story-title">
           <div className="story-opening__inner">

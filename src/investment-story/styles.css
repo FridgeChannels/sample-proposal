@@ -1,7 +1,6 @@
 * { box-sizing: border-box; }
 
 :root {
-  --story-header-height: 50px;
   --story-viewport-height: 100vh;
 }
 
@@ -15,7 +14,6 @@
 
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: var(--story-header-height);
   scroll-snap-type: y mandatory;
 }
 
@@ -33,20 +31,6 @@ body {
   margin: 0 auto;
   background: var(--ui-paper);
   overflow: clip;
-}
-
-.story-header {
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-template-rows: 50px;
-  align-items: center;
-  min-height: var(--story-header-height);
-  padding: 0 20px;
-  background: transparent;
-  backdrop-filter: none;
 }
 
 .story-brand {
@@ -73,14 +57,14 @@ body {
 .story-brand--centered .story-brand__mark { flex-basis: 52px; width: 52px; height: 52px; }
 .story-brand--centered .story-brand__mark img { top: -10px; left: -10px; width: 72px; height: 72px; }
 
-.story-brand:focus-visible,.story-text-link:focus-visible,.story-footer a:focus-visible,.story-scroll-link:focus-visible,.story-opening__down:focus-visible { outline: 2px solid var(--ui-lilac); outline-offset: 3px; }
+.story-text-link:focus-visible,.story-footer a:focus-visible,.story-scroll-link:focus-visible,.story-opening__down:focus-visible { outline: 2px solid var(--ui-lilac); outline-offset: 3px; }
 
 .story-opening,.story-screen {
   position: relative;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  min-height: calc(var(--story-viewport-height) - var(--story-header-height));
+  min-height: var(--story-viewport-height);
   scroll-snap-align: start;
   scroll-snap-stop: always;
 }
@@ -345,7 +329,7 @@ body {
   background-size: auto 120%;
 }
 .story-screen--steps {
-  min-height: calc(var(--story-viewport-height) - var(--story-header-height));
+  min-height: var(--story-viewport-height);
   padding: clamp(36px, 8svh, 72px) 22px;
   scroll-snap-stop: normal;
 }
@@ -503,7 +487,6 @@ body {
 }
 
 @media (min-width: 620px) {
-  .story-header { padding-right: 30px; padding-left: 30px; }
   .story-opening { padding-right: 42px; padding-left: 42px; }
   .story-screen { padding-right: 42px; padding-left: 42px; }
   .story-screen--steps { padding: 0; }
