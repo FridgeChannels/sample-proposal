@@ -1,0 +1,47 @@
+.ui-icon-nav {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px;
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius-pill);
+  background: var(--ui-surface);
+}
+
+.ui-icon-nav button {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: var(--ui-radius-pill);
+  background: transparent;
+  color: var(--ui-muted);
+  font: 600 11px var(--ui-font-sans);
+  cursor: pointer;
+}
+
+.ui-icon-nav button svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ui-icon-nav button.is-active {
+  background: var(--ui-ink);
+  color: white;
+}
+
+.ui-icon-nav button:focus-visible {
+  outline: 3px solid var(--ui-lilac);
+  outline-offset: 2px;
+}
+
+.ui-icon-nav__label {
+  white-space: nowrap;
+}

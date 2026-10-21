@@ -1,0 +1,25 @@
+:root {
+  --ui-ink: #050505;
+  --ui-deep: #001b1b;
+  --ui-ink-soft: #292929;
+  --ui-muted: #777777;
+  --ui-paper: #f7f7f6;
+  --ui-paper-warm: #f3f2e9;
+  --ui-surface: #ffffff;
+  --ui-line: #d4d4d0;
+  --ui-mist: #ebebeb;
+  --ui-lilac: #beb8f4;
+  --ui-gold: #d0bb80;
+  --ui-teal: #79b7c0;
+  --ui-mint: #91dcb8;
+  --ui-clay: #bea17f;
+  --ui-coral: #e29b74;
+  --ui-lemon: #efed55;
+  --ui-radius-sm: 12px;
+  --ui-radius-md: 22px;
+  --ui-radius-lg: 32px;
+  --ui-radius-pill: 999px;
+  --ui-shadow-soft: 0 18px 48px rgba(0, 0, 0, 0.08);
+  --ui-font-sans: "Avenir Next", "Helvetica Neue", sans-serif;
+  --ui-font-serif: "Iowan Old Style", "Baskerville", Georgia, serif;
+}

@@ -1,0 +1,38 @@
+.ui-icon-button {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 1px solid var(--ui-line);
+  border-radius: 50%;
+  background: var(--ui-surface);
+  color: var(--ui-ink);
+  font: 400 22px/1 var(--ui-font-sans);
+  cursor: pointer;
+  transition: background .18s ease,color .18s ease,transform .18s ease;
+}
+
+.ui-icon-button:hover {
+  transform: rotate(5deg);
+  background: var(--ui-ink);
+  color: white;
+}
+
+.ui-icon-button:focus-visible {
+  outline: 3px solid var(--ui-lilac);
+  outline-offset: 3px;
+}
+
+.ui-icon-button--dark {
+  border-color: var(--ui-ink);
+  background: var(--ui-ink);
+  color: white;
+}
+
+.ui-icon-button--light {
+  border-color: rgba(255,255,255,.35);
+  background: transparent;
+  color: white;
+}

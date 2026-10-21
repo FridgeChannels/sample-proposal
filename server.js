@@ -1165,6 +1165,24 @@ async function handleRequest(req, res) {
   }
 
   if (
+    requestUrl.pathname === '/playground'
+    || requestUrl.pathname === '/playground/'
+    || requestUrl.pathname === '/playground.html'
+  ) {
+    await serveDistHtml(res, 'playground.html', 'Failed to load the design system playground (run `npm run build` to generate dist/)');
+    return;
+  }
+
+  if (
+    requestUrl.pathname === '/investment-story'
+    || requestUrl.pathname === '/investment-story/'
+    || requestUrl.pathname === '/investment-story.html'
+  ) {
+    await serveDistHtml(res, 'investment-story.html', 'Failed to load the FridgeChannel investment story (run `npm run build` to generate dist/)');
+    return;
+  }
+
+  if (
     requestUrl.pathname === '/qualified-meeting-doc'
     || requestUrl.pathname === '/qualified-meeting-doc/'
     || requestUrl.pathname === '/qualified-meeting-doc.html'

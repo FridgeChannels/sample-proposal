@@ -98,6 +98,18 @@ export default defineConfig({
             return
           }
 
+          if (url.pathname === '/playground' || url.pathname === '/playground/') {
+            req.url = `/playground.html${url.search}`
+            next()
+            return
+          }
+
+          if (url.pathname === '/investment-story' || url.pathname === '/investment-story/') {
+            req.url = `/investment-story.html${url.search}`
+            next()
+            return
+          }
+
           if (url.pathname === '/') {
             req.url = `/gift-challenge-react.html${url.search}`
             next()
@@ -223,6 +235,8 @@ export default defineConfig({
         pilotDesignCopy: resolve(projectRoot, 'pilot-design-copy.html'),
         fiveHourEnergy: resolve(projectRoot, '5hourenergy.html'),
         pilotPlanPrep: resolve(projectRoot, 'pilot-plan-prep.html'),
+        playground: resolve(projectRoot, 'playground.html'),
+        investmentStory: resolve(projectRoot, 'investment-story.html'),
       },
     },
   },

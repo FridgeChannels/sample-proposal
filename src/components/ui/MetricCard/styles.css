@@ -1,0 +1,40 @@
+.ui-metric-card {
+  display: grid;
+  gap: 22px;
+  min-height: 160px;
+  padding: 23px;
+}
+
+.ui-metric-card__top,.ui-metric-card__value-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.ui-metric-card__top {
+  font: 600 11px var(--ui-font-sans);
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  opacity: .76;
+}
+
+.ui-metric-card__icon {
+  font-size: 19px;
+}
+
+.ui-metric-card__value-row strong {
+  font: 400 clamp(30px,4vw,45px)/.95 var(--ui-font-serif);
+  letter-spacing: -.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.ui-metric-card p {
+  margin: -10px 0 0;
+  font: 12px/1.45 var(--ui-font-sans);
+  opacity: .7;
+}
+
+.ui-card--dark .ui-metric-card__top {
+  color: rgba(255,255,255,.7);
+}

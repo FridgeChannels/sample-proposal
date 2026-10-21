@@ -1,0 +1,38 @@
+.pg-spec {
+  margin-top: 10px;
+  color: var(--ui-muted);
+  font-size: 9px;
+}
+
+.pg-spec summary {
+  width: max-content;
+  color: var(--ui-muted);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  cursor: pointer;
+}
+
+.pg-spec[open] {
+  padding: 9px 10px;
+  border: 1px solid var(--ui-line);
+  border-radius: 9px;
+  background: var(--ui-paper);
+}
+
+.pg-spec p {
+  margin: 7px 0 0 !important;
+  font-size: 8px !important;
+  line-height: 1.5;
+}
+
+.pg-spec strong {
+  margin-right: 4px;
+  color: var(--ui-ink);
+  font-weight: 700;
+}
+
+.pg-component-card .pg-spec {
+  position: relative;
+  z-index: 2;
+}

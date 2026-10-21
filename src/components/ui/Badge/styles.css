@@ -1,0 +1,41 @@
+.ui-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 27px;
+  padding: 0 11px;
+  border-radius: var(--ui-radius-pill);
+  font: 600 11px/1 var(--ui-font-sans);
+  letter-spacing: .025em;
+  white-space: nowrap;
+}
+
+.ui-badge--neutral {
+  background: #ededeb;
+  color: var(--ui-ink-soft);
+}
+
+.ui-badge--gold {
+  background: var(--ui-gold);
+  color: var(--ui-ink);
+}
+
+.ui-badge--lilac {
+  background: var(--ui-lilac);
+  color: var(--ui-ink);
+}
+
+.ui-badge--teal {
+  background: var(--ui-teal);
+  color: var(--ui-ink);
+}
+
+.ui-badge--mint {
+  background: var(--ui-mint);
+  color: var(--ui-ink);
+}
+
+.ui-badge--coral {
+  background: var(--ui-coral);
+  color: var(--ui-ink);
+}

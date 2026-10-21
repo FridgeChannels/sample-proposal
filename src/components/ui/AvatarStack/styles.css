@@ -1,0 +1,43 @@
+.ui-avatar-stack {
+  display: flex;
+  align-items: center;
+  padding-left: 4px;
+}
+
+.ui-avatar {
+  display: grid;
+  place-items: center;
+  width: 43px;
+  height: 43px;
+  margin-left: -5px;
+  border: 2px solid var(--ui-surface);
+  border-radius: 50%;
+  font: 700 11px var(--ui-font-sans);
+  letter-spacing: .02em;
+}
+
+.ui-avatar--0 {
+  background: var(--ui-gold);
+  color: var(--ui-ink);
+}
+
+.ui-avatar--1 {
+  background: var(--ui-mint);
+  color: var(--ui-ink);
+}
+
+.ui-avatar--2 {
+  background: var(--ui-lilac);
+  color: var(--ui-ink);
+}
+
+.ui-avatar--3 {
+  background: var(--ui-coral);
+  color: var(--ui-ink);
+}
+
+.ui-avatar--more {
+  background: var(--ui-ink);
+  color: white;
+  font-size: 10px;
+}
