@@ -51,8 +51,8 @@ body {
   align-self: center;
   margin-bottom: clamp(24px, 4vw, 40px);
 }
-.story-brand--centered .story-brand__mark { flex-basis: 52px; width: 52px; height: 52px; }
-.story-brand--centered .story-brand__mark img { top: -10px; left: -10px; width: 72px; height: 72px; }
+.story-brand--centered .story-brand__mark { flex-basis: 100px; width: 100px; height: 100px; }
+.story-brand--centered .story-brand__mark img { top: 0; left: 0; width: 100px; height: 100px; }
 
 .story-text-link:focus-visible,.story-footer a:focus-visible,.story-scroll-link:focus-visible,.story-opening__down:focus-visible { outline: 2px solid var(--ui-lilac); outline-offset: 3px; }
 
