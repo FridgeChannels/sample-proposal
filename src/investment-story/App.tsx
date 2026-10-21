@@ -32,8 +32,61 @@ const processSteps = [
   { title: 'Tap, shop, and reorder.', description: 'When needed, a tap opens a personalized, brand-directed shopping experience—a direct path to the next purchase, without searching or competing recommendations.' },
 ]
 
-function StoryScreen({ id, children, className = '' }: { id?: string; children: ReactNode; className?: string }) {
+function StoryScreen({ id, children, className = '' }: { id?: string; children?: ReactNode; className?: string }) {
   return <article id={id} className={`story-screen ${className}`}>{children}</article>
+}
+
+function ProductTapAnimation() {
+  return (
+    <div className="story-product-demo" role="group" aria-label="Product experience animation">
+      <p className="story-eyebrow story-product-demo__label">PRODUCT EXPERIENCES</p>
+      <svg className="story-product-tap" viewBox="0 0 620 352" role="img" aria-hidden="true" focusable="false">
+        <defs>
+          <linearGradient id="tap-scene-paper" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor="#faf7f0" />
+            <stop offset="1" stopColor="#e9e5dc" />
+          </linearGradient>
+          <linearGradient id="tap-fridge-face" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stopColor="#e4e7e5" />
+            <stop offset=".56" stopColor="#f4f4f0" />
+            <stop offset="1" stopColor="#d9dddc" />
+          </linearGradient>
+          <filter id="tap-scene-shadow" x="-20%" y="-20%" width="140%" height="150%">
+            <feDropShadow dx="0" dy="12" stdDeviation="11" floodColor="#10201f" floodOpacity=".14" />
+          </filter>
+        </defs>
+        <rect width="620" height="352" rx="23" fill="url(#tap-scene-paper)" />
+        <circle cx="151" cy="180" r="133" fill="#ead7c7" fillOpacity=".45" />
+        <g filter="url(#tap-scene-shadow)">
+          <rect x="358" y="24" width="235" height="304" rx="23" fill="url(#tap-fridge-face)" stroke="#c5cbc8" strokeWidth="2" />
+          <path d="M369 190h213" stroke="#c9cecb" strokeWidth="2" />
+          <path d="M558 78v77" stroke="#a8b0ad" strokeWidth="6" strokeLinecap="round" />
+          <path d="M378 42v132" stroke="#fff" strokeOpacity=".55" strokeWidth="2" />
+        </g>
+        <rect x="458" y="132" width="48" height="66" rx="10" fill="#d95130" stroke="#fff" strokeOpacity=".6" strokeWidth="2" filter="url(#tap-scene-shadow)" />
+        <path d="M480 151c7 5 7 14 0 19m7-25c12 9 12 23 0 32" fill="none" stroke="#fff4e9" strokeWidth="2.5" strokeLinecap="round" />
+        <circle className="story-product-tap__pulse" cx="481" cy="165" r="33" fill="none" stroke="#d95130" strokeWidth="3" />
+        <path d="M472 183h18" stroke="#fff4e9" strokeWidth="2" strokeLinecap="round" />
+
+        <g className="story-product-tap__arm">
+          <path d="M-22 246c47-2 97-15 151-37" fill="none" stroke="#183d3a" strokeWidth="58" strokeLinecap="round" />
+          <path d="M-8 225c34-4 65-13 96-26" fill="none" stroke="#28514a" strokeWidth="3" strokeLinecap="round" opacity=".78" />
+          <path d="M111 216c48-15 99-33 153-46 26-7 47-10 66-11" fill="none" stroke="#cf9575" strokeWidth="34" strokeLinecap="round" />
+          <path d="M115 192c7 12 13 23 17 35" fill="none" stroke="#f0bea0" strokeWidth="3" strokeLinecap="round" opacity=".8" />
+        </g>
+
+        <g className="story-product-tap__phone">
+          <path d="M327 166c-11-7-19-2-19 8 0 8 8 17 19 22l12-8-2-21-10-1Z" fill="#cf9575" />
+          <rect x="337" y="111" width="56" height="96" rx="13" fill="#17201f" />
+          <rect x="342" y="117" width="46" height="83" rx="8" fill="#fffaf1" />
+          <rect x="357" y="123" width="16" height="3" rx="1.5" fill="#c7c6bf" />
+          <circle cx="365" cy="192" r="3" fill="#c7c6bf" />
+          <path d="M383 151c9 0 13 6 11 14l-4 14c-2 7-10 8-13 2l-3-12c-2-10 0-17 9-18Z" fill="#d99d7d" />
+          <path d="M384 155c5 2 7 6 6 11" fill="none" stroke="#efbea0" strokeWidth="2" strokeLinecap="round" />
+        </g>
+      </svg>
+    </div>
+  )
 }
 
 function App() {
@@ -98,11 +151,12 @@ function App() {
             >
               {openingCopy}
             </TextGenerateEffect>
-            <a className="story-scroll-link" href="#slide-1" style={{ transitionDelay: `${openingCopyRevealDuration}s` }}>Explore the story <span aria-hidden="true">↓</span></a>
+            <a className="story-scroll-link" href="#slide-video" style={{ transitionDelay: `${openingCopyRevealDuration}s` }}>Explore the story <span aria-hidden="true">↓</span></a>
           </div>
         </section>
 
         <section className="story-section story-section--hero" aria-label="FridgeChannel">
+          <StoryScreen id="slide-video" className="story-screen--video" />
           <StoryScreen id="slide-1" className="story-screen--hero">
             <div className="story-brand story-brand--centered" aria-hidden="true">
               <span className="story-brand__mark">
@@ -308,8 +362,30 @@ function App() {
           </StoryScreen>
         </section>
 
+        <section className="story-section story-section--product-experiences" aria-label="Product experiences">
+          <StoryScreen id="slide-10" className="story-screen--product-experiences">
+            <ProductTapAnimation />
+            <div className="story-product-selection">
+              <div className="story-product-entry-grid">
+                <a className="story-product-entry story-product-entry--amazon" href="/fc-asin-plus-sample.html">
+                  <span className="story-product-entry__index">01</span>
+                  <h3>Amazon Experience</h3>
+                  <p>See where an Amazon customer lands after tapping.</p>
+                  <span className="story-product-entry__action">Try Amazon <span aria-hidden="true">↗</span></span>
+                </a>
+                <a className="story-product-entry story-product-entry--dtc" href="/about-fridgechannel.html">
+                  <span className="story-product-entry__index">02</span>
+                  <h3>DTC Experience</h3>
+                  <p>See the direct-to-brand shopping experience after tap.</p>
+                  <span className="story-product-entry__action">Try DTC <span aria-hidden="true">↗</span></span>
+                </a>
+              </div>
+            </div>
+          </StoryScreen>
+        </section>
+
         <section className="story-section story-section--closing" aria-label="Investment partners">
-          <StoryScreen id="slide-9" className="story-screen--closing">
+          <StoryScreen id="slide-11" className="story-screen--closing">
             <div className="story-closing__content">
               <p className="story-eyebrow">THE OPPORTUNITY</p>
               <h2>Help build CPG’s direct connection to the household.</h2>
