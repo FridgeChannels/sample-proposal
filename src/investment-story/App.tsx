@@ -140,7 +140,10 @@ function App() {
             <h2 className="story-heading">A Consensus on Structural Problem</h2>
             <p className="story-copy story-copy--lead">A consensus emerging from approximately 300 face-to-face brand interviews: stronger retention requires direct access without more interruption.</p>
             <div className="story-cohorts" aria-label="Recent quantified exhibition cohorts">
-              <p className="story-eyebrow">EXHIBITION COHORTS</p>
+              <div className="story-cohorts__heading">
+                <p className="story-eyebrow">EXHIBITION COHORTS</p>
+                <span>Viewed Brands</span>
+              </div>
               {[
                 ['Summer Fancy Food Show 2026', '53'],
                 ['SuperZoo 2026', '125'],
