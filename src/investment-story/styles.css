@@ -207,6 +207,9 @@ body {
 
 .story-display em { font-weight: 400; }
 
+.story-screen--video { align-items: center; justify-content: center; background: #eef0f3; }
+.story-video-label { margin: 0; color: rgba(5,5,5,.55); font-size: clamp(18px, 4vw, 22px); font-weight: 700; letter-spacing: .12em; }
+
 .story-section--hero .story-screen--hero-copy {
   background-color: var(--ui-paper-warm);
   background-image: url('/investment-story/backgrounds/06-orange-gradient.jpg');

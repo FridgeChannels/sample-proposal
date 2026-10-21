@@ -156,7 +156,9 @@ function App() {
         </section>
 
         <section className="story-section story-section--hero" aria-label="FridgeChannel">
-          <StoryScreen id="slide-video" className="story-screen--video" />
+          <StoryScreen id="slide-video" className="story-screen--video">
+            <p className="story-video-label">展示视频</p>
+          </StoryScreen>
           <StoryScreen id="slide-1" className="story-screen--hero">
             <div className="story-brand story-brand--centered" aria-hidden="true">
               <span className="story-brand__mark">
