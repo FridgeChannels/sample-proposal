@@ -319,11 +319,13 @@ body {
 .story-interview-proof > p { grid-column: 1 / -1; margin: 0; color: inherit; font-size: 16px; line-height: 1.5; }
 .story-text-link { display: inline-flex; align-items: center; gap: 7px; color: var(--ui-ink); font-size: 16px; font-weight: 700; text-underline-offset: 3px; }
 .story-brand-disclosure { position: relative; grid-column: 1 / -1; margin-top: 7px; }
-.story-brand-disclosure summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; background: transparent; color: var(--ui-ink); cursor: pointer; font-size: 16px; font-weight: 700; list-style: none; }
+.story-brand-disclosure summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 64px; padding: 8px 0; border-top: 1px solid color-mix(in srgb,var(--ui-ink) 28%,transparent); border-bottom: 1px solid color-mix(in srgb,var(--ui-ink) 28%,transparent); background: transparent; color: var(--ui-ink); cursor: pointer; font-size: 17px; font-weight: 700; list-style: none; }
 .story-brand-disclosure summary::-webkit-details-marker { display: none; }
 .story-brand-disclosure summary:focus-visible { outline: 2px solid var(--ui-ink); outline-offset: 3px; }
-.story-brand-disclosure summary span { color: inherit; font-size: 18px; font-weight: 400; line-height: .8; transition: transform .18s ease; }
-.story-brand-disclosure[open] summary span { transform: rotate(180deg); }
+.story-brand-disclosure__chevron { display: grid; flex: 0 0 44px; width: 44px; height: 44px; place-items: center; border: 2px solid currentColor; border-radius: 50%; color: var(--ui-ink); transition: color .18s ease, background-color .18s ease, transform .18s ease; }
+.story-brand-disclosure__chevron svg { display: block; width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2.5; }
+.story-brand-disclosure summary:hover .story-brand-disclosure__chevron,.story-brand-disclosure[open] .story-brand-disclosure__chevron { background: var(--ui-ink); color: var(--ui-paper); }
+.story-brand-disclosure[open] .story-brand-disclosure__chevron { transform: rotate(180deg); }
 .story-brand-disclosure__panel { position: absolute; z-index: 12; top: calc(100% + 8px); right: 0; left: 0; max-height: min(40svh, 330px); overflow: auto; padding: 14px; background: var(--ui-paper); color: var(--ui-ink); -webkit-overflow-scrolling: touch; }
 .story-brand-disclosure__panel > .story-eyebrow { color: var(--ui-muted); }
 .story-brand-disclosure__panel > .story-footnote { margin-top: 4px; color: var(--ui-muted); }

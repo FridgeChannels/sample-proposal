@@ -223,7 +223,7 @@ function App() {
               <div><strong>~300</strong><span>CPG brands interviewed<br />face-to-face</span></div>
               <p>This consensus emerged from face-to-face interviews with approximately 300 CPG brands.</p>
               <details className="story-brand-disclosure">
-                <summary>View interviewed brands <span aria-hidden="true">⌄</span></summary>
+                <summary>View interviewed brands <span className="story-brand-disclosure__chevron" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="m5 9 7 7 7-7" /></svg></span></summary>
                 <div className="story-brand-disclosure__panel">
                   <p className="story-eyebrow">FICTIONAL SAMPLE DATA</p>
                   <p className="story-footnote">18 example names shown. Replace with the confirmed brand list when available.</p>
