@@ -24,10 +24,10 @@ const heroCopyStaggerDuration = 0.04
 const heroCopyTransitionDuration = 0.5
 const heroCopySecondaryStartDelay = (heroCopyPrimary.split(' ').length - 1) * heroCopyStaggerDuration + heroCopyTransitionDuration
 const closingContactDetails = {
-  phone: '',
-  email: '',
+  phone: '+1 972-900-0833',
+  email: 'billy@fridgechannels.com',
 }
-const closingContactPhoneUri = closingContactDetails.phone.replace(/[^\d+.-]/g, '')
+const closingContactPhoneUri = closingContactDetails.phone.replace(/[^\d+]/g, '')
 const closingContacts = [
   { label: 'Phone', value: closingContactDetails.phone, placeholder: 'Add phone number', href: closingContactPhoneUri ? `tel:${closingContactPhoneUri}` : '' },
   { label: 'SMS', value: closingContactDetails.phone, placeholder: 'Add phone number', href: closingContactPhoneUri ? `sms:${closingContactPhoneUri}` : '' },
@@ -545,7 +545,12 @@ function App() {
               <div className="story-closing__contact-list">
                 {closingContacts.map(({ label, value, placeholder, href }) => (
                   href ? (
-                    <a className="story-closing__contact-row" href={href} key={label}>
+                    <a
+                      className="story-closing__contact-row"
+                      href={href}
+                      key={label}
+                      data-track={`contact_${label.toLowerCase()}`}
+                    >
                       <span>{label}</span>
                       <span>{value}</span>
                     </a>
