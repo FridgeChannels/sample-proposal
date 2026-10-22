@@ -252,7 +252,7 @@ body {
 .story-screen--steps {
   min-height: var(--story-viewport-height);
   padding: clamp(36px, 8svh, 80px) 22px;
-  scroll-snap-stop: normal;
+  scroll-snap-stop: always;
 }
 .story-screen--steps-first .story-process__content { position: relative; top: clamp(-24px, -5.1vw, -16px); }
 .story-process__content { width: 100%; max-width: 536px; margin: 0 auto; }
