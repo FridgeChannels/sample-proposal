@@ -1,24 +1,27 @@
 import { useEffect, useRef, type ReactNode } from 'react'
 import { POSTHOG_TOKEN, posthogOptions } from './options'
 import { snFromLocation } from './sn'
-import type { PostHog } from 'posthog-js'
+import type { CaptureOptions, PostHog } from 'posthog-js'
 
-export type ProposalAnalyticsPage = 'sample' | 'live'
+export type ProposalAnalyticsPage = 'sample' | 'live' | 'investor'
 
 type AnalyticsRootProps = {
   page: ProposalAnalyticsPage
   children: ReactNode
   /** Observe `main > section` dwell time (gift-challenge deck). */
   trackSectionDwell?: boolean
+  /** Record a session replay, including cross-origin iframes that also run PostHog. */
+  sessionReplay?: boolean
 }
 
 let posthogClient: PostHog | null = null
-const pendingEvents: Array<[string, Record<string, unknown> | undefined]> = []
+const pendingEvents: Array<[string, Record<string, unknown> | undefined, CaptureOptions | undefined]> = []
+const readyListeners: Array<(client: PostHog) => void> = []
 
 function flushPending(client: PostHog) {
   while (pendingEvents.length) {
-    const [event, properties] = pendingEvents.shift()!
-    client.capture(event, properties)
+    const [event, properties, options] = pendingEvents.shift()!
+    client.capture(event, properties, options)
   }
 }
 
@@ -143,7 +146,7 @@ function startSectionDwell(client: PostHog): () => void {
  * Boots PostHog only when `VITE_POSTHOG_PROJECT_TOKEN` is set.
  * The SDK is dynamically imported so builds without a token stay lean.
  */
-export function AnalyticsRoot({ page, children, trackSectionDwell = false }: AnalyticsRootProps) {
+export function AnalyticsRoot({ page, children, trackSectionDwell = false, sessionReplay = false }: AnalyticsRootProps) {
   const dwellStopRef = useRef<(() => void) | null>(null)
 
   useEffect(() => {
@@ -154,11 +157,18 @@ export function AnalyticsRoot({ page, children, trackSectionDwell = false }: Ana
     void import('posthog-js').then(({ default: posthog }) => {
       if (cancelled) return
       if (!posthogClient) {
-        posthog.init(token, posthogOptions)
+        posthog.init(token, sessionReplay
+          ? {
+              ...posthogOptions,
+              disable_session_recording: false,
+              session_recording: { ...posthogOptions.session_recording, recordCrossOriginIframes: true },
+            }
+          : posthogOptions)
         posthogClient = posthog
       }
       flushPending(posthog)
       bindMagnetSession(posthog, page)
+      readyListeners.splice(0).forEach((listener) => listener(posthog))
       if (trackSectionDwell) {
         dwellStopRef.current?.()
         dwellStopRef.current = startSectionDwell(posthog)
@@ -170,17 +180,25 @@ export function AnalyticsRoot({ page, children, trackSectionDwell = false }: Ana
       dwellStopRef.current?.()
       dwellStopRef.current = null
     }
-  }, [page, trackSectionDwell])
+  }, [page, trackSectionDwell, sessionReplay])
 
   return <>{children}</>
 }
 
 /** Safe custom capture when PostHog may be uninitialized (no env token). */
-export function captureEvent(event: string, properties?: Record<string, unknown>) {
+export function captureEvent(event: string, properties?: Record<string, unknown>, options?: CaptureOptions) {
   if (!POSTHOG_TOKEN) return
   if (!posthogClient) {
-    pendingEvents.push([event, properties])
+    pendingEvents.push([event, properties, options])
     return
   }
-  posthogClient.capture(event, properties)
+  posthogClient.capture(event, properties, options)
+}
+
+/** Resolves once PostHog is initialized; never resolves without a project token. */
+export function whenPosthogReady(): Promise<PostHog> {
+  if (posthogClient) return Promise.resolve(posthogClient)
+  return new Promise((resolve) => {
+    if (POSTHOG_TOKEN) readyListeners.push(resolve)
+  })
 }

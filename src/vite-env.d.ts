@@ -14,4 +14,5 @@ interface ImportMeta {
 interface Window {
   __FC_LEGAL_DOCS_BASE_URL__?: string
   __FC_SAMPLE_PHASE__?: { magnetSn?: string; experience?: string }
+  __FC_INVESTOR_STORY__?: { videoUrl?: string | null; videoPosterUrl?: string | null }
 }

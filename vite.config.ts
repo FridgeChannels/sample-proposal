@@ -46,7 +46,8 @@ async function resolveSamplePhaseHtml(pathname: string): Promise<string | null> 
   try {
     const response = await fetch(`${API_ORIGIN}/api/sample-phase?sn=${encodeURIComponent(sn)}`)
     if (!response.ok) return '/gift-challenge-react.html'
-    const data = (await response.json()) as { phase?: string }
+    const data = (await response.json()) as { phase?: string; experience?: string }
+    if (data.experience === 'investor') return '/investment-story.html'
     return data.phase === 'live' ? '/dtc-sample.html' : '/gift-challenge-react.html'
   } catch {
     // API server may not be up yet; default to sample deck.
@@ -64,6 +65,20 @@ export default defineConfig({
         const legalBase = String(process.env.VITE_LEGAL_DOCS_BASE_URL || '').replace(/\/$/, '')
         if (!legalBase) return html
         const injection = `<script>window.__FC_LEGAL_DOCS_BASE_URL__=${JSON.stringify(legalBase)};</script>`
+        return html.replace('</head>', `${injection}</head>`)
+      },
+    },
+    {
+      // Dev mirror of server.js serveInvestmentStory config injection.
+      name: 'inject-investor-story-config',
+      apply: 'serve',
+      transformIndexHtml(html, ctx) {
+        if (!ctx.filename.endsWith('investment-story.html')) return html
+        const config = {
+          videoUrl: String(process.env.INVESTOR_STORY_VIDEO_URL || '').trim() || null,
+          videoPosterUrl: String(process.env.INVESTOR_STORY_VIDEO_POSTER_URL || '').trim() || null,
+        }
+        const injection = `<script>window.__FC_INVESTOR_STORY__=${JSON.stringify(config).replace(/</g, '\\u003c')};</script>`
         return html.replace('</head>', `${injection}</head>`)
       },
     },

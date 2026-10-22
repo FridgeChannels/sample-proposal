@@ -237,9 +237,25 @@ function inlineScriptJson(value) {
   return JSON.stringify(value).replace(/</g, '\\u003c');
 }
 
-async function serveDistHtml(res, fileName, missingMessage, { injectPublicConfig = false, samplePhase = null } = {}) {
+function investorStoryConfig() {
+  return {
+    videoUrl: String(process.env.INVESTOR_STORY_VIDEO_URL || '').trim() || null,
+    videoPosterUrl: String(process.env.INVESTOR_STORY_VIDEO_POSTER_URL || '').trim() || null,
+  };
+}
+
+async function serveInvestmentStory(res, { samplePhase = null } = {}) {
+  await serveDistHtml(
+    res,
+    'investment-story.html',
+    'Failed to load the FridgeChannel investment story (run `npm run build` to generate dist/)',
+    { samplePhase, investorStory: investorStoryConfig() },
+  );
+}
+
+async function serveDistHtml(res, fileName, missingMessage, { injectPublicConfig = false, samplePhase = null, investorStory = null } = {}) {
   try {
-    const needsInjection = injectPublicConfig || samplePhase;
+    const needsInjection = injectPublicConfig || samplePhase || investorStory;
     let body = await fs.readFile(
       path.join(DIST_ROOT, fileName),
       needsInjection ? 'utf8' : undefined,
@@ -252,6 +268,9 @@ async function serveDistHtml(res, fileName, missingMessage, { injectPublicConfig
       }
       if (samplePhase) {
         injection += `<script>window.__FC_SAMPLE_PHASE__=${inlineScriptJson(samplePhase)};</script>`;
+      }
+      if (investorStory) {
+        injection += `<script>window.__FC_INVESTOR_STORY__=${inlineScriptJson(investorStory)};</script>`;
       }
       if (injection) body = body.replace('</head>', `${injection}</head>`);
     }
@@ -368,6 +387,10 @@ async function servePilotPlanLogin(res) {
 
 async function serveSampleOrLiveBySn(res, sn) {
   const samplePhase = await lookupSamplePhase(sn);
+  if (samplePhase.experience === 'investor') {
+    await serveInvestmentStory(res, { samplePhase: { magnetSn: samplePhase.magnetSn, experience: samplePhase.experience } });
+    return;
+  }
   if (samplePhase.phase === 'live') {
     await servePostMeeting(res, { samplePhase: { magnetSn: samplePhase.magnetSn, experience: samplePhase.experience } });
     return;
@@ -1178,7 +1201,7 @@ async function handleRequest(req, res) {
     || requestUrl.pathname === '/investment-story/'
     || requestUrl.pathname === '/investment-story.html'
   ) {
-    await serveDistHtml(res, 'investment-story.html', 'Failed to load the FridgeChannel investment story (run `npm run build` to generate dist/)');
+    await serveInvestmentStory(res);
     return;
   }
 

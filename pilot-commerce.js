@@ -336,7 +336,9 @@ async function loadSampleProposalBySn(sn) {
 }
 
 function normalizeMagnetExperience(value) {
-  return String(value || '').trim().toLowerCase() === 'asin_plus' ? 'asin_plus' : 'dtc';
+  const normalized = String(value || '').trim().toLowerCase();
+  if (normalized === 'asin_plus' || normalized === 'investor') return normalized;
+  return 'dtc';
 }
 
 async function lookupSamplePhase(sn) {

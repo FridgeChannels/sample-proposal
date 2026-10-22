@@ -1,2 +1,2 @@
-export { AnalyticsRoot, captureEvent, type ProposalAnalyticsPage } from './AnalyticsRoot'
+export { AnalyticsRoot, captureEvent, whenPosthogReady, type ProposalAnalyticsPage } from './AnalyticsRoot'
 export { snFromLocation } from './sn'

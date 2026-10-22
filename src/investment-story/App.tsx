@@ -1,8 +1,18 @@
-import { useLayoutEffect, useState, type ReactNode } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type MouseEvent, type ReactNode } from 'react'
 import { BrandMark } from '../components/ui/BrandMark'
 import ScrollRevealContent from '../components/ui/ScrollRevealContent'
 import { TextGenerateEffect } from '../components/ui/TextGenerateEffect'
 import AnimatedText from '../components/ui/animated-text'
+import { ExperienceView, type ExperienceCloseMethod } from './ExperienceView'
+import {
+  channelFromSearch,
+  readStoryPosition,
+  saveStoryPosition,
+  snFromLocation,
+  storyUrlWithChannel,
+  type InvestorChannel,
+} from './experienceRoute'
+import { currentSlide, recordExperience, setStoryPaused, startStoryTracking, trackInvestor, trackVideo } from './tracking'
 import './styles.css'
 
 const sampleInterviewedBrands = [
@@ -83,8 +93,112 @@ function ProductTapAnimation() {
   )
 }
 
+const EXPERIENCE_OPEN_CLASS = 'story-experience-open'
+
+function StoryVideo() {
+  const config = window.__FC_INVESTOR_STORY__
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const src = config?.videoUrl || null
+
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video || !src) return
+    return trackVideo(video, 'story_intro')
+  }, [src])
+
+  if (!src) return <p className="story-video-label">展示视频</p>
+  return (
+    <video
+      ref={videoRef}
+      className="story-video"
+      src={src}
+      poster={config?.videoPosterUrl || undefined}
+      controls
+      playsInline
+      preload="metadata"
+      data-track="story_video"
+    />
+  )
+}
+
+function scrollToStoryPosition(position: { slideIndex: number; scrollY: number }) {
+  const slide = document.querySelectorAll<HTMLElement>('.story-page .story-screen')[position.slideIndex]
+  window.scrollTo({ top: slide ? slide.offsetTop : position.scrollY, behavior: 'instant' })
+}
+
 function App() {
   const [openPillar, setOpenPillar] = useState<number | null>(null)
+  const sn = snFromLocation()
+  const [channel, setChannel] = useState<InvestorChannel | null>(() => (sn ? channelFromSearch() : null))
+  const experienceRef = useRef<{ channel: InvestorChannel; openedAt: number; scrollY: number; inPageHistory: boolean } | null>(null)
+  const closeMethodRef = useRef<ExperienceCloseMethod | null>(null)
+
+  useEffect(() => startStoryTracking({ restored: false }), [])
+
+  useEffect(() => {
+    const onPopState = () => {
+      const next = sn ? channelFromSearch() : null
+      if (next && !experienceRef.current) {
+        experienceRef.current = { channel: next, openedAt: performance.now(), scrollY: window.scrollY, inPageHistory: true }
+        trackInvestor('experience_opened', { channel: next, entry: 'history_forward' })
+      }
+      setChannel(next)
+    }
+    window.addEventListener('popstate', onPopState)
+    return () => window.removeEventListener('popstate', onPopState)
+  }, [sn])
+
+  useLayoutEffect(() => {
+    const root = document.documentElement
+    if (channel) {
+      if (!experienceRef.current) {
+        // Direct link / refresh on ?experience=: no in-page history entry to pop back to.
+        experienceRef.current = { channel, openedAt: performance.now(), scrollY: window.scrollY, inPageHistory: false }
+        trackInvestor('experience_opened', { channel, entry: 'direct_link' })
+      }
+      root.classList.add(EXPERIENCE_OPEN_CLASS)
+      setStoryPaused(true)
+      return
+    }
+    const closed = experienceRef.current
+    if (!closed) return
+    experienceRef.current = null
+    root.classList.remove(EXPERIENCE_OPEN_CLASS)
+    const stored = readStoryPosition()
+    if (closed.inPageHistory) window.scrollTo({ top: closed.scrollY, behavior: 'instant' })
+    else if (stored) scrollToStoryPosition(stored)
+    setStoryPaused(false)
+    const dwellMs = Math.round(performance.now() - closed.openedAt)
+    recordExperience(closed.channel, dwellMs)
+    trackInvestor('experience_closed', {
+      channel: closed.channel,
+      dwell_ms: dwellMs,
+      method: closeMethodRef.current || 'browser_back',
+      restored_slide_index: stored?.slideIndex ?? null,
+    })
+    closeMethodRef.current = null
+  }, [channel])
+
+  const openExperience = (event: MouseEvent<HTMLAnchorElement>, next: InvestorChannel) => {
+    if (!sn) return
+    event.preventDefault()
+    const slide = currentSlide()
+    saveStoryPosition({ slideIndex: slide?.slide_index ?? 0, scrollY: window.scrollY })
+    experienceRef.current = { channel: next, openedAt: performance.now(), scrollY: window.scrollY, inPageHistory: true }
+    trackInvestor('experience_opened', { channel: next, entry: 'story_button', from_slide_id: slide?.slide_id ?? null, from_slide_index: slide?.slide_index ?? null })
+    window.history.pushState({ investorExperience: next }, '', storyUrlWithChannel(next))
+    setChannel(next)
+  }
+
+  const closeExperience = () => {
+    closeMethodRef.current = 'back_button'
+    if (experienceRef.current?.inPageHistory) {
+      window.history.back()
+      return
+    }
+    window.history.replaceState(null, '', storyUrlWithChannel(null))
+    setChannel(null)
+  }
 
   useLayoutEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) return
@@ -135,7 +249,7 @@ function App() {
             <p className="story-deck"><AnimatedText text="In-Home Retention Intelligence for CPG" animationType="words" staggerDelay={0.08} duration={0.55} delay={0.25} /></p>
           </StoryScreen>
           <StoryScreen id="slide-video" className="story-screen--video">
-            <p className="story-video-label">展示视频</p>
+            <StoryVideo />
           </StoryScreen>
           <StoryScreen className="story-screen--hero-copy">
             <h2 className="story-heading story-section-title story-hero-copy__heading">FridgeChannel</h2>
@@ -221,7 +335,11 @@ function App() {
                         type="button"
                         aria-expanded={isOpen}
                         aria-controls={panelId}
-                        onClick={() => setOpenPillar(isOpen ? null : index)}
+                        data-track={`pillar_toggle:${title}`}
+                        onClick={() => {
+                          setOpenPillar(isOpen ? null : index)
+                          trackInvestor('pillar_toggle', { pillar: title, pillar_index: index + 1, open: !isOpen })
+                        }}
                       >
                         <span>{title}</span>
                         <span className="story-pillar__chevron" aria-hidden="true">⌄</span>
@@ -245,8 +363,11 @@ function App() {
             <div className="story-interview-proof">
               <div><strong>~300</strong><span>CPG brands interviewed<br />face-to-face</span></div>
               <p>This consensus emerged from face-to-face interviews with approximately 300 CPG brands.</p>
-              <details className="story-brand-disclosure">
-                <summary>View interviewed brands <span className="story-brand-disclosure__chevron" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="m5 9 7 7 7-7" /></svg></span></summary>
+              <details
+                className="story-brand-disclosure"
+                onToggle={(event) => trackInvestor('brand_list_toggle', { open: event.currentTarget.open })}
+              >
+                <summary data-track="brand_list_toggle">View interviewed brands <span className="story-brand-disclosure__chevron" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="m5 9 7 7 7-7" /></svg></span></summary>
                 <div className="story-brand-disclosure__panel">
                   <p className="story-eyebrow">FICTIONAL SAMPLE DATA</p>
                   <p className="story-footnote">18 example names shown. Replace with the confirmed brand list when available.</p>
@@ -355,13 +476,23 @@ function App() {
             <ProductTapAnimation />
             <div className="story-product-selection">
               <div className="story-product-entry-grid">
-                <a className="story-product-entry story-product-entry--amazon" href="/fc-asin-plus-sample.html">
+                <a
+                  className="story-product-entry story-product-entry--amazon"
+                  href={sn ? storyUrlWithChannel('asin_plus') : '/fc-asin-plus-sample.html'}
+                  data-track="experience_entry:asin_plus"
+                  onClick={(event) => openExperience(event, 'asin_plus')}
+                >
                   <span className="story-product-entry__index">01</span>
                   <h3>Amazon Experience</h3>
                   <p>See where an Amazon customer lands after tapping.</p>
                   <span className="story-product-entry__action">Try Amazon <span aria-hidden="true">↗</span></span>
                 </a>
-                <a className="story-product-entry story-product-entry--dtc" href="/about-fridgechannel.html">
+                <a
+                  className="story-product-entry story-product-entry--dtc"
+                  href={sn ? storyUrlWithChannel('dtc') : '/about-fridgechannel.html'}
+                  data-track="experience_entry:dtc"
+                  onClick={(event) => openExperience(event, 'dtc')}
+                >
                   <span className="story-product-entry__index">02</span>
                   <h3>DTC Experience</h3>
                   <p>See the direct-to-brand shopping experience after tap.</p>
@@ -380,11 +511,12 @@ function App() {
               <p className="story-footnote">Team, financial model, market analysis, and fundraising terms available in the data room.</p>
             </div>
             <footer className="story-footer story-footer--closing">
-              <a href="#top" aria-label="Back to top">BACK TO TOP ↑</a>
+              <a href="#top" aria-label="Back to top" data-track="back_to_top">BACK TO TOP ↑</a>
             </footer>
           </StoryScreen>
         </section>
       </main>
+      {sn && channel && <ExperienceView key={channel} sn={sn} channel={channel} onBack={closeExperience} />}
     </div>
   )
 }
