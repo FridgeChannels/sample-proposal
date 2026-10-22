@@ -30,7 +30,6 @@ const closingContactDetails = {
 const closingContactPhoneUri = closingContactDetails.phone.replace(/[^\d+]/g, '')
 const closingContacts = [
   { label: 'Phone', value: closingContactDetails.phone, placeholder: 'Add phone number', href: closingContactPhoneUri ? `tel:${closingContactPhoneUri}` : '' },
-  { label: 'SMS', value: closingContactDetails.phone, placeholder: 'Add phone number', href: closingContactPhoneUri ? `sms:${closingContactPhoneUri}` : '' },
   { label: 'Email', value: closingContactDetails.email, placeholder: 'Add email address', href: closingContactDetails.email ? `mailto:${closingContactDetails.email}` : '' },
 ]
 const solutionPillars = [
@@ -478,7 +477,6 @@ function App() {
               ['2027 KeHE Summer Show', '112'],
               ['Natural Products Expo West 2027', '227'],
               ['Global Pet Expo 2027', '47'],
-              ['COOC/OOCC 2027 Annual Olive Oil Conference', 'TBD'],
               ['Sweets & Snacks Expo 2027', '33'],
               ['Summer Fancy Food Show 2027', '53'],
             ].map(([name, value]) => <div className="story-exhibition" key={name}><span>{name}</span><strong>{value}</strong></div>)}
