@@ -1,6 +1,5 @@
 import { useLayoutEffect, useState, type ReactNode } from 'react'
 import { BrandMark } from '../components/ui/BrandMark'
-import { ParticleTitle } from '../components/ui/particle-title'
 import ScrollRevealContent from '../components/ui/ScrollRevealContent'
 import { TextGenerateEffect } from '../components/ui/TextGenerateEffect'
 import AnimatedText from '../components/ui/animated-text'
@@ -16,10 +15,6 @@ const heroCopySecondary = 'Permissioned interactions generate engagement and rep
 const heroCopyStaggerDuration = 0.04
 const heroCopyTransitionDuration = 0.5
 const heroCopySecondaryStartDelay = (heroCopyPrimary.split(' ').length - 1) * heroCopyStaggerDuration + heroCopyTransitionDuration
-const openingCopy = 'As access to consumers becomes more contested and intermediated, CPG brands need lasting household relationships—not another messaging channel. FC helps brands create in-home retention touchpoints that make the brand an ambient presence in everyday life, rather than another interruption. Through ongoing, permissioned interactions, brands learn in-home retention habits—and turn that understanding into a proprietary retention advantage.'
-const openingCopyStaggerDuration = 0.04
-const openingCopyTransitionDuration = 0.5
-const openingCopyRevealDuration = (openingCopy.split(' ').length - 1) * openingCopyStaggerDuration + openingCopyTransitionDuration
 const solutionPillars = [
   { title: 'Ambient Belonging', description: 'A beautiful, welcome presence in household routines—not another app, feed, or notification demanding attention.' },
   { title: 'Independent Access', description: 'A direct path to the brand when needed—without paid rediscovery, algorithmic detours, or competing product recommendations.' },
@@ -97,14 +92,14 @@ function App() {
 
     const revealSelector = [
       '.story-eyebrow', 'h1', 'h2', 'h3', '.story-deck', '.story-copy',
-      '.story-quote', '.story-scroll-link', '.story-cohort-stat', '.story-cohort-caption', '.story-data-row',
+      '.story-quote', '.story-cohort-stat', '.story-cohort-caption', '.story-data-row',
       '.story-pillar', '.story-interview-proof > div', '.story-interview-proof > p', '.story-brand-disclosure',
       '.story-step-title', '.story-learning-note', '.story-revenue-row', '.story-commission',
       '.story-potential-number', '.story-potential-arrow', '.story-potential-value', '.story-potential-caption',
       '.story-potential-copy', '.story-market-target', '.story-exhibition', '.story-market-close', '.story-process__step', '.story-process__closing-note',
       '.story-goal__copy', '.story-closing__lead', '.story-footer--closing',
     ].join(',')
-    const pages = document.querySelectorAll<HTMLElement>('.story-opening, .story-screen')
+    const pages = document.querySelectorAll<HTMLElement>('.story-screen')
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (!entry.isIntersecting) return
@@ -130,31 +125,6 @@ function App() {
   return (
     <div className="story-page">
       <main id="top">
-        <section className="story-opening story-opening--image-01" id="story-intro" aria-labelledby="investment-story-title">
-          <div className="story-opening__inner">
-            <ParticleTitle as="h1" theme="light" className="story-opening__particle-title" text={'A lasting place\nin the household'} />
-          </div>
-          <a className="story-opening__down" href="#story-intro-copy" aria-label="Continue to the investment story">
-            <span aria-hidden="true">↓</span>
-          </a>
-          <div className="story-opening__index" aria-hidden="true">FC / 2026</div>
-        </section>
-
-        <section className="story-opening story-opening--image-01" id="story-intro-copy" aria-label="Investment story introduction">
-          <div className="story-opening__inner">
-            <TextGenerateEffect
-              as="p"
-              className="story-opening__copy"
-              staggerDuration={openingCopyStaggerDuration}
-              transition={{ duration: openingCopyTransitionDuration, ease: [0.22, 0.7, 0.2, 1] }}
-              emphasis="make the brand an ambient presence in everyday life, rather than another interruption."
-            >
-              {openingCopy}
-            </TextGenerateEffect>
-            <a className="story-scroll-link" href="#slide-video" style={{ transitionDelay: `${openingCopyRevealDuration}s` }}>Explore the story <span aria-hidden="true">↓</span></a>
-          </div>
-        </section>
-
         <section className="story-section story-section--hero" aria-label="FridgeChannel">
           <StoryScreen id="slide-video" className="story-screen--video">
             <p className="story-video-label">展示视频</p>

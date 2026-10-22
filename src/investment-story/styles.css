@@ -54,9 +54,9 @@ body {
 .story-brand--centered .story-brand__mark { flex-basis: 100px; width: 100px; height: 100px; }
 .story-brand--centered .story-brand__mark img { top: 0; left: 0; width: 100px; height: 100px; }
 
-.story-text-link:focus-visible,.story-footer a:focus-visible,.story-scroll-link:focus-visible,.story-opening__down:focus-visible { outline: 2px solid var(--ui-lilac); outline-offset: 3px; }
+.story-text-link:focus-visible,.story-footer a:focus-visible { outline: 2px solid var(--ui-lilac); outline-offset: 3px; }
 
-.story-opening,.story-screen {
+.story-screen {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -74,44 +74,6 @@ body {
 }
 .story-reveal-ready.is-revealed .story-reveal-item { opacity: 1; transform: translate3d(0,0,0); }
 
-.story-opening {
-  align-items: center;
-  padding: clamp(30px, 7svh, 61px) 25px;
-  background: var(--ui-paper-warm);
-  color: var(--ui-ink);
-}
-
-.story-opening--image-01 {
-  background-color: var(--ui-paper-warm);
-  background-image: url('/investment-story/backgrounds/01-orange-gradient.jpg');
-  background-position: center;
-  background-size: cover;
-  color: var(--ui-ink);
-}
-
-.story-opening__inner { width: 100%; }
-.story-opening__down {
-  position: absolute;
-  bottom: 17px;
-  left: 50%;
-  display: grid;
-  width: 44px;
-  height: 44px;
-  place-items: center;
-  transform: translateX(-50%);
-  color: var(--ui-ink);
-  font-size: 30px;
-  line-height: 1;
-  text-decoration: none;
-}
-.story-opening__particle-title { margin: 0; }
-.story-opening .story-opening__particle-title h1.particle-title__heading { margin: 0; }
-.story-opening .story-opening__particle-title h1.particle-title__heading--visible {
-  margin: 0;
-  font: 500 clamp(32px, 12vw, 64px)/1.08 Inter, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
-  letter-spacing: normal;
-}
-
 .story-eyebrow {
   margin: 0;
   color: var(--ui-muted);
@@ -121,53 +83,6 @@ body {
   line-height: 1.45;
   text-transform: uppercase;
 }
-
-.story-opening h1 {
-  margin: 0 0 23px;
-  color: var(--ui-ink);
-  font: 400 clamp(42px, 12vw, 66px)/.96 var(--ui-font-serif);
-  letter-spacing: -.055em;
-}
-
-.story-opening p {
-  max-width: 480px;
-  margin: 0;
-  color: var(--ui-ink-soft);
-  font-size: 16px;
-  line-height: 1.72;
-}
-
-.story-opening p strong { color: var(--ui-ink); font-weight: 600; }
-.story-opening--image-01 h1 { color: var(--ui-ink); }
-.story-opening--image-01 p { color: var(--ui-ink); }
-.story-opening--image-01 p strong { color: var(--ui-ink); }
-
-.story-scroll-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 28px;
-  color: var(--ui-gold);
-  font-size: 16px;
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.story-opening--image-01 .story-scroll-link { color: var(--ui-ink); }
-
-.story-scroll-link span { font-size: 17px; }
-
-.story-opening__index {
-  position: absolute;
-  right: 24px;
-  bottom: 19px;
-  color: var(--ui-muted);
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: .12em;
-}
-
-.story-opening--image-01 .story-opening__index { color: var(--ui-ink); }
 
 .story-section { scroll-margin-top: 0; }
 .story-screen { padding: clamp(28px, 5svh, 44px) 22px; }
@@ -538,14 +453,6 @@ body {
 .story-product-entry__action { display: flex; align-items: center; gap: 8px; margin-top: 12px; font-size: clamp(16px, 3.5vw, 19px); font-weight: 700; }
 .story-product-entry__action > span { color: #bd4726; font-size: 21px; }
 
-@media (max-width: 420px) and (max-height: 650px) {
-  .story-opening { padding: 24px 20px; }
-  .story-opening h1 { margin-bottom: 16px; font-size: clamp(34px, 10.6vw, 46px); }
-  .story-opening p { font-size: 16px; line-height: 1.52; }
-  .story-scroll-link { margin-top: 14px; }
-  .story-opening__index { display: none; }
-}
-
 @media (max-width: 420px) and (max-height: 700px) {
   .story-screen--steps { padding: 28px 20px; }
   .story-screen--steps-first .story-process__content { top: -10px; }
@@ -576,7 +483,6 @@ body {
 }
 
 @media (min-width: 620px) {
-  .story-opening { padding-right: 42px; padding-left: 42px; }
   .story-screen { padding-right: 42px; padding-left: 42px; }
   .story-screen--steps { padding: 0; }
   .story-screen--steps { padding-right: 42px; padding-left: 42px; }
@@ -585,9 +491,6 @@ body {
 
 @media (min-width: 760px) {
   .story-page { width: min(100%, 1080px); }
-  .story-opening { padding-right: clamp(40px, 6vw, 76px); padding-left: clamp(40px, 6vw, 76px); }
-  .story-opening__inner { max-width: 850px; }
-  .story-opening .story-opening__particle-title h1.particle-title__heading--visible { font-size: clamp(54px, 6.2vw, 82px); }
   .story-screen { padding-right: clamp(40px, 6vw, 76px); padding-left: clamp(40px, 6vw, 76px); }
   .story-screen--steps { padding: clamp(44px, 7svh, 64px) clamp(40px, 6vw, 76px); }
   .story-screen--closing { padding-top: clamp(92px, 16svh, 164px); padding-bottom: 84px; }
@@ -629,8 +532,6 @@ body {
 
 @media (min-width: 980px) {
   .story-page { width: min(100%, 1240px); }
-  .story-opening { padding-right: clamp(72px, 8vw, 112px); padding-left: clamp(72px, 8vw, 112px); }
-  .story-opening__inner { max-width: 920px; }
   .story-screen { padding-right: clamp(72px, 8vw, 112px); padding-left: clamp(72px, 8vw, 112px); }
   .story-screen--steps { padding: clamp(48px, 7svh, 68px) clamp(72px, 8vw, 112px); }
   .story-section--closing .story-footer--closing { right: clamp(72px, 8vw, 112px); left: clamp(72px, 8vw, 112px); }
@@ -752,7 +653,6 @@ body {
 @media (min-width: 1280px) {
   .story-page { width: min(100%, 1360px); }
   .story-screen { padding-right: clamp(112px, 9vw, 150px); padding-left: clamp(112px, 9vw, 150px); }
-  .story-opening { padding-right: clamp(112px, 9vw, 150px); padding-left: clamp(112px, 9vw, 150px); }
   .story-screen--steps { padding-right: clamp(112px, 9vw, 150px); padding-left: clamp(112px, 9vw, 150px); }
   .story-section--closing .story-footer--closing { right: clamp(112px, 9vw, 150px); left: clamp(112px, 9vw, 150px); }
   .story-section--problem #slide-2,
@@ -764,7 +664,6 @@ body {
 }
 
 @media (min-width: 760px) and (max-height: 820px) {
-  .story-opening { padding-top: 34px; padding-bottom: 34px; }
   .story-screen { padding-top: 32px; padding-bottom: 32px; }
   .story-screen--steps { padding-top: 34px; padding-bottom: 34px; }
   .story-process__heading { margin-bottom: 24px; }
