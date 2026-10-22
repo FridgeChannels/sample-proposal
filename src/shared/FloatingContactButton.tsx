@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { useEffect, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent } from 'react'
 
 const fabStyle: CSSProperties = {
   position: 'fixed',
@@ -38,10 +38,71 @@ const buttonStyle: CSSProperties = {
   cursor: 'pointer',
 }
 
+const copiedStyle: CSSProperties = {
+  position: 'absolute',
+  right: 'calc(100% + 12px)',
+  bottom: 10,
+  padding: '8px 12px',
+  borderRadius: 999,
+  background: '#fff',
+  color: '#171717',
+  boxShadow: '0 6px 16px rgba(18, 31, 27, 0.16)',
+  font: '600 13px/1.2 Arial, sans-serif',
+  whiteSpace: 'nowrap',
+  pointerEvents: 'none',
+}
+
+const contactMethods = [
+  { label: 'SMS', href: 'sms:+19729000833', value: '+1 972-900-0833', icon: 'sms.svg', ariaLabel: 'Send an SMS to FridgeChannel' },
+  { label: 'WhatsApp', href: 'https://wa.me/1972900083', value: '+1 972-900-083', icon: 'whatsapp.svg', ariaLabel: 'Message FridgeChannel on WhatsApp' },
+  { label: 'Email', href: 'mailto:billy@fridgechannels.com', value: 'billy@fridgechannels.com', icon: 'gmail.svg', ariaLabel: 'Email FridgeChannel' },
+]
+
+async function copyToClipboard(value: string) {
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(value)
+      return
+    }
+  } catch {
+    // Fall back to a temporary input for browsers that reject clipboard access.
+  }
+
+  const input = document.createElement('textarea')
+  input.value = value
+  input.setAttribute('readonly', '')
+  input.style.position = 'fixed'
+  input.style.opacity = '0'
+  document.body.appendChild(input)
+  input.select()
+  const copied = document.execCommand('copy')
+  input.remove()
+
+  if (!copied) throw new Error('Clipboard copy failed')
+}
+
 /** Persistent, low-friction contact entry shared by the DTC and About pages. */
 export function FloatingContactButton() {
   const [isOpen, setIsOpen] = useState(false)
+  const [copyFeedback, setCopyFeedback] = useState('')
   const rootRef = useRef<HTMLDivElement>(null)
+  const copyFeedbackTimeoutRef = useRef<number | undefined>(undefined)
+
+  const handleContactClick = async (event: ReactMouseEvent<HTMLAnchorElement>, value: string) => {
+    const isDesktop = window.matchMedia('(hover: hover) and (pointer: fine)').matches
+    if (!isDesktop) return
+
+    event.preventDefault()
+    try {
+      await copyToClipboard(value)
+      setCopyFeedback('Copied')
+    } catch {
+      setCopyFeedback('Copy failed')
+    }
+
+    window.clearTimeout(copyFeedbackTimeoutRef.current)
+    copyFeedbackTimeoutRef.current = window.setTimeout(() => setCopyFeedback(''), 1800)
+  }
 
   useEffect(() => {
     if (!isOpen) return
@@ -66,21 +127,26 @@ export function FloatingContactButton() {
     }
   }, [isOpen])
 
+  useEffect(() => () => window.clearTimeout(copyFeedbackTimeoutRef.current), [])
+
   return (
     <div ref={rootRef} style={{ ...fabStyle, ...(isOpen ? openFabStyle : {}) }}>
       {isOpen && (
         <nav style={{ display: 'grid', gap: 10, width: 'max-content', margin: 0 }} aria-label="Contact FridgeChannel directly">
-          <a style={actionStyle} href="sms:+19729000833" aria-label="Send an SMS to FridgeChannel">
-            <img src="/assets/contact/sms.svg" width="28" height="28" alt="" />
-          </a>
-          <a style={actionStyle} href="https://wa.me/1972900083" aria-label="Message FridgeChannel on WhatsApp">
-            <img src="/assets/contact/whatsapp.svg" width="28" height="28" alt="" />
-          </a>
-          <a style={actionStyle} href="mailto:billy@fridgechannels.com" aria-label="Email FridgeChannel">
-            <img src="/assets/contact/gmail.svg" width="28" height="28" alt="" />
-          </a>
+          {contactMethods.map((method) => (
+            <a
+              key={method.label}
+              style={actionStyle}
+              href={method.href}
+              aria-label={method.ariaLabel}
+              onClick={(event) => void handleContactClick(event, method.value)}
+            >
+              <img src={`/assets/contact/${method.icon}`} width="28" height="28" alt="" />
+            </a>
+          ))}
         </nav>
       )}
+      {copyFeedback && <span style={copiedStyle} role="status" aria-live="polite">{copyFeedback}</span>}
       <button
         type="button"
         style={buttonStyle}
