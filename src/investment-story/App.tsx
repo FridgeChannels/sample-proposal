@@ -13,13 +13,11 @@ import {
   type InvestorChannel,
 } from './experienceRoute'
 import { currentSlide, recordExperience, setStoryPaused, startStoryTracking, trackInvestor, trackVideo } from './tracking'
+import { followUpClients } from './follow-up-clients'
 import './styles.css'
 
-const sampleInterviewedBrands = [
-  { cohort: 'SuperZoo 2026', brands: ['Example Brand 001', 'Example Brand 002', 'Example Brand 003', 'Example Brand 004', 'Example Brand 005', 'Example Brand 006'] },
-  { cohort: 'Newtopia Now 2026', brands: ['Example Brand 007', 'Example Brand 008', 'Example Brand 009', 'Example Brand 010', 'Example Brand 011', 'Example Brand 012'] },
-  { cohort: 'NACS Show 2026', brands: ['Example Brand 013', 'Example Brand 014', 'Example Brand 015', 'Example Brand 016', 'Example Brand 017', 'Example Brand 018'] },
-]
+const followUpClientCollator = new Intl.Collator('en', { sensitivity: 'base' })
+const orderedFollowUpClients = [...followUpClients].sort((clientA, clientB) => followUpClientCollator.compare(clientA.name, clientB.name))
 const heroCopyPrimary = 'FridgeChannel helps CPG brands turn product deliveries into lasting household connections—with branded physical touchpoints that consumers keep at home and tap to reorder directly from the brand.'
 const heroCopySecondary = 'Permissioned interactions generate engagement and replenishment signals, building a proprietary data foundation for specialized AI models designed to improve shopping experiences, guide brand decisions, and inform better products.'
 const heroCopyStaggerDuration = 0.04
@@ -367,14 +365,14 @@ function App() {
                 className="story-brand-disclosure"
                 onToggle={(event) => trackInvestor('brand_list_toggle', { open: event.currentTarget.open })}
               >
-                <summary data-track="brand_list_toggle">View interviewed brands <span className="story-brand-disclosure__chevron" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="m5 9 7 7 7-7" /></svg></span></summary>
+                <summary data-track="brand_list_toggle">View follow-up clients <span className="story-brand-disclosure__chevron" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="m5 9 7 7 7-7" /></svg></span></summary>
                 <div className="story-brand-disclosure__panel">
-                  <p className="story-eyebrow">FICTIONAL SAMPLE DATA</p>
-                  <p className="story-footnote">18 example names shown. Replace with the confirmed brand list when available.</p>
-                  {sampleInterviewedBrands.map(({ cohort, brands }) => <div className="story-brand-group" key={cohort}>
-                    <h4>{cohort}</h4>
-                    <ul>{brands.map((brand) => <li key={brand}>{brand}</li>)}</ul>
-                  </div>)}
+                  <ul className="story-follow-up-list">
+                    {orderedFollowUpClients.map(({ name, exhibitions }) => <li key={name}>
+                      <strong>{name}</strong>
+                      {exhibitions.length > 0 && <span>{exhibitions.join(' · ')}</span>}
+                    </li>)}
+                  </ul>
                 </div>
               </details>
             </div>
