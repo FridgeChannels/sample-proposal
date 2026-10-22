@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from 'react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
 
 const fabStyle: CSSProperties = {
   position: 'fixed',
@@ -33,26 +33,50 @@ const buttonStyle: CSSProperties = {
   height: 52,
   padding: 0,
   lineHeight: 0,
-  background: 'var(--leg-brand, #17382b)',
-  boxShadow: '0 8px 20px color-mix(in oklch, var(--leg-brand, #17382b) 28%, transparent)',
+  background: '#f15b2a',
+  boxShadow: '0 8px 20px rgba(241, 91, 42, 0.32)',
   cursor: 'pointer',
 }
 
 /** Persistent, low-friction contact entry shared by the DTC and About pages. */
 export function FloatingContactButton() {
   const [isOpen, setIsOpen] = useState(false)
+  const rootRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!isOpen) return
+
+    const closeOnOutsideClick = (event: MouseEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsOpen(false)
+    }
+
+    // A document click covers mouse clicks on desktop and taps on mobile.
+    document.addEventListener('click', closeOnOutsideClick)
+    document.addEventListener('keydown', closeOnEscape)
+
+    return () => {
+      document.removeEventListener('click', closeOnOutsideClick)
+      document.removeEventListener('keydown', closeOnEscape)
+    }
+  }, [isOpen])
 
   return (
-    <div style={{ ...fabStyle, ...(isOpen ? openFabStyle : {}) }}>
+    <div ref={rootRef} style={{ ...fabStyle, ...(isOpen ? openFabStyle : {}) }}>
       {isOpen && (
         <nav style={{ display: 'grid', gap: 10, width: 'max-content', margin: 0 }} aria-label="Contact FridgeChannel directly">
-          <a style={actionStyle} href="sms:+16208941711" aria-label="Send an SMS to FridgeChannel">
+          <a style={actionStyle} href="sms:+19729000833" aria-label="Send an SMS to FridgeChannel">
             <img src="/assets/contact/sms.svg" width="28" height="28" alt="" />
           </a>
-          <a style={actionStyle} href="https://wa.me/16208941711" aria-label="Message FridgeChannel on WhatsApp">
+          <a style={actionStyle} href="https://wa.me/1972900083" aria-label="Message FridgeChannel on WhatsApp">
             <img src="/assets/contact/whatsapp.svg" width="28" height="28" alt="" />
           </a>
-          <a style={actionStyle} href="mailto:ella@fridgechannels.com" aria-label="Email FridgeChannel">
+          <a style={actionStyle} href="mailto:billy@fridgechannels.com" aria-label="Email FridgeChannel">
             <img src="/assets/contact/gmail.svg" width="28" height="28" alt="" />
           </a>
         </nav>

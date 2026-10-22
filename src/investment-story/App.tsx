@@ -4,6 +4,7 @@ import ScrollRevealContent from '../components/ui/ScrollRevealContent'
 import { TextGenerateEffect } from '../components/ui/TextGenerateEffect'
 import AnimatedText from '../components/ui/animated-text'
 import { ExperienceView, type ExperienceCloseMethod } from './ExperienceView'
+import { FloatingContactButton } from '../shared/FloatingContactButton'
 import {
   channelFromSearch,
   readStoryPosition,
@@ -23,15 +24,6 @@ const heroCopySecondary = 'Permissioned interactions generate engagement and rep
 const heroCopyStaggerDuration = 0.04
 const heroCopyTransitionDuration = 0.5
 const heroCopySecondaryStartDelay = (heroCopyPrimary.split(' ').length - 1) * heroCopyStaggerDuration + heroCopyTransitionDuration
-const closingContactDetails = {
-  phone: '+1 972-900-0833',
-  email: 'billy@fridgechannels.com',
-}
-const closingContactPhoneUri = closingContactDetails.phone.replace(/[^\d+]/g, '')
-const closingContacts = [
-  { label: 'Phone', value: closingContactDetails.phone, placeholder: 'Add phone number', href: closingContactPhoneUri ? `tel:${closingContactPhoneUri}` : '' },
-  { label: 'Email', value: closingContactDetails.email, placeholder: 'Add email address', href: closingContactDetails.email ? `mailto:${closingContactDetails.email}` : '' },
-]
 const solutionPillars = [
   { title: 'Ambient Belonging', description: 'A beautiful, welcome presence in household routines—not another app, feed, or notification demanding attention.' },
   { title: 'Independent Access', description: 'A direct path to the brand when needed—without paid rediscovery, algorithmic detours, or competing product recommendations.' },
@@ -239,7 +231,7 @@ function App() {
       '.story-step-title', '.story-learning-note', '.story-revenue-row', '.story-commission',
       '.story-potential-number', '.story-potential-arrow', '.story-potential-value', '.story-potential-caption',
       '.story-potential-copy', '.story-market-target', '.story-exhibition', '.story-market-close', '.story-process__step', '.story-process__closing-note',
-      '.story-goal__copy', '.story-closing__lead', '.story-closing__contact', '.story-footer--closing',
+      '.story-goal__copy', '.story-closing__lead', '.story-footer--closing',
     ].join(',')
     const pages = document.querySelectorAll<HTMLElement>('.story-screen')
     const observer = new IntersectionObserver((entries) => {
@@ -538,35 +530,13 @@ function App() {
               <p className="story-closing__lead">Seeking investment partners for FC’s first commercial deployments and retention intelligence foundation.</p>
               <p className="story-footnote">Team, financial model, market analysis, and fundraising terms available in the data room.</p>
             </div>
-            <section className="story-closing__contact" aria-labelledby="story-closing-contact-title">
-              <h3 id="story-closing-contact-title">Contact</h3>
-              <div className="story-closing__contact-list">
-                {closingContacts.map(({ label, value, placeholder, href }) => (
-                  href ? (
-                    <a
-                      className="story-closing__contact-row"
-                      href={href}
-                      key={label}
-                      data-track={`contact_${label.toLowerCase()}`}
-                    >
-                      <span>{label}</span>
-                      <span>{value}</span>
-                    </a>
-                  ) : (
-                    <div className="story-closing__contact-row story-closing__contact-row--pending" key={label}>
-                      <span>{label}</span>
-                      <span>{placeholder}</span>
-                    </div>
-                  )
-                ))}
-              </div>
-            </section>
             <footer className="story-footer story-footer--closing">
               <a href="#top" aria-label="Back to top" data-track="back_to_top">BACK TO TOP ↑</a>
             </footer>
           </StoryScreen>
         </section>
       </main>
+      <FloatingContactButton />
       {sn && channel && <ExperienceView key={channel} sn={sn} channel={channel} onBack={closeExperience} />}
     </div>
   )
