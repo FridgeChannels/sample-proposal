@@ -1,7 +1,22 @@
 import { useEffect, useRef, type ReactNode } from 'react'
-import { POSTHOG_TOKEN, posthogOptions } from './options'
+import { leanSessionRecording, POSTHOG_TOKEN, posthogOptions } from './options'
 import { snFromLocation } from './sn'
 import type { CaptureOptions, PostHog } from 'posthog-js'
+
+/** Wait for window load, then idle (capped) so PostHog never races first paint. */
+function whenBrowserIdle(timeoutMs = 2000): Promise<void> {
+  return new Promise((resolve) => {
+    const schedule = () => {
+      if (typeof requestIdleCallback === 'function') {
+        requestIdleCallback(() => resolve(), { timeout: timeoutMs })
+      } else {
+        window.setTimeout(() => resolve(), Math.min(timeoutMs, 200))
+      }
+    }
+    if (document.readyState === 'complete') schedule()
+    else window.addEventListener('load', schedule, { once: true })
+  })
+}
 
 export type ProposalAnalyticsPage = 'sample' | 'live' | 'investor'
 
@@ -15,6 +30,9 @@ type AnalyticsRootProps = {
 }
 
 let posthogClient: PostHog | null = null
+let bootPromise: Promise<PostHog> | null = null
+/** Set by AnalyticsRoot; lets experience handoff skip the idle wait. */
+let kickBoot: (() => void) | null = null
 const pendingEvents: Array<[string, Record<string, unknown> | undefined, CaptureOptions | undefined]> = []
 const readyListeners: Array<(client: PostHog) => void> = []
 
@@ -23,6 +41,10 @@ function flushPending(client: PostHog) {
     const [event, properties, options] = pendingEvents.shift()!
     client.capture(event, properties, options)
   }
+}
+
+function notifyReady(client: PostHog) {
+  readyListeners.splice(0).forEach((listener) => listener(client))
 }
 
 function sectionKey(el: Element, index: number): string {
@@ -144,7 +166,7 @@ function startSectionDwell(client: PostHog): () => void {
 
 /**
  * Boots PostHog only when `VITE_POSTHOG_PROJECT_TOKEN` is set.
- * The SDK is dynamically imported so builds without a token stay lean.
+ * Default path waits for load + idle; experience handoff can kick boot early via whenPosthogReady.
  */
 export function AnalyticsRoot({ page, children, trackSectionDwell = false, sessionReplay = false }: AnalyticsRootProps) {
   const dwellStopRef = useRef<(() => void) | null>(null)
@@ -153,30 +175,44 @@ export function AnalyticsRoot({ page, children, trackSectionDwell = false, sessi
     const token = POSTHOG_TOKEN
     if (!token) return
     let cancelled = false
+    let started = false
 
-    void import('posthog-js').then(({ default: posthog }) => {
-      if (cancelled) return
-      if (!posthogClient) {
-        posthog.init(token, sessionReplay
-          ? {
-              ...posthogOptions,
-              disable_session_recording: false,
-              session_recording: { ...posthogOptions.session_recording, recordCrossOriginIframes: true },
-            }
-          : posthogOptions)
-        posthogClient = posthog
-      }
-      flushPending(posthog)
-      bindMagnetSession(posthog, page)
-      readyListeners.splice(0).forEach((listener) => listener(posthog))
-      if (trackSectionDwell) {
-        dwellStopRef.current?.()
-        dwellStopRef.current = startSectionDwell(posthog)
-      }
-    })
+    const start = () => {
+      if (cancelled || started) return
+      started = true
+      bootPromise = import('posthog-js').then(({ default: posthog }) => {
+        if (!posthogClient) {
+          posthog.init(token, sessionReplay
+            ? {
+                ...posthogOptions,
+                disable_session_recording: false,
+                session_recording: {
+                  ...leanSessionRecording,
+                  ...posthogOptions.session_recording,
+                  recordCrossOriginIframes: true,
+                },
+              }
+            : posthogOptions)
+          posthogClient = posthog
+        }
+        // Identify + proposal_opened first so queued investor_* events inherit person props.
+        bindMagnetSession(posthog, page)
+        flushPending(posthog)
+        notifyReady(posthog)
+        if (trackSectionDwell) {
+          dwellStopRef.current?.()
+          dwellStopRef.current = startSectionDwell(posthog)
+        }
+        return posthog
+      })
+    }
+
+    kickBoot = start
+    void whenBrowserIdle().then(start)
 
     return () => {
       cancelled = true
+      if (kickBoot === start) kickBoot = null
       dwellStopRef.current?.()
       dwellStopRef.current = null
     }
@@ -198,7 +234,10 @@ export function captureEvent(event: string, properties?: Record<string, unknown>
 /** Resolves once PostHog is initialized; never resolves without a project token. */
 export function whenPosthogReady(): Promise<PostHog> {
   if (posthogClient) return Promise.resolve(posthogClient)
+  if (!POSTHOG_TOKEN) return new Promise(() => {})
+  kickBoot?.()
+  if (bootPromise) return bootPromise
   return new Promise((resolve) => {
-    if (POSTHOG_TOKEN) readyListeners.push(resolve)
+    readyListeners.push(resolve)
   })
 }

@@ -9,7 +9,8 @@ import {
 } from './experienceRoute'
 import { investorVisitId, trackInvestor } from './tracking'
 
-const HANDOFF_WAIT_MS = 1500
+/** Covers deferred idle boot, or eager kick + dynamic import of posthog-js. */
+const HANDOFF_WAIT_MS = 4000
 
 const channelLabels: Record<InvestorChannel, string> = {
   dtc: 'DTC Experience',
@@ -92,18 +93,40 @@ export function ExperienceView({
 
   return (
     <div className="story-experience" role="dialog" aria-modal="true" aria-label={channelLabels[channel]}>
-      {src && (
-        <iframe
-          ref={iframeRef}
-          src={src}
-          title={`FridgeChannel ${channelLabels[channel]}`}
-          loading="eager"
-          allow="clipboard-read; clipboard-write; fullscreen"
-          allowFullScreen
-          onLoad={onLoad}
-        />
-      )}
-      {!loaded && <div className="story-experience__loading" aria-hidden="true"><span /></div>}
+      <div className="story-experience__stage">
+        <div className="story-experience__device">
+          <div className="story-experience__chrome">
+            <div className="story-experience__status" aria-hidden="true">
+              <span className="story-experience__status-time">9:41</span>
+              <span className="story-experience__island" />
+              <span className="story-experience__status-icons">
+                <span className="story-experience__signal" />
+                <span className="story-experience__wifi" />
+                <span className="story-experience__battery" />
+              </span>
+            </div>
+            <div className="story-experience__screen">
+              {src && (
+                <iframe
+                  ref={iframeRef}
+                  src={src}
+                  title={`FridgeChannel ${channelLabels[channel]}`}
+                  loading="eager"
+                  allow="clipboard-read; clipboard-write; fullscreen"
+                  allowFullScreen
+                  onLoad={onLoad}
+                />
+              )}
+              {!loaded && (
+                <div className="story-experience__loading" aria-hidden="true">
+                  <span />
+                </div>
+              )}
+            </div>
+            <div className="story-experience__home" aria-hidden="true" />
+          </div>
+        </div>
+      </div>
       <button
         type="button"
         className="story-experience__back"

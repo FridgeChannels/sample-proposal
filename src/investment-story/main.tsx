@@ -4,7 +4,7 @@ import { App } from './App'
 import '../components/ui/tokens.css'
 
 createRoot(document.getElementById('root')!).render(
-  <AnalyticsRoot page="investor" sessionReplay>
+  <AnalyticsRoot page="investor" sessionReplay trackSectionDwell>
     <App />
   </AnalyticsRoot>,
 )
