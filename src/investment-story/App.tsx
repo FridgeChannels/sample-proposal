@@ -34,7 +34,6 @@ function StoryScreen({ id, children, className = '' }: { id?: string; children?:
 function ProductTapAnimation() {
   return (
     <div className="story-product-demo" role="group" aria-label="Product experience animation">
-      <p className="story-eyebrow story-product-demo__label">PRODUCT EXPERIENCES</p>
       <svg className="story-product-tap" viewBox="0 0 620 352" role="img" aria-hidden="true" focusable="false">
         <defs>
           <linearGradient id="tap-scene-paper" x1="0" y1="0" x2="1" y2="1">
@@ -139,7 +138,7 @@ function App() {
             <p className="story-video-label">展示视频</p>
           </StoryScreen>
           <StoryScreen className="story-screen--hero-copy">
-            <h2 className="story-heading story-hero-copy__heading">FridgeChannel</h2>
+            <h2 className="story-heading story-section-title story-hero-copy__heading">FridgeChannel</h2>
             <TextGenerateEffect
               as="p"
               className="story-copy story-copy--lead story-copy--light"
@@ -163,7 +162,7 @@ function App() {
 
         <section className="story-section story-section--problem" aria-label="A consensus on the structural problem">
           <StoryScreen id="slide-2">
-            <h2 className="story-heading">A Consensus on Structural Problem</h2>
+            <h2 className="story-heading story-section-title">A Consensus on Structural Problem</h2>
             <p className="story-copy story-copy--lead">A consensus emerging from approximately 300 face-to-face brand interviews: stronger retention requires direct access without more interruption.</p>
             <div className="story-cohorts" aria-label="Recent quantified exhibition cohorts">
               <div className="story-cohorts__heading">
@@ -179,8 +178,8 @@ function App() {
             </div>
           </StoryScreen>
           <StoryScreen className="story-screen--voice">
+            <h2 className="story-heading story-section-title">A Consensus on Structural Problem</h2>
             <div className="story-voice">
-              <p className="story-section-kicker story-voice__section-label">A Consensus on Structural Problem</p>
               <h3 className="story-voice__title">What consumers need:</h3>
               <p className="story-copy story-copy--lead">A peaceful home—not another app, notification, email, text, or feed. When they want to buy their usual brand again, they want to go straight to it—not search, browse recommendations, or sort through “similar products.”</p>
               <div className="story-voice__speaker">
@@ -191,8 +190,8 @@ function App() {
             </div>
           </StoryScreen>
           <StoryScreen className="story-screen--voice">
+            <h2 className="story-heading story-section-title">A Consensus on Structural Problem</h2>
             <div className="story-voice">
-              <p className="story-section-kicker story-voice__section-label">A Consensus on Structural Problem</p>
               <h3 className="story-voice__title">What brands need:</h3>
               <p className="story-copy story-copy--lead">A direct way for existing customers to buy again—without paying for another ad to bring them back, or having search results and recommendations steer them toward competitors.</p>
               <div className="story-voice__speaker">
@@ -206,7 +205,7 @@ function App() {
 
         <section className="story-section story-section--solution" aria-label="Ambient Connected Household solution">
           <StoryScreen id="slide-3" className="story-screen--solution-intro">
-            <h2 className="story-heading">Ambient Connected Household is the Solution</h2>
+            <h2 className="story-heading story-section-title">Ambient Connected Household is the Solution</h2>
             <p className="story-copy">Four pillars make the household connection useful, welcome, and entirely on the household’s terms.</p>
             <div className="story-pillar-list story-pillar-list--solution">
               {solutionPillars.map(({ title, description }, index) => {
@@ -235,12 +234,14 @@ function App() {
             </div>
           </StoryScreen>
           <StoryScreen className="story-screen--metric">
+            <h2 className="story-heading story-section-title">Ambient Connected Household is the Solution</h2>
             <p className="story-eyebrow">THE GROWTH METRIC</p>
             <strong className="story-household-metric__title">Ambient Connected<br />Households</strong>
             <p className="story-household-metric__copy">With FC, brands can grow their number of Ambient Connected Households—a metric CPG believe will become central to profitable CPG growth.</p>
             <img className="story-household-metric__visual" src="/investment-story/household-growth-chart.png" alt="Connected line chart illustration" />
           </StoryScreen>
           <StoryScreen id="interviewed-brands" className="story-screen--interview-proof">
+            <h2 className="story-heading story-section-title">Ambient Connected Household is the Solution</h2>
             <div className="story-interview-proof">
               <div><strong>~300</strong><span>CPG brands interviewed<br />face-to-face</span></div>
               <p>This consensus emerged from face-to-face interviews with approximately 300 CPG brands.</p>
@@ -270,22 +271,22 @@ function App() {
 
         <section className="story-section story-section--business" aria-label="Business model">
           <StoryScreen id="slide-5" className="story-screen--revenue">
-            <h2 className="story-heading story-business__title">Business Model</h2>
+            <h2 className="story-heading story-section-title">Business Model</h2>
             <p className="story-copy story-copy--lead"><strong>FC aims to become CPG’s leading in-home repeat-purchase channel—earning a share of every sale it drives.</strong></p>
             <div className="story-revenue-list">
               <article className="story-revenue-row"><div><h3><span className="story-business__index">01</span>Product revenue</h3><p>CPG brands purchase branded retention touchpoints at volume-based prices.</p><strong className="story-price">$0.60–$2.49 <small>per unit</small></strong></div></article>
             </div>
           </StoryScreen>
           <StoryScreen className="story-screen--performance">
-            <p className="story-section-kicker story-business__kicker">Business Model</p>
-            <p className="story-business__item-index">02 · Performance revenue</p>
+            <h2 className="story-heading story-section-title">Business Model</h2>
+            <p className="story-business__item-index"><span className="story-business__item-number">02</span><span aria-hidden="true"> · </span>Performance revenue</p>
             <h2 className="story-heading">Earn on every<br />sale it drives.</h2>
             <p className="story-copy story-copy--lead">FC earns a commission on net sales generated through its touchpoints.</p>
             <div className="story-commission story-commission--large"><span className="story-commission__dtc"><strong>10%</strong><small>DTC orders</small></span><i aria-hidden="true"/><span><strong>5%</strong><small>Amazon orders</small></span></div>
           </StoryScreen>
           <StoryScreen className="story-screen--expansion">
-            <p className="story-section-kicker story-business__kicker">Business Model</p>
-            <p className="story-business__item-index">03 · Account expansion</p>
+            <h2 className="story-heading story-section-title">Business Model</h2>
+            <p className="story-business__item-index"><span className="story-business__item-number">03</span><span aria-hidden="true"> · </span>Account expansion</p>
             <h2 className="story-heading">Grow deployment.<br />Grow the channel.</h2>
             <p className="story-copy story-copy--lead">Brands can start with one deployment, then expand to more households, products, and channels. Larger deployments generate additional product revenue; purchases through deployed touchpoints generate ongoing commissions.</p>
             <p className="story-learning-note story-learning-note--expansion">Deployment optimization and retention strategy are included—not separate consulting fees.</p>
@@ -294,7 +295,7 @@ function App() {
 
         <section className="story-section story-section--potential" aria-label="Revenue potential">
           <StoryScreen id="slide-6" className="story-screen--potential">
-            <h2 className="story-heading story-potential__heading">Revenue potential</h2>
+            <h2 className="story-heading story-section-title">Revenue potential</h2>
             <p className="story-eyebrow story-eyebrow--dark">U.S. HOUSEHOLD PENETRATION</p>
             <strong className="story-potential-number">1%</strong>
             <span className="story-potential-arrow" aria-hidden="true">↓</span>
@@ -307,7 +308,7 @@ function App() {
 
         <section className="story-section story-section--market" aria-label="Go-to-market and account expansion">
           <StoryScreen id="slide-7" className="story-screen--market-intro">
-            <h2 className="story-heading story-market__section-heading">Go-to-Market &amp; Account Expansion</h2>
+            <h2 className="story-heading story-section-title">Go-to-Market &amp; Account Expansion</h2>
             <h2 className="story-heading">Show the product.<br /><em>Win the brand.</em></h2>
             <p className="story-copy story-copy--lead">Live product demos at trade shows are FC’s primary acquisition strategy.</p>
             <div className="story-market-target">
@@ -317,6 +318,7 @@ function App() {
             <p className="story-copy story-copy--lead">Show the product. Win the brand. Live demonstrations open a direct conversation with decision-makers.</p>
           </StoryScreen>
           <StoryScreen className="story-screen--exhibitions">
+            <h2 className="story-heading story-section-title">Go-to-Market &amp; Account Expansion</h2>
             <div className="story-exhibitions__heading"><div><p className="story-eyebrow">TARGET EXHIBITIONS</p><h3>Next 12 months</h3></div><span>PROSPECT BRANDS*</span></div>
             {[
               ['NACS Show 2026', '42'],
@@ -335,11 +337,12 @@ function App() {
 
         <section className="story-section story-section--ambition" aria-label="24-month ambition">
           <StoryScreen id="slide-8" className="story-screen--goal story-screen--goal-primary">
-            <h2 className="story-heading story-goal__section-heading">24-Month Ambition</h2>
+            <h2 className="story-heading story-section-title">24-Month Ambition</h2>
             <p className="story-section-kicker story-goal__kicker">Goal 1</p>
             <p className="story-goal__copy">Enable CPG brands to build ambient connections with <span className="story-goal__number">20%</span> <strong className="story-goal__emphasis">of U.S. households through in-home retention touchpoints</strong>—giving brands a lasting place in household routines and a direct path to the next purchase, without repeatedly buying attention.</p>
           </StoryScreen>
           <StoryScreen className="story-screen--goal story-screen--foundation">
+            <h2 className="story-heading story-section-title">24-Month Ambition</h2>
             <p className="story-section-kicker story-goal__kicker">Goal 2</p>
             <h2 className="story-heading">The leading CPG in-home intelligence foundation</h2>
             <p className="story-goal__copy">Build the leading data foundation for CPG in-home retention through ongoing, permissioned household interactions. Use this proprietary understanding of in-home retention habits to train specialized AI models that help brands personalize shopping experiences and drive repeat purchase.</p>
@@ -348,6 +351,7 @@ function App() {
 
         <section className="story-section story-section--product-experiences" aria-label="Product experiences">
           <StoryScreen id="slide-10" className="story-screen--product-experiences">
+            <h2 className="story-heading story-section-title">Product Experiences</h2>
             <ProductTapAnimation />
             <div className="story-product-selection">
               <div className="story-product-entry-grid">

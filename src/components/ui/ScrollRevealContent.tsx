@@ -35,15 +35,15 @@ export function ScrollRevealContent({ id, heading, items, closingNote, className
   return (
     <>
       <article id={id} className={`story-screen story-screen--steps story-screen--steps-first ${className}`}>
+        <h2 className="story-heading story-section-title">How FC Works</h2>
         <div className="story-process__content">
-          <h2 className="story-heading story-process__eyebrow">How FC Works</h2>
           <h2 className="story-process__heading">{heading}</h2>
           <StepList items={firstPageItems} startIndex={0} />
         </div>
       </article>
       <article className={`story-screen story-screen--steps story-screen--steps-final ${className}`} aria-label="How FC works, final step">
+        <h2 className="story-heading story-section-title">How FC Works</h2>
         <div className="story-process__content story-process__content--final">
-          <h2 className="story-heading story-process__eyebrow">How FC Works</h2>
           <StepList items={finalPageItems} startIndex={2} />
           {closingNote && <p className="story-process__closing-note">{closingNote}</p>}
         </div>
