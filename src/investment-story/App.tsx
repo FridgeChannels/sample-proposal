@@ -126,9 +126,6 @@ function App() {
     <div className="story-page">
       <main id="top">
         <section className="story-section story-section--hero" aria-label="FridgeChannel">
-          <StoryScreen id="slide-video" className="story-screen--video">
-            <p className="story-video-label">展示视频</p>
-          </StoryScreen>
           <StoryScreen id="slide-1" className="story-screen--hero">
             <div className="story-brand story-brand--centered" aria-hidden="true">
               <span className="story-brand__mark">
@@ -137,6 +134,9 @@ function App() {
             </div>
             <h2 className="story-display"><AnimatedText text="Fridge Channel" animationType="letters" staggerDelay={0.035} duration={0.55} /></h2>
             <p className="story-deck"><AnimatedText text="In-Home Retention Intelligence for CPG" animationType="words" staggerDelay={0.08} duration={0.55} delay={0.25} /></p>
+          </StoryScreen>
+          <StoryScreen id="slide-video" className="story-screen--video">
+            <p className="story-video-label">展示视频</p>
           </StoryScreen>
           <StoryScreen className="story-screen--hero-copy">
             <TextGenerateEffect
