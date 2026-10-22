@@ -252,6 +252,7 @@ body {
 }
 .story-screen--steps-first .story-process__content { position: relative; top: -20px; }
 .story-process__content { width: 100%; max-width: 536px; margin: 0 auto; }
+.story-process__eyebrow { margin-bottom: 12px; }
 .story-process__heading { max-width: 520px; margin: 0 0 clamp(28px, 5svh, 48px); font: 400 clamp(30px, 7vw, 44px)/1.04 var(--ui-font-serif); letter-spacing: -.04em; }
 .story-process__list { display: flex; flex-direction: column; gap: clamp(68px, 10svh, 112px); margin: 0; padding: 0; list-style: none; }
 .story-process__step { display: grid; grid-template-columns: 68px 2px minmax(0, 1fr); column-gap: 14px; align-items: stretch; transition: opacity .64s ease, transform .64s cubic-bezier(.2,.7,.2,1); }
