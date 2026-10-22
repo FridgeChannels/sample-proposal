@@ -294,10 +294,7 @@ body {
 .story-section--process .story-screen--steps-final {
   justify-content: flex-start;
   padding-top: clamp(100px, 13svh, 150px);
-  background-color: var(--ui-paper-warm);
-  background-image: url('/investment-story/backgrounds/04-checker-bottom.jpg');
-  background-position: center bottom;
-  background-size: auto 120%;
+  background: var(--ui-paper-warm);
 }
 .story-screen--steps {
   min-height: var(--story-viewport-height);
@@ -314,7 +311,7 @@ body {
 .story-process__copy { min-width: 0; }
 .story-process__step-heading { margin: 0 0 9px; font: 400 clamp(27px, 7.63vw, 42px)/1 var(--ui-font-serif); letter-spacing: -.04em; }
 .story-process__copy p { margin: 0; color: var(--ui-ink-soft); font-size: 16px; line-height: 1.42; }
-.story-process__closing-note { max-width: 450px; margin: clamp(38px, 6svh, 56px) auto 0; padding-top: 20px; color: #fff; font-size: 16px; line-height: 1.5; }
+.story-process__closing-note { max-width: 450px; margin: clamp(38px, 6svh, 56px) auto 0; padding-top: 20px; color: var(--ui-ink-soft); font-size: 16px; line-height: 1.5; }
 .story-learning-note { margin: 0; color: var(--ui-ink-soft); font: 400 22px/1.22 var(--ui-font-serif); letter-spacing: -.02em; }
 
 .story-section--business { background: var(--ui-paper-warm); color: var(--ui-ink); }
