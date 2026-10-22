@@ -371,7 +371,6 @@ function App() {
         <section className="story-section story-section--closing" aria-label="Investment partners">
           <StoryScreen id="slide-11" className="story-screen--closing">
             <div className="story-closing__content">
-              <p className="story-eyebrow">THE OPPORTUNITY</p>
               <h2>Help build CPG’s direct connection to the household.</h2>
               <p className="story-closing__lead">Seeking investment partners for FC’s first commercial deployments and retention intelligence foundation.</p>
               <p className="story-footnote">Team, financial model, market analysis, and fundraising terms available in the data room.</p>
