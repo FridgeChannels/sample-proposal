@@ -83,6 +83,7 @@ body {
   line-height: 1.45;
   text-transform: uppercase;
 }
+.story-section-kicker { margin: 0 0 14px; color: #183d3a; font-size: 16px; font-weight: 700; letter-spacing: .025em; line-height: 1.3; text-transform: none; }
 
 .story-section { scroll-margin-top: 0; }
 .story-screen { padding: clamp(28px, 5svh, 44px) 22px; }
@@ -291,6 +292,9 @@ body {
 .story-revenue-row { display: grid; grid-template-columns: minmax(0,1fr); padding: 15px 0 16px; }
 .story-section--business .story-revenue-row p { color: rgba(255,255,255,.82); }
 .story-revenue-row h3 { margin-bottom: 6px; }
+.story-business__kicker { margin-bottom: 16px; }
+.story-business__item-index { margin: 0 0 10px; color: #183d3a; font-size: 16px; font-weight: 700; letter-spacing: .025em; }
+.story-business__index { margin-right: 10px; color: #183d3a; font: 700 16px/1 var(--ui-font-sans); font-variant-numeric: tabular-nums; }
 .story-revenue-row p { max-width: 430px; }
 .story-section--business .story-screen--revenue .story-price { color: var(--ui-ink); }
 .story-price { display: block; margin-top: 9px; font: 400 clamp(48px, 10vw, 58px)/.95 var(--ui-font-serif); letter-spacing: -.045em; font-variant-numeric: tabular-nums; }
@@ -360,6 +364,7 @@ body {
   background-size: cover;
 }
 .story-goal__copy { max-width: 470px; margin: 0; color: var(--ui-ink-soft); font-size: 16px; line-height: 1.62; }
+.story-goal__kicker { align-self: flex-start; }
 .story-screen--goal-primary .story-goal__copy { font-weight: 400; }
 .story-goal__number { color: #fff; font-family: var(--ui-font-serif); font-size: clamp(4.5em, 9vw, 6em); font-weight: 400; line-height: .95; letter-spacing: -.06em; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .story-goal__emphasis { color: var(--ui-ink); font-weight: 700; }

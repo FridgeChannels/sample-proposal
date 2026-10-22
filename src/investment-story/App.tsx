@@ -91,7 +91,7 @@ function App() {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) return
 
     const revealSelector = [
-      '.story-eyebrow', 'h1', 'h2', 'h3', '.story-deck', '.story-copy',
+      '.story-eyebrow', '.story-section-kicker', 'h1', 'h2', 'h3', '.story-deck', '.story-copy',
       '.story-quote', '.story-cohort-stat', '.story-cohort-caption', '.story-data-row',
       '.story-pillar', '.story-interview-proof > div', '.story-interview-proof > p', '.story-brand-disclosure',
       '.story-step-title', '.story-learning-note', '.story-revenue-row', '.story-commission',
@@ -267,18 +267,22 @@ function App() {
 
         <section className="story-section story-section--business" aria-label="Business model">
           <StoryScreen id="slide-5" className="story-screen--revenue">
-            <h2 className="story-heading">Business Model</h2>
+            <p className="story-section-kicker story-business__kicker">Business Model</p>
             <p className="story-copy story-copy--lead"><strong>FC aims to become CPG’s leading in-home repeat-purchase channel—earning a share of every sale it drives.</strong></p>
             <div className="story-revenue-list">
-              <article className="story-revenue-row"><div><h3>Product revenue</h3><p>CPG brands purchase branded retention touchpoints at volume-based prices.</p><strong className="story-price">$0.60–$2.49 <small>per unit</small></strong></div></article>
+              <article className="story-revenue-row"><div><h3><span className="story-business__index">01</span>Product revenue</h3><p>CPG brands purchase branded retention touchpoints at volume-based prices.</p><strong className="story-price">$0.60–$2.49 <small>per unit</small></strong></div></article>
             </div>
           </StoryScreen>
           <StoryScreen className="story-screen--performance">
+            <p className="story-section-kicker story-business__kicker">Business Model</p>
+            <p className="story-business__item-index">02 · Performance revenue</p>
             <h2 className="story-heading">Earn on every<br />sale it drives.</h2>
             <p className="story-copy story-copy--lead">FC earns a commission on net sales generated through its touchpoints.</p>
             <div className="story-commission story-commission--large"><span className="story-commission__dtc"><strong>10%</strong><small>DTC orders</small></span><i aria-hidden="true"/><span><strong>5%</strong><small>Amazon orders</small></span></div>
           </StoryScreen>
           <StoryScreen className="story-screen--expansion">
+            <p className="story-section-kicker story-business__kicker">Business Model</p>
+            <p className="story-business__item-index">03 · Account expansion</p>
             <h2 className="story-heading">Grow deployment.<br />Grow the channel.</h2>
             <p className="story-copy story-copy--lead">Brands can start with one deployment, then expand to more households, products, and channels. Larger deployments generate additional product revenue; purchases through deployed touchpoints generate ongoing commissions.</p>
             <p className="story-learning-note story-learning-note--expansion">Deployment optimization and retention strategy are included—not separate consulting fees.</p>
@@ -326,9 +330,11 @@ function App() {
 
         <section className="story-section story-section--ambition" aria-label="24-month ambition">
           <StoryScreen id="slide-8" className="story-screen--goal story-screen--goal-primary">
+            <p className="story-section-kicker story-goal__kicker">Goal 1</p>
             <p className="story-goal__copy">Enable CPG brands to build ambient connections with <span className="story-goal__number">20%</span> <strong className="story-goal__emphasis">of U.S. households through in-home retention touchpoints</strong>—giving brands a lasting place in household routines and a direct path to the next purchase, without repeatedly buying attention.</p>
           </StoryScreen>
           <StoryScreen className="story-screen--goal story-screen--foundation">
+            <p className="story-section-kicker story-goal__kicker">Goal 2</p>
             <h2 className="story-heading">The leading CPG in-home intelligence foundation</h2>
             <p className="story-goal__copy">Build the leading data foundation for CPG in-home retention through ongoing, permissioned household interactions. Use this proprietary understanding of in-home retention habits to train specialized AI models that help brands personalize shopping experiences and drive repeat purchase.</p>
           </StoryScreen>
