@@ -106,7 +106,9 @@ const EXPERIENCE_OPEN_CLASS = 'story-experience-open'
 function StoryVideo() {
   const config = window.__FC_INVESTOR_STORY__
   const videoRef = useRef<HTMLVideoElement>(null)
+  const [hasStarted, setHasStarted] = useState(false)
   const src = config?.videoUrl || null
+  const poster = config?.videoPosterUrl || null
 
   useEffect(() => {
     const video = videoRef.current
@@ -114,18 +116,38 @@ function StoryVideo() {
     return trackVideo(video, 'story_intro')
   }, [src])
 
-  if (!src) return <p className="story-video-label">展示视频</p>
   return (
-    <video
-      ref={videoRef}
-      className="story-video"
-      src={src}
-      poster={config?.videoPosterUrl || undefined}
-      controls
-      playsInline
-      preload="metadata"
-      data-track="story_video"
-    />
+    <div className="story-video-cinema">
+      <div
+        className="story-video-cinema__ambient"
+        aria-hidden="true"
+        style={poster ? { backgroundImage: `url("${poster}")` } : undefined}
+      />
+      {src ? (
+        <div className="story-video-frame">
+          <video
+            ref={videoRef}
+            className="story-video"
+            src={src}
+            poster={poster || undefined}
+            controls={hasStarted}
+            playsInline
+            preload="metadata"
+            data-track="story_video"
+            onPlay={() => setHasStarted(true)}
+          />
+          {!hasStarted && poster && <img className="story-video-frame__poster" src={poster} alt="" />}
+          {!hasStarted && <button
+            className="story-video-play"
+            type="button"
+            aria-label="Play introduction video"
+            onClick={() => { void videoRef.current?.play().catch(() => undefined) }}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10-6.5z" /></svg>
+          </button>}
+        </div>
+      ) : <p className="story-video-label">展示视频</p>}
+    </div>
   )
 }
 
