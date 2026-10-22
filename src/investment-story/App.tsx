@@ -139,6 +139,7 @@ function App() {
             <p className="story-video-label">展示视频</p>
           </StoryScreen>
           <StoryScreen className="story-screen--hero-copy">
+            <h2 className="story-heading story-hero-copy__heading">FridgeChannel</h2>
             <TextGenerateEffect
               as="p"
               className="story-copy story-copy--lead story-copy--light"
@@ -179,6 +180,7 @@ function App() {
           </StoryScreen>
           <StoryScreen className="story-screen--voice">
             <div className="story-voice">
+              <p className="story-section-kicker story-voice__section-label">A Consensus on Structural Problem</p>
               <h3 className="story-voice__title">What consumers need:</h3>
               <p className="story-copy story-copy--lead">A peaceful home—not another app, notification, email, text, or feed. When they want to buy their usual brand again, they want to go straight to it—not search, browse recommendations, or sort through “similar products.”</p>
               <div className="story-voice__speaker">
@@ -190,6 +192,7 @@ function App() {
           </StoryScreen>
           <StoryScreen className="story-screen--voice">
             <div className="story-voice">
+              <p className="story-section-kicker story-voice__section-label">A Consensus on Structural Problem</p>
               <h3 className="story-voice__title">What brands need:</h3>
               <p className="story-copy story-copy--lead">A direct way for existing customers to buy again—without paying for another ad to bring them back, or having search results and recommendations steer them toward competitors.</p>
               <div className="story-voice__speaker">
@@ -267,7 +270,7 @@ function App() {
 
         <section className="story-section story-section--business" aria-label="Business model">
           <StoryScreen id="slide-5" className="story-screen--revenue">
-            <p className="story-section-kicker story-business__kicker">Business Model</p>
+            <h2 className="story-heading story-business__title">Business Model</h2>
             <p className="story-copy story-copy--lead"><strong>FC aims to become CPG’s leading in-home repeat-purchase channel—earning a share of every sale it drives.</strong></p>
             <div className="story-revenue-list">
               <article className="story-revenue-row"><div><h3><span className="story-business__index">01</span>Product revenue</h3><p>CPG brands purchase branded retention touchpoints at volume-based prices.</p><strong className="story-price">$0.60–$2.49 <small>per unit</small></strong></div></article>
@@ -291,6 +294,7 @@ function App() {
 
         <section className="story-section story-section--potential" aria-label="Revenue potential">
           <StoryScreen id="slide-6" className="story-screen--potential">
+            <h2 className="story-heading story-potential__heading">Revenue potential</h2>
             <p className="story-eyebrow story-eyebrow--dark">U.S. HOUSEHOLD PENETRATION</p>
             <strong className="story-potential-number">1%</strong>
             <span className="story-potential-arrow" aria-hidden="true">↓</span>
@@ -303,6 +307,7 @@ function App() {
 
         <section className="story-section story-section--market" aria-label="Go-to-market and account expansion">
           <StoryScreen id="slide-7" className="story-screen--market-intro">
+            <h2 className="story-heading story-market__section-heading">Go-to-Market &amp; Account Expansion</h2>
             <h2 className="story-heading">Show the product.<br /><em>Win the brand.</em></h2>
             <p className="story-copy story-copy--lead">Live product demos at trade shows are FC’s primary acquisition strategy.</p>
             <div className="story-market-target">
@@ -330,6 +335,7 @@ function App() {
 
         <section className="story-section story-section--ambition" aria-label="24-month ambition">
           <StoryScreen id="slide-8" className="story-screen--goal story-screen--goal-primary">
+            <h2 className="story-heading story-goal__section-heading">24-Month Ambition</h2>
             <p className="story-section-kicker story-goal__kicker">Goal 1</p>
             <p className="story-goal__copy">Enable CPG brands to build ambient connections with <span className="story-goal__number">20%</span> <strong className="story-goal__emphasis">of U.S. households through in-home retention touchpoints</strong>—giving brands a lasting place in household routines and a direct path to the next purchase, without repeatedly buying attention.</p>
           </StoryScreen>

@@ -133,6 +133,8 @@ body {
   background-size: cover;
   color: var(--ui-ink);
 }
+.story-hero-copy__heading { width: 100%; max-width: 900px; }
+.story-section--hero .story-screen--hero-copy > .story-copy { width: 100%; max-width: 900px; }
 
 .story-cohorts { width: min(100%, 430px); margin: 36px auto 0; }
 .story-cohorts__heading { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: baseline; gap: 8px; padding: 0 0 2px; }
@@ -166,6 +168,7 @@ body {
 .story-section--problem #slide-2 .story-data-row { border-bottom-color: rgba(5,5,5,.2); }
 
 .story-quote { margin: 20px 0 0; font: 400 clamp(23px, 6.7vw, 25px)/1.14 var(--ui-font-serif); letter-spacing: -.025em; }
+.story-voice__section-label { margin-bottom: 12px; font-size: clamp(14px, 1.7vw, 16px); }
 .story-voice__title { margin: 0 0 12px; font: 600 18px/1.2 var(--ui-font-sans); letter-spacing: -.02em; }
 .story-voice__speaker { display: flex; align-items: center; gap: 8px; margin: 16px 0 0; }
 .story-voice__illustration { display: block; width: clamp(96px, 23vw, 128px); height: auto; object-fit: contain; }
@@ -248,19 +251,19 @@ body {
 }
 .story-screen--steps {
   min-height: var(--story-viewport-height);
-  padding: clamp(36px, 8svh, 72px) 22px;
+  padding: clamp(36px, 8svh, 80px) 22px;
   scroll-snap-stop: normal;
 }
-.story-screen--steps-first .story-process__content { position: relative; top: -20px; }
+.story-screen--steps-first .story-process__content { position: relative; top: clamp(-24px, -5.1vw, -16px); }
 .story-process__content { width: 100%; max-width: 536px; margin: 0 auto; }
 .story-process__eyebrow { margin-bottom: 12px; }
-.story-process__heading { max-width: 520px; margin: 0 0 clamp(28px, 5svh, 48px); font: 400 clamp(30px, 7vw, 44px)/1.04 var(--ui-font-serif); letter-spacing: -.04em; }
+.story-process__heading { max-width: 520px; margin: 0 0 clamp(28px, 5svh, 48px); font: 400 clamp(27px, 7.63vw, 44px)/1.04 var(--ui-font-serif); letter-spacing: -.04em; }
 .story-process__list { display: flex; flex-direction: column; gap: clamp(68px, 10svh, 112px); margin: 0; padding: 0; list-style: none; }
-.story-process__step { display: grid; grid-template-columns: 68px 2px minmax(0, 1fr); column-gap: 14px; align-items: stretch; transition: opacity .64s ease, transform .64s cubic-bezier(.2,.7,.2,1); }
+.story-process__step { display: grid; grid-template-columns: clamp(54px, 17.3vw, 84px) 2px minmax(0, 1fr); column-gap: clamp(10px, 3.56vw, 20px); align-items: stretch; transition: opacity .64s ease, transform .64s cubic-bezier(.2,.7,.2,1); }
 .story-process__number { padding-top: 7px; color: #bf3f12; font-size: 12px; font-weight: 700; letter-spacing: .09em; line-height: 1.4; white-space: nowrap; }
 .story-process__rail { display: block; width: 2px; min-height: 100%; background: rgba(0,27,27,.14); }
 .story-process__copy { min-width: 0; }
-.story-process__step-heading { margin: 0 0 9px; font: 400 clamp(30px, 7vw, 42px)/1 var(--ui-font-serif); letter-spacing: -.04em; }
+.story-process__step-heading { margin: 0 0 9px; font: 400 clamp(27px, 7.63vw, 42px)/1 var(--ui-font-serif); letter-spacing: -.04em; }
 .story-process__copy p { margin: 0; color: var(--ui-ink-soft); font-size: 16px; line-height: 1.42; }
 .story-process__closing-note { max-width: 450px; margin: clamp(38px, 6svh, 56px) auto 0; padding-top: 20px; color: #fff; font-size: 16px; line-height: 1.5; }
 .story-learning-note { margin: 0; color: var(--ui-ink-soft); font: 400 22px/1.22 var(--ui-font-serif); letter-spacing: -.02em; }
@@ -293,6 +296,7 @@ body {
 .story-section--business .story-revenue-row p { color: rgba(255,255,255,.82); }
 .story-revenue-row h3 { margin-bottom: 6px; }
 .story-business__kicker { margin-bottom: 16px; }
+.story-business__title { max-width: 780px; }
 .story-business__item-index { margin: 0 0 10px; color: #183d3a; font-size: 16px; font-weight: 700; letter-spacing: .025em; }
 .story-business__index { margin-right: 10px; color: #183d3a; font: 700 16px/1 var(--ui-font-sans); font-variant-numeric: tabular-nums; }
 .story-revenue-row p { max-width: 430px; }
@@ -313,6 +317,7 @@ body {
 .story-section--business .story-screen--expansion .story-learning-note { color: var(--ui-ink); }
 
 .story-section--potential { background-color: var(--ui-paper-warm); background-image: url('/investment-story/backgrounds/06-orange-gradient.jpg'); background-position: center; background-size: cover; color: #fff; }
+.story-potential__heading { max-width: 900px; }
 .story-eyebrow--dark { margin-top: 14px; color: rgba(255,255,255,.76); }
 .story-potential-number { display: block; margin-top: 5px; font: 400 clamp(82px, 24vw, 130px)/.8 var(--ui-font-serif); letter-spacing: -.085em; font-variant-numeric: tabular-nums; }
 .story-potential-arrow { display: block; margin: 7px 0 7px clamp(58px, 16vw, 94px); color: rgba(255,255,255,.78); font-size: 25px; }
@@ -355,6 +360,7 @@ body {
   background-position: center;
   background-size: cover;
 }
+.story-goal__section-heading { max-width: 900px; }
 .story-section--ambition .story-screen--foundation {
   justify-content: flex-start;
   padding-top: clamp(28px, 5svh, 44px);
@@ -402,7 +408,7 @@ body {
   justify-content: center;
   gap: clamp(12px, 2.2svh, 20px);
   width: 100%;
-  height: var(--story-viewport-height);
+  height: auto;
   min-height: var(--story-viewport-height);
   padding: 24px 22px;
 }
@@ -458,35 +464,6 @@ body {
 .story-product-entry p { max-width: 30ch; margin: 0; font-size: clamp(13px, 2.6vw, 15px); line-height: 1.4; }
 .story-product-entry__action { display: flex; align-items: center; gap: 8px; margin-top: 12px; font-size: clamp(16px, 3.5vw, 19px); font-weight: 700; }
 .story-product-entry__action > span { color: #bd4726; font-size: 21px; }
-
-@media (max-width: 420px) and (max-height: 700px) {
-  .story-screen--steps { padding: 28px 20px; }
-  .story-screen--steps-first .story-process__content { top: -10px; }
-  .story-process__heading { margin-bottom: 26px; font-size: clamp(26px, 7vw, 32px); line-height: 1.02; }
-  .story-process__list { gap: 56px; }
-  .story-process__step { grid-template-columns: 54px 2px minmax(0, 1fr); column-gap: 10px; }
-  .story-process__number { font-size: 11px; }
-  .story-process__step-heading { margin-bottom: 6px; font-size: clamp(27px, 7vw, 32px); }
-  .story-process__copy p { font-size: 15px; line-height: 1.42; }
-  .story-process__closing-note { margin-top: 32px; padding-top: 16px; }
-}
-
-@media (max-width: 520px) {
-  .story-screen.story-screen--product-experiences { gap: 10px; padding: 18px 12px; }
-  .story-product-demo { gap: 7px; }
-  .story-product-entry-grid { gap: 8px; }
-  .story-product-entry { padding: 10px 10px 9px; border-radius: 13px; }
-  .story-product-entry__index { font-size: 23px; }
-  .story-product-entry h3 { margin: 4px 0; font-size: clamp(16px, 4.7vw, 20px); }
-  .story-product-entry p { font-size: 12px; line-height: 1.35; }
-  .story-product-entry__action { gap: 5px; margin-top: 8px; font-size: 16px; }
-  .story-product-entry__action > span { font-size: 18px; }
-}
-
-@media (max-width: 520px) and (max-height: 700px) {
-  .story-product-entry { padding-top: 7px; padding-bottom: 7px; }
-  .story-product-entry p { font-size: 11px; }
-}
 
 @media (min-width: 620px) {
   .story-screen { padding-right: 42px; padding-left: 42px; }
@@ -597,7 +574,6 @@ body {
   .story-section--business .story-screen--expansion > .story-heading,
   .story-section--business .story-screen--expansion > .story-copy,
   .story-section--business .story-screen--expansion > .story-learning-note { max-width: 780px; }
-  .story-section--business .story-screen--revenue > .story-heading,
   .story-section--business .story-screen--performance > .story-heading,
   .story-section--business .story-screen--expansion > .story-heading { font-size: clamp(48px, 5.2vw, 70px); }
   .story-revenue-list { width: min(100%, 780px); }
@@ -613,24 +589,26 @@ body {
     align-items: center;
     column-gap: clamp(24px, 4vw, 54px);
   }
-  .story-screen--potential > .story-eyebrow { grid-column: 1 / -1; grid-row: 1; margin: 0 0 8px; }
-  .story-screen--potential > .story-potential-number { grid-column: 1; grid-row: 2; font-size: clamp(110px, 14vw, 166px); }
-  .story-screen--potential > .story-potential-arrow { grid-column: 2; grid-row: 2 / span 2; margin: 0; font-size: 34px; text-align: center; }
-  .story-screen--potential > .story-potential-value { grid-column: 1; grid-row: 3; font-size: clamp(64px, 7vw, 88px); }
-  .story-screen--potential > .story-potential-caption { grid-column: 1; grid-row: 4; margin: 10px 0 0; }
-  .story-screen--potential > .story-potential-copy { grid-column: 3; grid-row: 2 / span 2; max-width: 600px; font-size: 18px; }
-  .story-screen--potential > .story-footnote { grid-column: 3; grid-row: 4; max-width: 600px; margin: 12px 0 0; }
+  .story-screen--potential > .story-eyebrow { grid-column: 1 / -1; grid-row: 2; margin: 0 0 8px; }
+  .story-screen--potential > .story-potential__heading { grid-column: 1 / -1; grid-row: 1; align-self: end; margin-bottom: 28px; }
+  .story-screen--potential > .story-potential-number { grid-column: 1; grid-row: 3; font-size: clamp(110px, 14vw, 166px); }
+  .story-screen--potential > .story-potential-arrow { grid-column: 2; grid-row: 3 / span 2; margin: 0; font-size: 34px; text-align: center; }
+  .story-screen--potential > .story-potential-value { grid-column: 1; grid-row: 4; font-size: clamp(64px, 7vw, 88px); }
+  .story-screen--potential > .story-potential-caption { grid-column: 1; grid-row: 5; margin: 10px 0 0; }
+  .story-screen--potential > .story-potential-copy { grid-column: 3; grid-row: 3 / span 2; max-width: 600px; font-size: 18px; }
+  .story-screen--potential > .story-footnote { grid-column: 3; grid-row: 5; max-width: 600px; margin: 12px 0 0; }
 
   .story-section--market .story-screen--market-intro {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(360px, .9fr);
+    grid-template-columns: minmax(0, 1fr) minmax(320px, .9fr);
     align-content: center;
     column-gap: clamp(48px, 7vw, 90px);
   }
-  .story-screen--market-intro > h2 { grid-column: 1; grid-row: 1; font-size: clamp(48px, 5.3vw, 68px); }
-  .story-screen--market-intro > p:first-of-type { grid-column: 1; grid-row: 2; }
-  .story-screen--market-intro > .story-market-target { grid-column: 2; grid-row: 1; align-self: end; margin: 0 0 14px; }
-  .story-screen--market-intro > p:last-of-type { grid-column: 2; grid-row: 2; }
+  .story-screen--market-intro > .story-market__section-heading { grid-column: 1 / -1; grid-row: 1; max-width: 960px; margin-bottom: 26px; font-size: clamp(42px, 4.8vw, 60px); }
+  .story-screen--market-intro > h2:not(.story-market__section-heading) { grid-column: 1; grid-row: 2; font-size: clamp(48px, 5.3vw, 68px); }
+  .story-screen--market-intro > p:first-of-type { grid-column: 1; grid-row: 3; }
+  .story-screen--market-intro > .story-market-target { grid-column: 2; grid-row: 2; align-self: end; margin: 0 0 14px; }
+  .story-screen--market-intro > p:last-of-type { grid-column: 2; grid-row: 3; }
   .story-section--market .story-screen--exhibitions {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -643,10 +621,12 @@ body {
   .story-screen--exhibitions .story-exhibition { min-height: 46px; }
 
   .story-screen--goal-primary .story-goal__copy,
+  .story-screen--goal-primary > .story-goal__section-heading,
   .story-screen--foundation > .story-heading,
   .story-screen--foundation .story-goal__copy { max-width: 800px; }
   .story-screen--goal-primary .story-goal__copy { font-size: 20px; }
   .story-screen--goal-primary .story-goal__number { font-size: clamp(5.5em, 10vw, 7em); }
+  .story-screen--goal-primary > .story-goal__section-heading { font-size: clamp(48px, 5.5vw, 72px); }
   .story-screen--foundation > .story-heading { font-size: clamp(50px, 5.5vw, 72px); }
   .story-screen--foundation .story-goal__copy { font-size: 18px; }
   .story-screen--closing { padding-top: clamp(100px, 15svh, 172px); }
@@ -680,6 +660,91 @@ body {
   .story-product-demo { gap: 8px; }
   .story-product-entry { padding-top: 8px; padding-bottom: 8px; }
   .story-screen--closing { padding-top: 86px; padding-bottom: 72px; }
+}
+
+/* Mobile type and spacing follow the 393px iPhone 14 Pro reference proportion. */
+@media (max-width: 520px) {
+  :root {
+    --story-mobile-copy-size: clamp(15px, 4.07vw, 18px);
+    --story-mobile-gutter: clamp(18px, 5.6vw, 24px);
+  }
+
+  .story-screen { padding: clamp(28px, 5svh, 48px) var(--story-mobile-gutter); }
+  .story-eyebrow,
+  .story-section-kicker,
+  .story-copy,
+  .story-copy--lead,
+  .story-cohort-caption,
+  .story-data-row,
+  .story-pillar p,
+  .story-pillar__number,
+  .story-voice__title,
+  .story-household-metric__copy,
+  .story-interview-proof > div span,
+  .story-interview-proof > p,
+  .story-brand-disclosure summary,
+  .story-brand-group h4,
+  .story-brand-group li,
+  .story-footnote,
+  .story-process__copy p,
+  .story-process__closing-note,
+  .story-business__item-index,
+  .story-business__index,
+  .story-revenue-row p,
+  .story-price small,
+  .story-commission small,
+  .story-potential-caption,
+  .story-potential-copy,
+  .story-goal__copy,
+  .story-closing__lead,
+  .story-footer > span,
+  .story-footer a,
+  .story-market-target p,
+  .story-exhibitions__heading > span,
+  .story-exhibition,
+  .story-exhibition small { font-size: var(--story-mobile-copy-size); }
+
+  .story-screen--steps { padding: clamp(36px, 8svh, 80px) var(--story-mobile-gutter); }
+  .story-process__number { font-size: clamp(11px, 3.05vw, 14px); }
+  .story-learning-note { font-size: clamp(20px, 5.6vw, 26px); }
+  .story-pillar-list--solution { margin-top: clamp(18px, 5.6vw, 30px); }
+  .story-pillar-list--solution .story-pillar h3 { font-size: clamp(16px, 4.58vw, 21px); }
+  .story-quote { margin-top: clamp(16px, 5.1vw, 26px); font-size: clamp(22px, 6.36vw, 30px); }
+  .story-cohorts { margin-top: clamp(28px, 9.16vw, 44px); }
+  .story-market-target { gap: clamp(10px, 3.56vw, 20px); margin: clamp(10px, 3.3vw, 20px) 0; padding: clamp(10px, 3.3vw, 20px) 0; }
+  .story-market-target strong { font-size: clamp(58px, 16.54vw, 78px); }
+  .story-market-close { margin-top: clamp(26px, 9.16vw, 44px); font-size: clamp(22px, 6.36vw, 30px); }
+  .story-exhibitions__heading h3 { font-size: clamp(22px, 6.36vw, 30px); }
+  .story-exhibition { min-height: clamp(36px, 10.18vw, 48px); padding: clamp(6px, 2.04vw, 10px) 0; }
+  .story-screen--closing { padding-bottom: clamp(72px, 23.41vw, 112px); }
+  .story-section--closing .story-footer--closing { right: var(--story-mobile-gutter); bottom: clamp(12px, 4.33vw, 24px); left: var(--story-mobile-gutter); }
+
+  .story-screen.story-screen--product-experiences {
+    gap: clamp(8px, 2.54vw, 16px);
+    padding: clamp(16px, 4.58vw, 22px) clamp(10px, 3.05vw, 16px);
+  }
+  .story-product-demo { gap: clamp(6px, 1.78vw, 10px); }
+  .story-product-entry-grid { gap: clamp(6px, 2.04vw, 12px); }
+  .story-product-entry { padding: clamp(8px, 2.54vw, 13px) clamp(8px, 2.54vw, 13px) clamp(7px, 2.29vw, 12px); }
+  .story-product-entry { border-radius: clamp(12px, 3.3vw, 18px); }
+  .story-product-entry h3 { margin: clamp(4px, 1.02vw, 6px) 0; font-size: clamp(16px, 4.7vw, 23px); }
+  .story-product-entry p { font-size: clamp(11px, 3.05vw, 15px); line-height: 1.35; }
+  .story-product-entry__action { gap: clamp(4px, 1.27vw, 8px); margin-top: clamp(6px, 2.04vw, 12px); font-size: clamp(15px, 4.07vw, 18px); }
+  .story-product-entry__action > span { font-size: clamp(17px, 4.58vw, 21px); }
+}
+
+@media (max-width: 420px) and (max-height: 700px) {
+  .story-screen--steps { padding: 28px var(--story-mobile-gutter); }
+  .story-screen--steps-first .story-process__content { top: -10px; }
+  .story-process__heading { margin-bottom: 26px; font-size: clamp(26px, 7vw, 32px); line-height: 1.02; }
+  .story-process__list { gap: 56px; }
+  .story-process__step { grid-template-columns: clamp(48px, 15vw, 54px) 2px minmax(0, 1fr); column-gap: clamp(9px, 2.8vw, 10px); }
+  .story-process__number { font-size: 11px; }
+  .story-process__step-heading { margin-bottom: 6px; font-size: clamp(27px, 7vw, 32px); }
+  .story-process__copy p { font-size: 15px; line-height: 1.42; }
+  .story-process__closing-note { margin-top: 32px; padding-top: 16px; }
+  .story-product-entry { padding-top: 7px; padding-bottom: 7px; }
+  .story-product-entry p { font-size: 11px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
