@@ -54,7 +54,7 @@ const copiedStyle: CSSProperties = {
 
 const contactMethods = [
   { label: 'SMS', href: 'sms:+19729000833', value: '+1 972-900-0833', icon: 'sms.svg', ariaLabel: 'Send an SMS to FridgeChannel' },
-  { label: 'WhatsApp', href: 'https://wa.me/1972900083', value: '+1 972-900-083', icon: 'whatsapp.svg', ariaLabel: 'Message FridgeChannel on WhatsApp' },
+  { label: 'WhatsApp', href: 'https://wa.me/19729000833', value: '+1 972-900-0833', icon: 'whatsapp.svg', ariaLabel: 'Message FridgeChannel on WhatsApp' },
   { label: 'Email', href: 'mailto:billy@fridgechannels.com', value: 'billy@fridgechannels.com', icon: 'gmail.svg', ariaLabel: 'Email FridgeChannel' },
 ]
 
