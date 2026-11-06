@@ -58,20 +58,17 @@ body {
 .hommio-frame__back {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   justify-self: start;
-  gap: 9px;
-  min-height: 40px;
+  width: 52px;
+  height: 52px;
+  min-height: 52px;
   color: #19372d;
-  font-size: 13px;
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.hommio-frame__back {
-  padding: 0 14px;
+  padding: 0;
   border: 0;
-  border-radius: 999px;
+  border-radius: 50%;
   pointer-events: auto;
+  text-decoration: none;
   transition: background-color 140ms ease;
 }
 
@@ -100,13 +97,6 @@ body {
     grid-template-columns: 1fr;
     height: 60px;
     padding: 0 12px;
-  }
-
-  .hommio-frame__back {
-    gap: 6px;
-    min-height: 38px;
-    padding: 0 10px;
-    font-size: 12px;
   }
 
 }

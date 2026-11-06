@@ -5,13 +5,11 @@ const HOMMIO_SITES = {
   dtc: {
     title: 'Hommio for DTC brands',
     url: 'https://hommio.ai/dtcbrands',
-    returnLabel: 'Customer View',
     fallbackPath: '/dtc-sample.html',
   },
   amazon: {
     title: 'Hommio for Amazon brands',
     url: 'https://hommio.ai/amazonbrands',
-    returnLabel: 'Customer View',
     fallbackPath: '/asin-sample.html',
   },
 } as const
@@ -67,9 +65,8 @@ export function App() {
   return (
     <main className="hommio-frame">
       <header className={`hommio-frame__bar${barVisible ? '' : ' is-hidden'}`} aria-hidden={!barVisible}>
-        <a className="hommio-frame__back" href={returnHref}>
-          <ChevronSmallLeftIcon aria-hidden="true" focusable="false" size={18} />
-          <span>{site.returnLabel}</span>
+        <a className="hommio-frame__back" href={returnHref} aria-label="返回示例页">
+          <ChevronSmallLeftIcon aria-hidden="true" focusable="false" size={24} />
         </a>
       </header>
       <iframe
