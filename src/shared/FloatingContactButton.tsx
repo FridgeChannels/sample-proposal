@@ -48,6 +48,12 @@ const buttonStyle: CSSProperties = {
   cursor: 'pointer',
 }
 
+const inlineButtonStyle: CSSProperties = {
+  ...buttonStyle,
+  background: 'var(--leg-brand)',
+  boxShadow: '0 6px 16px rgba(23, 56, 43, 0.18)',
+}
+
 const copiedStyle: CSSProperties = {
   position: 'absolute',
   right: 'calc(100% + 12px)',
@@ -170,7 +176,7 @@ export function FloatingContactButton({ placement = 'floating' }: { placement?: 
       {copyFeedback && <span style={placement === 'inline' ? inlineCopiedStyle : copiedStyle} role="status" aria-live="polite">{copyFeedback}</span>}
       <button
         type="button"
-        style={buttonStyle}
+        style={placement === 'inline' ? inlineButtonStyle : buttonStyle}
         aria-label={isOpen ? 'Close contact options' : 'Contact FridgeChannel'}
         aria-expanded={isOpen}
         onClick={() => setIsOpen((current) => !current)}
