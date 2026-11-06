@@ -10,7 +10,6 @@ import { FinanceView } from './components/FinanceView'
 import { AddressView } from './components/AddressView'
 import { GlobalUrgencyRail } from './components/GlobalUrgencyRail'
 import {
-  aboutPageUrlForSn,
   fetchMagnetExperience,
   type MagnetExperience,
 } from '../shared/magnetExperience'
@@ -235,18 +234,23 @@ export function App() {
     openView('demo')
   }
 
-  const openAboutFridgeChannel = async () => {
+  const openAboutHommio = async () => {
     if (aboutOpening) return
     setAboutOpening(true)
-    try {
-      const nextExperience = experience || await fetchMagnetExperience(magnetSn)
-      setExperience(nextExperience)
-      const dest = window.top ?? window
-      dest.location.assign(aboutPageUrlForSn(nextExperience, magnetSn))
-    } catch {
-      setAboutOpening(false)
-      openView('about')
-    }
+    const pathname = window.location.pathname.replace(/\/$/, '').toLowerCase()
+    const routeExperience: MagnetExperience | null =
+      pathname === '/asin-sample' || pathname === '/asin-sample.html'
+        ? 'asin_plus'
+        : pathname === '/dtc-sample' || pathname === '/dtc-sample.html'
+          ? 'dtc'
+          : null
+    const nextExperience = routeExperience || experience || await fetchMagnetExperience(magnetSn)
+    setExperience(nextExperience)
+    const target = nextExperience === 'asin_plus'
+      ? 'https://hommio.ai/amazonbrands'
+      : 'https://hommio.ai/dtcbrands'
+    const dest = window.top ?? window
+    dest.location.assign(target)
   }
 
   const blockingError = handoffError || quoteError
@@ -263,7 +267,7 @@ export function App() {
         <LiveDemoView
           active={view === 'demo'}
           aboutLoading={aboutOpening}
-          onAboutFridgeChannel={() => { void openAboutFridgeChannel() }}
+          onAboutHommio={() => { void openAboutHommio() }}
         />
       )}
       {!blockingLoading && !blockingError && <>

@@ -8,11 +8,11 @@ import { FloatingContactButton } from '../../shared/FloatingContactButton'
 export function LiveDemoView({
   active,
   aboutLoading = false,
-  onAboutFridgeChannel,
+  onAboutHommio,
 }: {
   active: boolean
   aboutLoading?: boolean
-  onAboutFridgeChannel: () => void
+  onAboutHommio: () => void
 }) {
   const sn = snFromLocation()
   const src = sn ? liveDemoUrlForSn(sn) : LIVE_DEMO_URL
@@ -27,8 +27,8 @@ export function LiveDemoView({
         allowFullScreen
       />
       <div className="flow-cta-bar">
-        <button type="button" className="flow-cta-button" onClick={onAboutFridgeChannel} disabled={aboutLoading}>
-          <span>{aboutLoading ? 'Opening…' : 'About FridgeChannel'}</span>
+        <button type="button" className="flow-cta-button" onClick={onAboutHommio} disabled={aboutLoading}>
+          <span>{aboutLoading ? 'Opening…' : 'About Hommio'}</span>
           <b>→</b>
         </button>
       </div>
