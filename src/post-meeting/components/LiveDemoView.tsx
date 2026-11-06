@@ -31,8 +31,8 @@ export function LiveDemoView({
           <span>{aboutLoading ? 'Opening…' : 'About Hommio'}</span>
           <b>→</b>
         </button>
+        <FloatingContactButton placement="inline" />
       </div>
-      <FloatingContactButton />
     </main>
   )
 }

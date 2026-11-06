@@ -15,6 +15,16 @@ const openFabStyle: CSSProperties = {
   right: 'max(16px, calc((100% - 960px) / 2))',
 }
 
+const inlineFabStyle: CSSProperties = {
+  position: 'relative',
+  zIndex: 1200,
+  display: 'grid',
+  justifyItems: 'center',
+  gap: 10,
+  width: 52,
+  transition: 'none',
+}
+
 const actionStyle: CSSProperties = {
   display: 'grid',
   placeItems: 'center',
@@ -52,6 +62,13 @@ const copiedStyle: CSSProperties = {
   pointerEvents: 'none',
 }
 
+const inlineCopiedStyle: CSSProperties = {
+  ...copiedStyle,
+  right: '50%',
+  bottom: 'calc(100% + 8px)',
+  transform: 'translateX(50%)',
+}
+
 const contactMethods = [
   { label: 'SMS', href: 'sms:+19729000833', value: '+1 972-900-0833', icon: 'sms.svg', ariaLabel: 'Send an SMS to FridgeChannel' },
   { label: 'WhatsApp', href: 'https://wa.me/19729000833', value: '+1 972-900-0833', icon: 'whatsapp.svg', ariaLabel: 'Message FridgeChannel on WhatsApp' },
@@ -82,7 +99,7 @@ async function copyToClipboard(value: string) {
 }
 
 /** Persistent, low-friction contact entry shared by the DTC and About pages. */
-export function FloatingContactButton() {
+export function FloatingContactButton({ placement = 'floating' }: { placement?: 'floating' | 'inline' } = {}) {
   const [isOpen, setIsOpen] = useState(false)
   const [copyFeedback, setCopyFeedback] = useState('')
   const rootRef = useRef<HTMLDivElement>(null)
@@ -103,6 +120,10 @@ export function FloatingContactButton() {
     window.clearTimeout(copyFeedbackTimeoutRef.current)
     copyFeedbackTimeoutRef.current = window.setTimeout(() => setCopyFeedback(''), 1800)
   }
+
+  const rootStyle = placement === 'inline'
+    ? inlineFabStyle
+    : { ...fabStyle, ...(isOpen ? openFabStyle : {}) }
 
   useEffect(() => {
     if (!isOpen) return
@@ -130,7 +151,7 @@ export function FloatingContactButton() {
   useEffect(() => () => window.clearTimeout(copyFeedbackTimeoutRef.current), [])
 
   return (
-    <div ref={rootRef} style={{ ...fabStyle, ...(isOpen ? openFabStyle : {}) }}>
+    <div ref={rootRef} className={`floating-contact-button${placement === 'inline' ? ' is-inline' : ''}`} style={rootStyle}>
       {isOpen && (
         <nav style={{ display: 'grid', gap: 10, width: 'max-content', margin: 0 }} aria-label="Contact FridgeChannel directly">
           {contactMethods.map((method) => (
@@ -146,7 +167,7 @@ export function FloatingContactButton() {
           ))}
         </nav>
       )}
-      {copyFeedback && <span style={copiedStyle} role="status" aria-live="polite">{copyFeedback}</span>}
+      {copyFeedback && <span style={placement === 'inline' ? inlineCopiedStyle : copiedStyle} role="status" aria-live="polite">{copyFeedback}</span>}
       <button
         type="button"
         style={buttonStyle}
