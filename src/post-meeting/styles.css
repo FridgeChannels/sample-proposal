@@ -853,14 +853,25 @@ body:has(.post-meeting-app.is-about.is-asin-about){background:#f3f3f3}
   .about-fridgechannel-view.is-asin-about{height:100dvh!important;overflow:hidden!important}
   .about-fridgechannel-view.is-asin-about iframe{height:100%;min-height:100%}
 }
-.live-demo-view.has-flow-cta iframe{height:100%}
-.live-demo-view .flow-cta-bar{z-index:1200;display:flex;align-items:flex-end;justify-content:center;gap:12px;padding:0 16px calc(12px + env(safe-area-inset-bottom));border:0;background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;pointer-events:none}
-.live-demo-view .flow-cta-bar>*{pointer-events:auto}
-.live-demo-view .flow-cta-button{position:relative;flex:1 1 520px;width:auto;max-width:520px;min-width:0;min-height:52px;padding:11px 48px;border-radius:999px;box-shadow:0 6px 16px rgba(23,56,43,.18);justify-content:center;text-align:center}
-.live-demo-view .flow-cta-button>span{display:block;font-size:15px}
-.live-demo-view .flow-cta-button>b{position:absolute;right:18px;font-size:21px}
-.live-demo-view .floating-contact-button.is-inline{flex:0 0 52px}
-@media(max-width:700px){.live-demo-view .flow-cta-bar{gap:10px;padding:0 12px calc(12px + env(safe-area-inset-bottom))}.live-demo-view .flow-cta-button{min-height:52px;padding:9px 44px}}
+.live-demo-view.has-flow-cta{--live-demo-background:#e9e5da;flex-direction:column;background:var(--live-demo-background)}
+.live-demo-view.has-flow-cta.is-about-site{--live-demo-background:#fff}
+.live-demo-view.has-flow-cta:not(.is-preserved-hidden){display:flex}
+.live-demo-view.has-flow-cta iframe{flex:1 1 auto;height:auto;min-height:0}
+.live-demo-view.has-flow-cta iframe.is-inactive{display:none}
+.live-demo-view .flow-cta-bar{position:relative;inset:auto;z-index:1200;display:flex;flex:0 0 auto;align-items:center;justify-content:center;min-height:calc(54px + env(safe-area-inset-bottom));padding:1px 0 calc(1px + env(safe-area-inset-bottom));border:0;background:var(--live-demo-background);backdrop-filter:none;-webkit-backdrop-filter:none;pointer-events:auto}
+.live-demo-view .bottom-nav-bar{border-radius:999px;background:color-mix(in srgb,var(--live-demo-background) 95%,var(--leg-brand,#17382b) 5%);box-shadow:none}
+.live-demo-view .contact-hommio-view{display:grid;flex:1 1 auto;place-items:center;min-height:0;padding:24px 16px;overflow:auto;background:var(--live-demo-background)}
+.contact-hommio-view .floating-contact-button.is-page{position:relative;width:min(100%,560px)}
+.contact-hommio-methods{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(8px,3vw,28px);width:100%}
+.contact-hommio-method{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;min-height:132px;padding:12px 4px;border-radius:20px;color:var(--leg-brand,#17382b);text-align:center;text-decoration:none}
+.contact-hommio-method-icon{display:grid;place-items:center;width:72px;height:72px;border-radius:50%;background:#fff;box-shadow:0 8px 22px rgba(18,31,27,.12);transition:transform .18s ease,box-shadow .18s ease}
+.contact-hommio-method-icon img{display:block;width:34px;height:34px}
+.contact-hommio-method-label{font-size:14px;font-weight:600;line-height:1.2}
+.contact-hommio-method:hover .contact-hommio-method-icon{transform:translateY(-2px);box-shadow:0 12px 26px rgba(18,31,27,.16)}
+.contact-hommio-method:focus-visible{outline:2px solid var(--leg-brand,#17382b);outline-offset:2px}
+.contact-hommio-feedback{position:absolute;top:calc(100% + 8px);left:50%;padding:8px 12px;border-radius:999px;background:#fff;color:#171717;box-shadow:0 6px 16px rgba(18,31,27,.16);font:600 13px/1.2 Arial,sans-serif;white-space:nowrap;transform:translateX(-50%)}
+@media(max-width:420px){.contact-hommio-method{min-height:108px;gap:10px}.contact-hommio-method-icon{width:60px;height:60px}.contact-hommio-method-icon img{width:30px;height:30px}}
+@media(prefers-reduced-motion:reduce){.contact-hommio-method-icon{transition:none}}
 .pilot-plan-view .flow-cta-button{position:relative;justify-content:center;text-align:center}
 .pilot-plan-view .flow-cta-button>span{display:block}
 .pilot-plan-view .flow-cta-button>b{position:absolute;right:20px}

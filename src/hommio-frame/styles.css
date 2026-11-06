@@ -34,7 +34,7 @@ body {
 
 .hommio-frame__bar {
   position: absolute;
-  inset: 0 0 auto;
+  inset: 64px 0 auto;
   z-index: 10;
   display: grid;
   grid-template-columns: 1fr;

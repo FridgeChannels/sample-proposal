@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent } from 'react'
+import { motion } from 'framer-motion'
 
 const fabStyle: CSSProperties = {
   position: 'fixed',
@@ -23,6 +24,14 @@ const inlineFabStyle: CSSProperties = {
   gap: 10,
   width: 52,
   transition: 'none',
+}
+
+const navFabStyle: CSSProperties = {
+  position: 'relative',
+  zIndex: 1200,
+  display: 'grid',
+  justifyItems: 'center',
+  width: 'max-content',
 }
 
 const actionStyle: CSSProperties = {
@@ -75,6 +84,17 @@ const inlineCopiedStyle: CSSProperties = {
   transform: 'translateX(50%)',
 }
 
+const inlineContactMenuStyle: CSSProperties = {
+  position: 'absolute',
+  right: 0,
+  bottom: 'calc(100% + 10px)',
+  zIndex: 1201,
+  display: 'grid',
+  gap: 10,
+  width: 'max-content',
+  margin: 0,
+}
+
 const contactMethods = [
   { label: 'SMS', href: 'sms:+19729000833', value: '+1 972-900-0833', icon: 'sms.svg', ariaLabel: 'Send an SMS to FridgeChannel' },
   { label: 'WhatsApp', href: 'https://wa.me/19729000833', value: '+1 972-900-0833', icon: 'whatsapp.svg', ariaLabel: 'Message FridgeChannel on WhatsApp' },
@@ -105,8 +125,17 @@ async function copyToClipboard(value: string) {
 }
 
 /** Persistent, low-friction contact entry shared by the DTC and About pages. */
-export function FloatingContactButton({ placement = 'floating' }: { placement?: 'floating' | 'inline' } = {}) {
-  const [isOpen, setIsOpen] = useState(false)
+export function FloatingContactButton({
+  placement = 'floating',
+  open,
+  onOpenChange,
+}: {
+  placement?: 'floating' | 'inline' | 'nav' | 'page'
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+} = {}) {
+  const [internalOpen, setInternalOpen] = useState(false)
+  const isOpen = open ?? internalOpen
   const [copyFeedback, setCopyFeedback] = useState('')
   const rootRef = useRef<HTMLDivElement>(null)
   const copyFeedbackTimeoutRef = useRef<number | undefined>(undefined)
@@ -127,21 +156,29 @@ export function FloatingContactButton({ placement = 'floating' }: { placement?: 
     copyFeedbackTimeoutRef.current = window.setTimeout(() => setCopyFeedback(''), 1800)
   }
 
-  const rootStyle = placement === 'inline'
-    ? inlineFabStyle
-    : { ...fabStyle, ...(isOpen ? openFabStyle : {}) }
+  const rootStyle = placement === 'page'
+    ? undefined
+    : placement === 'nav'
+    ? navFabStyle
+    : placement === 'inline'
+      ? inlineFabStyle
+      : { ...fabStyle, ...(isOpen ? openFabStyle : {}) }
 
   useEffect(() => {
     if (!isOpen) return
 
     const closeOnOutsideClick = (event: MouseEvent) => {
       if (!rootRef.current?.contains(event.target as Node)) {
-        setIsOpen(false)
+        setInternalOpen(false)
+        onOpenChange?.(false)
       }
     }
 
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setIsOpen(false)
+      if (event.key === 'Escape') {
+        setInternalOpen(false)
+        onOpenChange?.(false)
+      }
     }
 
     // A document click covers mouse clicks on desktop and taps on mobile.
@@ -152,37 +189,51 @@ export function FloatingContactButton({ placement = 'floating' }: { placement?: 
       document.removeEventListener('click', closeOnOutsideClick)
       document.removeEventListener('keydown', closeOnEscape)
     }
-  }, [isOpen])
+  }, [isOpen, onOpenChange])
 
   useEffect(() => () => window.clearTimeout(copyFeedbackTimeoutRef.current), [])
 
   return (
-    <div ref={rootRef} className={`floating-contact-button${placement === 'inline' ? ' is-inline' : ''}`} style={rootStyle}>
-      {isOpen && (
-        <nav style={{ display: 'grid', gap: 10, width: 'max-content', margin: 0 }} aria-label="Contact FridgeChannel directly">
+    <div ref={rootRef} className={`floating-contact-button${placement === 'inline' ? ' is-inline' : ''}${placement === 'nav' ? ' is-nav' : ''}${placement === 'page' ? ' is-page' : ''}`} style={rootStyle}>
+      {(isOpen || placement === 'page') && (
+        <nav className={placement === 'page' ? 'contact-hommio-methods' : undefined} style={placement === 'page' ? undefined : placement === 'floating' ? { display: 'grid', gap: 10, width: 'max-content', margin: 0 } : inlineContactMenuStyle} aria-label={placement === 'page' ? 'Contact Hommio directly' : 'Contact FridgeChannel directly'}>
           {contactMethods.map((method) => (
             <a
               key={method.label}
-              style={actionStyle}
+              className={placement === 'page' ? 'contact-hommio-method' : undefined}
+              style={placement === 'page' ? undefined : actionStyle}
               href={method.href}
-              aria-label={method.ariaLabel}
+              aria-label={placement === 'page' ? `Contact Hommio via ${method.label}` : method.ariaLabel}
               onClick={(event) => void handleContactClick(event, method.value)}
             >
-              <img src={`/assets/contact/${method.icon}`} width="28" height="28" alt="" />
+              {placement === 'page' ? (
+                <>
+                  <span className="contact-hommio-method-icon"><img src={`/assets/contact/${method.icon}`} width="34" height="34" alt="" /></span>
+                  <span className="contact-hommio-method-label">{method.label}</span>
+                </>
+              ) : (
+                <img src={`/assets/contact/${method.icon}`} width="28" height="28" alt="" />
+              )}
             </a>
           ))}
         </nav>
       )}
-      {copyFeedback && <span style={placement === 'inline' ? inlineCopiedStyle : copiedStyle} role="status" aria-live="polite">{copyFeedback}</span>}
-      <button
+      {copyFeedback && <span className={placement === 'page' ? 'contact-hommio-feedback' : undefined} style={placement === 'page' ? undefined : placement === 'floating' ? copiedStyle : inlineCopiedStyle} role="status" aria-live="polite">{copyFeedback}</span>}
+      {placement !== 'page' && <motion.button
         type="button"
-        style={placement === 'inline' ? inlineButtonStyle : buttonStyle}
-        aria-label={isOpen ? 'Close contact options' : 'Contact FridgeChannel'}
+        whileTap={placement === 'nav' ? { scale: 0.97 } : undefined}
+        className={placement === 'nav' ? `bottom-nav-button${isOpen ? ' is-active' : ''}` : undefined}
+        style={placement === 'nav' ? undefined : placement === 'inline' ? inlineButtonStyle : buttonStyle}
+        aria-label={placement === 'nav' ? 'Contact Hommio' : isOpen ? 'Close contact options' : 'Contact FridgeChannel'}
         aria-expanded={isOpen}
-        onClick={() => setIsOpen((current) => !current)}
+        onClick={() => {
+          setInternalOpen(!isOpen)
+          onOpenChange?.(!isOpen)
+        }}
       >
-        <img src="/assets/contact/contact.svg" width="25" height="25" alt="" style={{ filter: 'brightness(0) invert(1)' }} />
-      </button>
+        <img src="/assets/contact/contact.svg" width={placement === 'nav' ? 22 : 25} height={placement === 'nav' ? 22 : 25} alt="" className={placement === 'nav' ? 'bottom-nav-icon' : undefined} style={placement === 'nav' ? undefined : { filter: 'brightness(0) invert(1)' }} />
+        {placement === 'nav' && <span className="bottom-nav-label" aria-hidden={!isOpen}>Contact Hommio</span>}
+      </motion.button>}
     </div>
   )
 }

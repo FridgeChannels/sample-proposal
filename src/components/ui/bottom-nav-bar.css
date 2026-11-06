@@ -1,0 +1,106 @@
+.bottom-nav-bar {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  height: 52px;
+  padding: 0 6px;
+  overflow: visible;
+  border: 0;
+  border-radius: 999px;
+  background: var(--leg-background, #fff);
+  box-shadow: none;
+}
+
+.bottom-nav-bar--sticky {
+  position: fixed;
+  z-index: 20;
+  inset-inline: 0;
+  bottom: 0;
+  height: calc(52px + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.bottom-nav-button {
+  box-sizing: border-box;
+  position: relative;
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  min-width: 44px;
+  min-height: 40px;
+  max-height: 44px;
+  padding: 8px 11px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--leg-muted-foreground, #66736a);
+  cursor: pointer;
+  transition: color 180ms ease, background-color 180ms ease;
+}
+
+.bottom-nav-button:hover:not(.is-active) {
+  background: color-mix(in srgb, var(--leg-muted-foreground, #66736a) 9%, transparent);
+}
+
+.bottom-nav-button.is-active {
+  gap: 2px;
+  background: color-mix(in srgb, var(--leg-brand, #17382b) 10%, transparent);
+  color: var(--leg-brand, #17382b);
+}
+
+.bottom-nav-button:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--leg-brand, #17382b) 68%, white);
+  outline-offset: 2px;
+}
+
+.bottom-nav-button:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+.bottom-nav-icon {
+  flex: 0 0 auto;
+  transition: color 180ms ease;
+}
+
+.bottom-nav-label {
+  display: inline-block;
+  max-width: 0;
+  overflow: hidden;
+  color: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  opacity: 0;
+  white-space: nowrap;
+  user-select: none;
+  transition: max-width 220ms ease, opacity 180ms ease;
+}
+
+.bottom-nav-button.is-active .bottom-nav-label {
+  max-width: 170px;
+  opacity: 1;
+}
+
+.bottom-nav-bar .bottom-nav-button img {
+  transition: opacity 180ms ease;
+}
+
+.bottom-nav-bar .bottom-nav-button:not(.is-active) img {
+  opacity: 0.55;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bottom-nav-button,
+  .bottom-nav-icon,
+  .bottom-nav-label,
+  .bottom-nav-bar .bottom-nav-button img {
+    transition: none;
+  }
+}

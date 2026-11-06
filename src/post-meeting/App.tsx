@@ -98,7 +98,6 @@ export function App() {
   const [quoteLoading, setQuoteLoading] = useState(Boolean(magnetSn && !financeToken))
   const [quoteError, setQuoteError] = useState('')
   const [experience, setExperience] = useState<MagnetExperience | null>(null)
-  const [aboutOpening, setAboutOpening] = useState(false)
   const offerNow = previewOfferNow(order, now)
   const paymentComplete = order.status === 'paid' || order.financeHandoff?.status === 'paid'
   const showGlobalUrgency = !financeToken && !paymentComplete && order.pricing.loaded && view !== 'demo' && view !== 'about'
@@ -234,28 +233,15 @@ export function App() {
     openView('demo')
   }
 
-  const openAboutHommio = async () => {
-    if (aboutOpening) return
-    setAboutOpening(true)
-    const pathname = window.location.pathname.replace(/\/$/, '').toLowerCase()
-    const routeExperience: MagnetExperience | null =
-      pathname === '/asin-sample' || pathname === '/asin-sample.html'
-        ? 'asin_plus'
-        : pathname === '/dtc-sample' || pathname === '/dtc-sample.html'
-          ? 'dtc'
-          : null
-    const nextExperience = routeExperience || experience || await fetchMagnetExperience(magnetSn)
-    setExperience(nextExperience)
-    const target = new URL('/hommio-frame.html', window.location.origin)
-    target.searchParams.set('site', nextExperience === 'asin_plus' ? 'amazon' : 'dtc')
-    target.searchParams.set('returnTo', `${window.location.pathname}${window.location.search}${window.location.hash}`)
-    const dest = window.top ?? window
-    dest.location.assign(target.toString())
-  }
-
   const blockingError = handoffError || quoteError
   const blockingLoading = handoffLoading || (quoteLoading && !financeToken)
   const isAsinAbout = (experience || 'dtc') === 'asin_plus'
+  const samplePath = window.location.pathname.replace(/\/$/, '').toLowerCase()
+  const isAsinSample = samplePath === '/asin-sample' || samplePath === '/asin-sample.html'
+  const isDtcSample = samplePath === '/dtc-sample' || samplePath === '/dtc-sample.html'
+  const officialSiteUrl = isAsinSample || (!isDtcSample && experience === 'asin_plus')
+    ? 'https://hommio.ai/amazonbrands'
+    : 'https://hommio.ai/dtcbrands'
   // The live demo iframe only needs the SN, so it starts loading without waiting for the quote.
   const demoVisible = demoMounted && !financeToken && !blockingError
 
@@ -266,8 +252,7 @@ export function App() {
       {demoVisible && (
         <LiveDemoView
           active={view === 'demo'}
-          aboutLoading={aboutOpening}
-          onAboutHommio={() => { void openAboutHommio() }}
+          aboutUrl={officialSiteUrl}
         />
       )}
       {!blockingLoading && !blockingError && <>
