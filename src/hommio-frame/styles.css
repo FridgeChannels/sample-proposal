@@ -94,26 +94,26 @@ body {
 
 @media (max-width: 640px) {
   .hommio-frame__bar {
-    inset: 0 0 auto;
+    inset: 56px 0 auto;
     display: block;
     width: auto;
-    height: 56px;
-    padding: 0;
+    height: 48px;
+    padding: 0 16px;
   }
 
   .hommio-frame__back {
     position: absolute;
-    top: 8px;
-    left: clamp(124px, 33vw, 132px);
-    width: 40px;
-    height: 40px;
-    min-height: 40px;
-    background: transparent;
+    top: 4px;
+    left: 16px;
+    width: 38px;
+    height: 38px;
+    min-height: 38px;
+    background: rgba(250, 248, 242, 0.9);
     box-shadow: none;
   }
 
   .hommio-frame__back:hover {
-    background: transparent;
+    background: rgba(250, 248, 242, 0.9);
   }
 
 }
