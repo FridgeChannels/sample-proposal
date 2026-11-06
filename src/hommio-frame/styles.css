@@ -37,12 +37,13 @@ body {
   inset: 0 0 auto;
   z-index: 10;
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: 1fr;
   align-items: center;
   height: 64px;
   padding: 0 24px;
-  background: rgba(250, 248, 242, 0.96);
+  background: transparent;
   border: 0;
+  pointer-events: none;
   transition: transform 200ms ease, opacity 200ms ease, visibility 0s linear;
 }
 
@@ -70,6 +71,7 @@ body {
   padding: 0 14px;
   border: 0;
   border-radius: 999px;
+  pointer-events: auto;
   transition: background-color 140ms ease;
 }
 
@@ -80,37 +82,6 @@ body {
 .hommio-frame__back:focus-visible {
   outline: 3px solid #d8803c;
   outline-offset: 3px;
-}
-
-.hommio-frame__identity {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  white-space: nowrap;
-}
-
-.hommio-frame__home {
-  color: inherit;
-  cursor: pointer;
-  text-decoration: none;
-  transition: opacity 140ms ease;
-}
-
-.hommio-frame__home:hover {
-  opacity: 0.76;
-}
-
-.hommio-frame__home:focus-visible {
-  outline: 2px solid #d8803c;
-  outline-offset: 5px;
-}
-
-.hommio-frame__brand {
-  color: #19372d;
-  font-size: 21px;
-  font-weight: 750;
-  letter-spacing: -0.06em;
 }
 
 .hommio-frame__site {
@@ -126,7 +97,7 @@ body {
 
 @media (max-width: 640px) {
   .hommio-frame__bar {
-    grid-template-columns: 1fr auto;
+    grid-template-columns: 1fr;
     height: 60px;
     padding: 0 12px;
   }
@@ -138,11 +109,6 @@ body {
     font-size: 12px;
   }
 
-  .hommio-frame__identity {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

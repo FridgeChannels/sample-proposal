@@ -16,9 +16,6 @@ const HOMMIO_SITES = {
   },
 } as const
 
-const HOMMIO_HOME_URL = 'https://hommio.ai/'
-const HOMMIO_FRAME_NAME = 'hommio-site'
-
 type SiteKey = keyof typeof HOMMIO_SITES
 
 function readSiteKey(): SiteKey {
@@ -74,18 +71,9 @@ export function App() {
           <ChevronSmallLeftIcon aria-hidden="true" focusable="false" size={18} />
           <span>{site.returnLabel}</span>
         </a>
-        <a
-          className="hommio-frame__identity hommio-frame__home"
-          href={HOMMIO_HOME_URL}
-          target={HOMMIO_FRAME_NAME}
-          aria-label="Hommio 首页"
-        >
-          <span className="hommio-frame__brand">hommio</span>
-        </a>
       </header>
       <iframe
         ref={frameRef}
-        name={HOMMIO_FRAME_NAME}
         className="hommio-frame__site"
         src={siteUrl}
         title={site.title}
