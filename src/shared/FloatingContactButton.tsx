@@ -95,10 +95,13 @@ const inlineContactMenuStyle: CSSProperties = {
   margin: 0,
 }
 
+const contactPhone = '+1 (620) 894-1711'
+const contactPhoneDigits = '16208941711'
+
 const contactMethods = [
-  { label: 'SMS', href: 'sms:+19729000833', value: '+1 972-900-0833', icon: 'sms.svg', ariaLabel: 'Send an SMS to FridgeChannel' },
-  { label: 'WhatsApp', href: 'https://wa.me/19729000833', value: '+1 972-900-0833', icon: 'whatsapp.svg', ariaLabel: 'Message FridgeChannel on WhatsApp' },
-  { label: 'Email', href: 'mailto:billy@fridgechannels.com', value: 'billy@fridgechannels.com', icon: 'gmail.svg', ariaLabel: 'Email FridgeChannel' },
+  { label: 'SMS', href: `sms:+${contactPhoneDigits}`, value: contactPhone, icon: 'sms.svg', ariaLabel: 'Send an SMS to FridgeChannel' },
+  { label: 'WhatsApp', href: `https://wa.me/${contactPhoneDigits}`, value: contactPhone, icon: 'whatsapp.svg', ariaLabel: 'Message FridgeChannel on WhatsApp' },
+  { label: 'Email', href: 'mailto:ella@fridgechannels.com', value: 'ella@fridgechannels.com', icon: 'gmail.svg', ariaLabel: 'Email FridgeChannel' },
 ]
 
 async function copyToClipboard(value: string) {
