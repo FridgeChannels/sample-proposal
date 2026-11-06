@@ -94,9 +94,16 @@ body {
 
 @media (max-width: 640px) {
   .hommio-frame__bar {
+    inset: auto auto max(16px, env(safe-area-inset-bottom)) 12px;
     grid-template-columns: 1fr;
-    height: 60px;
-    padding: 0 12px;
+    width: 52px;
+    height: 52px;
+    padding: 0;
+  }
+
+  .hommio-frame__back {
+    background: rgba(250, 248, 242, 0.96);
+    box-shadow: 0 4px 14px rgba(25, 55, 45, 0.18);
   }
 
 }
