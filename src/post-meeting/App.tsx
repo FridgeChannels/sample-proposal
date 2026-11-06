@@ -246,11 +246,11 @@ export function App() {
           : null
     const nextExperience = routeExperience || experience || await fetchMagnetExperience(magnetSn)
     setExperience(nextExperience)
-    const target = nextExperience === 'asin_plus'
-      ? 'https://hommio.ai/amazonbrands'
-      : 'https://hommio.ai/dtcbrands'
+    const target = new URL('/hommio-frame.html', window.location.origin)
+    target.searchParams.set('site', nextExperience === 'asin_plus' ? 'amazon' : 'dtc')
+    target.searchParams.set('returnTo', `${window.location.pathname}${window.location.search}${window.location.hash}`)
     const dest = window.top ?? window
-    dest.location.assign(target)
+    dest.location.assign(target.toString())
   }
 
   const blockingError = handoffError || quoteError

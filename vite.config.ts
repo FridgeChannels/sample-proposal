@@ -249,6 +249,7 @@ export default defineConfig({
         pilotPlan: resolve(projectRoot, 'pilot-plan.html'),
         pilotDesignCopy: resolve(projectRoot, 'pilot-design-copy.html'),
         fiveHourEnergy: resolve(projectRoot, '5hourenergy.html'),
+        hommioFrame: resolve(projectRoot, 'hommio-frame.html'),
         pilotPlanPrep: resolve(projectRoot, 'pilot-plan-prep.html'),
         playground: resolve(projectRoot, 'playground.html'),
         investmentStory: resolve(projectRoot, 'investment-story.html'),
