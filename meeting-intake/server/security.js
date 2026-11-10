@@ -28,6 +28,7 @@ const DEFAULT_ALLOWED_ORIGINS = [
   'http://127.0.0.1:5173',
   'https://dealquest.fridgechannels.com',
   'https://sample.fridgechannels.com',
+  'https://sample.hommio.ai',
 ]
 
 function httpError(status, code, message, extra = {}) {

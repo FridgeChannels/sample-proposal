@@ -10,8 +10,9 @@ services:
     image: sample-proposal:latest
     container_name: sample-proposal
     ports:
-      # host:container — host uses 4174 to avoid clashing with .env PORT=4173
-      - "4174:4173"
+      # localhost only — Caddy (sample.hommio.ai) reverse_proxies here.
+      # Host 4174 avoids clashing with local .env PORT=4173.
+      - "127.0.0.1:4174:4173"
     env_file:
       - path: .env
         required: false
