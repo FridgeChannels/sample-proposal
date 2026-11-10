@@ -928,19 +928,21 @@
 @media screen and (prefers-reduced-motion: no-preference) {
   .page-motion-ready > section :is(.slide-topline, h1, h2, h3, p, ol, ul, .table-scroll, .channel-detail-tablist, .economics-summary-metrics) {
     opacity: 0;
-    transition: opacity 440ms ease-out;
+    translate: 0 18px;
+    transition: opacity 520ms ease-out, translate 620ms cubic-bezier(.2,.75,.25,1);
   }
 
   .page-motion-ready > section:is(.page-in-view, :focus-within) :is(.slide-topline, h1, h2, h3, p, ol, ul, .table-scroll, .channel-detail-tablist, .economics-summary-metrics) {
     opacity: 1;
+    translate: none;
   }
 
   .page-motion-ready > section.page-in-view:not(:focus-within) :is(h1, h2, .channel-detail-tablist) {
-    transition-delay: 70ms;
+    transition-delay: 180ms;
   }
 
   .page-motion-ready > section.page-in-view:not(:focus-within) :is(h3, p, ol, ul, .table-scroll, .economics-summary-metrics) {
-    transition-delay: 150ms;
+    transition-delay: 380ms;
   }
 }
 #root{overflow-x:clip}
