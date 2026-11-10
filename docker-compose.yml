@@ -13,9 +13,9 @@ services:
       # localhost only — Caddy (sample.hommio.ai) reverse_proxies here.
       # Host 4174 avoids clashing with local .env PORT=4173.
       - "127.0.0.1:4174:4173"
+    # Classic string form — older docker-compose (v1) rejects path/required objects.
     env_file:
-      - path: .env
-        required: false
+      - .env
     environment:
       # App listens on 4173 inside the container only
       PORT: "4173"
