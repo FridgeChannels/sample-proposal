@@ -6,3 +6,41 @@
 .tilted-grid-strip-last{border-radius:0 8px 8px 0}
 .tilted-grid-hero--flush .tilted-grid-strip-first,.tilted-grid-hero--flush .tilted-grid-strip-last{border-radius:0}
 .tilted-grid-image{position:absolute;top:0;max-width:none;object-fit:contain}
+
+.tilted-grid-strip { pointer-events: auto; cursor: zoom-in; }
+.tilted-grid-tile:focus-visible .tilted-grid-strip { box-shadow: inset 0 0 0 2px #134d2f; }
+.tilted-grid-tile:focus-visible .tilted-grid-image { outline: 2px solid #134d2f; outline-offset: -2px; }
+
+.tilted-grid-preview {
+  max-width: 94vw;
+  max-height: 90dvh;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  overflow: visible;
+}
+
+.tilted-grid-preview::backdrop { background: rgb(0 0 0 / 84%); }
+
+.tilted-grid-preview :is(img, video) {
+  display: block;
+  width: min(86vw, 1200px);
+  max-height: 80dvh;
+  object-fit: contain;
+}
+
+.tilted-grid-preview > button {
+  position: absolute;
+  z-index: 1;
+  top: 8px;
+  right: 8px;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #111;
+  text-shadow: 0 0 3px #fff, 0 0 6px #fff;
+  font: 26px/1 sans-serif;
+  cursor: pointer;
+}

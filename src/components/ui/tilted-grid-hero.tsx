@@ -1,4 +1,5 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import './tilted-grid-hero.css'
 
 const SLICES = 16
@@ -57,6 +58,22 @@ export function TiltedGridHero({
   fade = 12,
 }: TiltedGridHeroProps) {
   const ref = useRef<HTMLDivElement>(null)
+  const dialogRef = useRef<HTMLDialogElement>(null)
+  const [selected, setSelected] = useState<TiltedGridImage | null>(null)
+
+  useEffect(() => {
+    if (!selected) return
+    const dialog = dialogRef.current
+    if (!dialog) return
+    dialog.showModal()
+    const overflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      dialog.close()
+      document.body.style.overflow = overflow
+    }
+  }, [selected])
+
   const id = useId().replace(/[^a-zA-Z0-9]/g, '')
   const orbit = `tgh-o-${id}`
   const tileClass = `tgh-t-${id}`
@@ -125,73 +142,102 @@ export function TiltedGridHero({
   })
 
   return (
-    <div ref={ref} className={`tilted-grid-hero${spacing === 0 ? ' tilted-grid-hero--flush' : ''}`} aria-hidden="true">
-      <style>{animationCss}</style>
-      <div
-        className="tilted-grid-band"
-        style={{
-          opacity: layout ? 1 : 0,
-          perspective: `${+(radiusPercent * CAMERA).toFixed(3)}cqw`,
-          perspectiveOrigin: `50% ${axis}%`,
-          maskImage: mask,
-          WebkitMaskImage: mask,
-        }}
-      >
-        {tiles.map(({ image, ratio, center }, index) => {
-          const share = ratio / SLICES
-          return (
-            <div
-              key={index}
-              className={`tilted-grid-tile ${tileClass}`}
-              style={{
-                left: `calc(50% - ${u(ratio / 2)})`,
-                top: `calc(${axis}% - ${u(0.5)})`,
-                width: u(ratio),
-                height: u(1),
-                transformStyle: 'preserve-3d',
-                animation: `${orbit} ${duration}s linear ${-(center / totalWidth) * duration}s infinite`,
-              }}
-            >
-              {Array.from({ length: SLICES }, (_, slice) => (
-                <div
-                  key={slice}
-                  className={`tilted-grid-strip${slice === 0 ? ' tilted-grid-strip-first' : ''}${slice === SLICES - 1 ? ' tilted-grid-strip-last' : ''}`}
-                  style={{
-                    left: u((ratio - share) / 2),
-                    width: slice === SLICES - 1 && spacing > 0 ? u(share) : `calc(${u(share)} + 1px)`,
-                    height: u(1),
-                    transform: turn((ratio / 2 - (slice + 0.5) * share) * unit),
-                  }}
-                >
-                  {image && (image.type === 'video' ? (
-                    <video
-                      key={image.src}
-                      src={image.src}
-                      poster={image.poster}
-                      aria-hidden="true"
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      preload="auto"
-                      className="tilted-grid-image"
-                      style={{ left: u(-slice * share), width: u(ratio), height: u(1) }}
-                    />
-                  ) : (
-                    <img
-                      src={image.src}
-                      alt=""
-                      draggable={false}
-                      className="tilted-grid-image"
-                      style={{ left: u(-slice * share), width: u(ratio), height: u(1) }}
-                    />
-                  ))}
-                </div>
-              ))}
-            </div>
-          )
-        })}
+    <>
+      <div ref={ref} className={`tilted-grid-hero${spacing === 0 ? ' tilted-grid-hero--flush' : ''}`}>
+        <style>{animationCss}</style>
+        <div
+          className="tilted-grid-band"
+          style={{
+            opacity: layout ? 1 : 0,
+            perspective: `${+(radiusPercent * CAMERA).toFixed(3)}cqw`,
+            perspectiveOrigin: `50% ${axis}%`,
+            maskImage: mask,
+            WebkitMaskImage: mask,
+          }}
+        >
+          {tiles.map(({ image, ratio, center }, index) => {
+            const share = ratio / SLICES
+            return (
+              <div
+                key={index}
+                role="button"
+                tabIndex={0}
+                aria-label={`Enlarge ${image.alt || 'carousel image'}`}
+                onClick={() => setSelected(image)}
+                onKeyDown={(event) => {
+                  if (event.key !== 'Enter' && event.key !== ' ') return
+                  event.preventDefault()
+                  setSelected(image)
+                }}
+                className={`tilted-grid-tile ${tileClass}`}
+                style={{
+                  left: `calc(50% - ${u(ratio / 2)})`,
+                  top: `calc(${axis}% - ${u(0.5)})`,
+                  width: u(ratio),
+                  height: u(1),
+                  transformStyle: 'preserve-3d',
+                  animationPlayState: selected ? 'paused' : undefined,
+                  animation: `${orbit} ${duration}s linear ${-(center / totalWidth) * duration}s infinite`,
+                }}
+              >
+                {Array.from({ length: SLICES }, (_, slice) => (
+                  <div
+                    key={slice}
+                    className={`tilted-grid-strip${slice === 0 ? ' tilted-grid-strip-first' : ''}${slice === SLICES - 1 ? ' tilted-grid-strip-last' : ''}`}
+                    style={{
+                      left: u((ratio - share) / 2),
+                      width: slice === SLICES - 1 && spacing > 0 ? u(share) : `calc(${u(share)} + 1px)`,
+                      height: u(1),
+                      transform: turn((ratio / 2 - (slice + 0.5) * share) * unit),
+                    }}
+                  >
+                    {image && (image.type === 'video' ? (
+                      <video
+                        key={image.src}
+                        src={image.src}
+                        poster={image.poster}
+                        aria-hidden="true"
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        preload="auto"
+                        className="tilted-grid-image"
+                        style={{ left: u(-slice * share), width: u(ratio), height: u(1) }}
+                      />
+                    ) : (
+                      <img
+                        src={image.src}
+                        alt=""
+                        draggable={false}
+                        className="tilted-grid-image"
+                        style={{ left: u(-slice * share), width: u(ratio), height: u(1) }}
+                      />
+                    ))}
+                  </div>
+                ))}
+              </div>
+            )
+          })}
+        </div>
       </div>
-    </div>
+      {selected && createPortal(
+        <dialog
+          ref={dialogRef}
+          className="tilted-grid-preview"
+          aria-label={selected.alt || 'Carousel preview'}
+          onClose={() => setSelected(null)}
+          onClick={(event) => {
+            if (event.target === event.currentTarget) event.currentTarget.close()
+          }}
+        >
+          <button type="button" autoFocus aria-label="Close preview" onClick={() => dialogRef.current?.close()}>×</button>
+          {selected.type === 'video'
+            ? <video src={selected.src} poster={selected.poster} controls autoPlay muted playsInline />
+            : <img src={selected.src} alt={selected.alt || ''} />}
+        </dialog>,
+        document.body,
+      )}
+    </>
   )
 }

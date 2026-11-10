@@ -17,6 +17,14 @@ export function extractPilotPlanConfig(source = pilotPlanDocument): TemplateConf
 
   document.body.querySelectorAll('script').forEach((script) => script.remove())
 
+  // Keep scroll targets at viewport size; only their contents are scaled.
+  document.querySelectorAll('.hommio-deck > section').forEach((slide) => {
+    const content = document.createElement('div')
+    content.className = 'desktop-slide-content'
+    content.append(...slide.childNodes)
+    slide.append(content)
+  })
+
   return {
     bodyMarkup: document.body.innerHTML,
     css,

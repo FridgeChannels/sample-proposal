@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { AnimatedFolder, type FolderProject } from '../components/ui/3d-folder'
 import { TiltedGridHero } from '../components/ui/tilted-grid-hero'
+import { ChannelEconomics } from './ChannelEconomics'
 import { extractPilotPlanConfig } from './pilot-plan-template'
 
 const heroImages = [
@@ -18,6 +19,20 @@ const heroImages = [
     aspectRatio: 9 / 16,
   },
   { src: '/gourmendfoods/products/hero-fridge-coffee-scene.png', alt: 'Coffee brand magnet on a refrigerator', aspectRatio: 1696 / 927 },
+  {
+    src: '/gourmendfoods/products/hero-amazon-order.mp4',
+    poster: '/gourmendfoods/products/hero-amazon-order-poster.jpg',
+    type: 'video' as const,
+    alt: 'Amazon reorder experience',
+    aspectRatio: 540 / 958,
+  },
+  {
+    src: '/gourmendfoods/products/hero-dtc-demo.mp4',
+    poster: '/gourmendfoods/products/hero-dtc-demo-poster.jpg',
+    type: 'video' as const,
+    alt: 'DTC experience demonstration',
+    aspectRatio: 540 / 870,
+  },
 ]
 
 const solutionParts: FolderProject[] = [
@@ -78,6 +93,8 @@ export function PilotPlan() {
   const meetConfig = useMemo(() => readMeetConfig(), [])
   const hostRef = useRef<HTMLDivElement>(null)
   const [folderHost, setFolderHost] = useState<HTMLElement | null>(null)
+  const [dtcEconomicsHost, setDtcEconomicsHost] = useState<HTMLElement | null>(null)
+  const [economicsHost, setEconomicsHost] = useState<HTMLElement | null>(null)
   const [heroHost, setHeroHost] = useState<HTMLElement | null>(null)
   const template = useMemo(() => extractPilotPlanConfig(), [])
   const bodyMarkup = useMemo(() => ({ __html: template.bodyMarkup }), [template])
@@ -103,7 +120,60 @@ export function PilotPlan() {
     }
   }, [template])
 
+  useLayoutEffect(() => {
+    const deck = hostRef.current?.querySelector<HTMLElement>('.hommio-deck')
+    const topbar = hostRef.current?.querySelector<HTMLElement>('.hommio-topbar')
+    if (!deck) return
+    const slides = [...deck.querySelectorAll<HTMLElement>(':scope > section')]
+    slides.forEach((slide) => {
+      slide.style.removeProperty('zoom')
+      slide.style.removeProperty('min-height')
+    })
+    const desktop = window.matchMedia('(min-width: 960px)')
+    let frame = 0
+    let disposed = false
+    const fit = () => {
+      if (disposed) return
+      const root = document.documentElement
+      if (!desktop.matches) {
+        root.style.removeProperty('--proposal-scale')
+        root.style.removeProperty('--proposal-canvas-top')
+        root.style.setProperty('--proposal-header-height', `${topbar?.getBoundingClientRect().height ?? 76}px`)
+        return
+      }
+
+      // Scale the entire reference composition, including its header and whitespace.
+      const scale = Math.min(window.innerWidth / 1440, window.innerHeight / 900)
+      root.style.setProperty('--proposal-scale', String(scale))
+      root.style.setProperty('--proposal-canvas-top', `${(window.innerHeight - 900 * scale) / 2}px`)
+      deck.style.removeProperty('--proposal-scale')
+      slides.forEach((slide) => {
+        slide.querySelector<HTMLElement>(':scope > .desktop-slide-content')?.style.removeProperty('--slide-scale')
+      })
+    }
+    const schedule = () => {
+      if (disposed) return
+      cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(fit)
+    }
+    window.addEventListener('resize', schedule)
+    deck.addEventListener('load', schedule, true)
+    void document.fonts.ready.then(schedule)
+    fit()
+    return () => {
+      disposed = true
+      cancelAnimationFrame(frame)
+      window.removeEventListener('resize', schedule)
+      deck.removeEventListener('load', schedule, true)
+      document.documentElement.style.removeProperty('--proposal-header-height')
+      document.documentElement.style.removeProperty('--proposal-scale')
+      document.documentElement.style.removeProperty('--proposal-canvas-top')
+    }
+  }, [template])
+
   useEffect(() => {
+    setDtcEconomicsHost(hostRef.current?.querySelector<HTMLElement>('[data-dtc-economics-root]') ?? null)
+    setEconomicsHost(hostRef.current?.querySelector<HTMLElement>('[data-amazon-economics-root]') ?? null)
     setFolderHost(hostRef.current?.querySelector<HTMLElement>('[data-parts-folder-root]') ?? null)
     setHeroHost(hostRef.current?.querySelector<HTMLElement>('[data-tilted-grid-hero]') ?? null)
   }, [template])
@@ -181,6 +251,8 @@ export function PilotPlan() {
       <style data-pilot-plan-styles>{template.css}</style>
       <div ref={hostRef} dangerouslySetInnerHTML={bodyMarkup} />
       {folderHost && createPortal(<AnimatedFolder title="Explore the three parts" projects={solutionParts} />, folderHost)}
+      {dtcEconomicsHost && createPortal(<ChannelEconomics channel="DTC" />, dtcEconomicsHost)}
+      {economicsHost && createPortal(<ChannelEconomics channel="Amazon" />, economicsHost)}
       {heroHost && createPortal(<TiltedGridHero images={heroImages} aspectRatio={1} gap={0} />, heroHost)}
     </>
   )
