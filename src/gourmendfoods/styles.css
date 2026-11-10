@@ -793,7 +793,7 @@
     .channel-detail-table-scroll{max-width:100%;margin-top:18px;overflow-x:auto}
     .channel-detail-panel table{width:100%;border-collapse:collapse;font-size:max(22px, .9rem);line-height:1.55;text-align:left}
     .channel-detail-panel th,.channel-detail-panel td{padding:14px 16px;border-bottom:1px solid rgba(19,77,47,.14);vertical-align:top}
-    .channel-detail-panel thead th{color:#000;font-size:max(22px, .8rem);background:rgba(19,77,47,.05)}
+    .channel-detail-panel thead th{color:#fff;font-size:max(22px, .8rem);background:#134d2f}
     .channel-detail-panel tbody th{color:#000}
     .channel-detail-panel td{color:#000}
     .channel-detail-steps,.channel-detail-terms{margin:0;padding-left:22px}
