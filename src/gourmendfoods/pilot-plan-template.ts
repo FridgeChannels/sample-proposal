@@ -17,6 +17,26 @@ export function extractPilotPlanConfig(source = pilotPlanDocument): TemplateConf
 
   document.body.querySelectorAll('script').forEach((script) => script.remove())
 
+  document.querySelectorAll<HTMLAnchorElement>('#contents .presentation-outline a[href^="#"]').forEach((link) => {
+    const number = link.querySelector('.presentation-outline-number')?.textContent?.trim()
+    const slide = document.getElementById(link.hash.slice(1))
+    if (!number || !slide?.matches('.hommio-deck > section')) return
+
+    const label = slide.querySelector(':scope > .slide-topline > span, .presentation-chapter-label')
+    if (label) {
+      label.prepend(`${number} · `)
+      return
+    }
+
+    const heading = document.getElementById(slide.getAttribute('aria-labelledby') ?? '')
+    if (!heading) return
+
+    const marker = document.createElement('span')
+    marker.className = 'slide-contents-number'
+    marker.textContent = number
+    heading.prepend(marker)
+  })
+
   // Keep scroll targets at viewport size; only their contents are scaled.
   document.querySelectorAll('.hommio-deck > section').forEach((slide) => {
     const content = document.createElement('div')

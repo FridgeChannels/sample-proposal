@@ -1305,3 +1305,14 @@ html { scroll-padding-top: var(--proposal-header-height, 76px); }
     100% { opacity: 0; transform: translate(var(--coin-drift), -42px) rotate(18deg) scale(.8); }
   }
 }
+
+.slide-contents-number {
+  flex: none;
+  margin-inline-end: .4em;
+  font: 22px/1.2 "Roboto Mono", monospace;
+  letter-spacing: 0;
+}
+
+.detail-heading .slide-contents-number {
+  margin-inline-end: 0;
+}
