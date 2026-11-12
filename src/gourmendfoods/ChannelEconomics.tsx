@@ -17,10 +17,10 @@ export function ChannelEconomics({ channel }: { channel: 'DTC' | 'Amazon' }) {
   }, [open])
   return <>
     <div className="channel-economics-summary">
-      <p className="economics-summary-intro">One repeat-purchase household. Two attributed {channel} orders per year.</p>
+      <p className="economics-summary-intro">One Hommio Retention Household, with two attributed {channel} orders per year.</p>
       <p className="economics-summary-period">Illustrative year 1 · Per household · USD</p>
       <dl className="economics-summary-metrics">
-        <div><dt>Allocated hardware</dt><dd>$5</dd><small>One-time investment per HPH</small></div>
+        <div><dt>Allocated hardware</dt><dd>$5</dd><small>One-time investment per HRH</small></div>
         <div><dt>Attributed revenue</dt><dd className="economics-revenue-value">+$100
           <span className="economics-coin-burst" aria-hidden="true">
             <span>$</span><span>+</span><span>$</span>

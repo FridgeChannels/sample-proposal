@@ -1147,3 +1147,18 @@ body {
     width: 100%;
   }
 }
+
+@media (max-width: 480px) {
+  .pg-component-grid,
+  .pg-metric-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .pg-component-card {
+    min-width: 0;
+  }
+
+  .pg-component-card .ui-icon-nav {
+    flex-wrap: wrap;
+  }
+}

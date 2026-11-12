@@ -488,7 +488,7 @@
       .comparison-pair{grid-template-columns:repeat(2,minmax(0,1fr));border-radius:20px}
       .comparison-panel{min-height:220px;padding:18px 14px;gap:20px}
       .comparison-panel small{font-size:11px;letter-spacing:.1em}
-      .comparison-panel p{font-size:1.12rem;line-height:1.18}
+      .comparison-panel p{font-size:1.12rem;line-height:1.18;overflow-wrap:anywhere}
       .comparison-slide--memory .comparison-fc p{font-size:1.3rem}
       .comparison-pager{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:20px}
       .comparison-pager button{width:6px;height:6px;min-height:0;padding:0;border:0;border-radius:999px;background:color-mix(in oklch,var(--leg-brand-foreground) 28%,transparent);transition:width .35s cubic-bezier(.16,1,.3,1),background-color .35s ease}
@@ -629,13 +629,13 @@
       .hero-copy .hero-body{max-width:34ch!important;margin-top:28px;font-size:15px;line-height:1.5}
       .hero-body .hero-sequence+.hero-sequence{margin-top:12px}
       main>section.hero .hero-visual{width:min(100% - 40px,680px)!important;margin:0 auto 32px}
-      .closing-box--pilot{grid-template-columns:1fr!important;gap:36px!important;justify-items:center!important;text-align:center!important}
+      .closing-box--pilot{grid-template-columns:minmax(0,1fr)!important;gap:36px!important;justify-items:center!important;text-align:center!important}
       .closing-box--pilot .closing-copy,.closing-box--pilot .closing-gains{width:100%}
       .closing-copy-text{max-width:34ch;margin:20px auto 0;font-size:16.4px}
       .closing-copy-text+.closing-copy-text{margin-top:14px}
       .pilot-design-copy{margin-top:22px}
       .pilot-design-copy{max-width:34ch;margin-right:auto;margin-left:auto;text-align:center}
-      .closing-gains .btn{width:max-content;max-width:100%;min-height:60px;margin-right:auto;margin-left:auto;padding:8px 12px 8px 24px;white-space:nowrap}
+      .closing-gains .btn{width:max-content;max-width:100%;min-height:60px;margin-right:auto;margin-left:auto;padding:8px 12px 8px 24px;white-space:normal}
       .closing-gains .btn:after{width:32px;height:32px;margin-left:8px}
       .pilot-cta-stack{width:100%;align-items:center}
     }

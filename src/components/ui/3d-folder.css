@@ -167,3 +167,15 @@
 @media (prefers-reduced-motion: reduce) {
   .animated-folder, .animated-folder *, .folder-lightbox, .folder-lightbox * { transition-duration: 0ms !important; }
 }
+
+@media (max-width: 620px) {
+  .animated-folder__stage {
+    width: min(100%, 370px);
+  }
+
+  .animated-folder__preview-title {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    font-size: clamp(16px, 4.5vw, 20px);
+  }
+}
