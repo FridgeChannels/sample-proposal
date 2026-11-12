@@ -1010,7 +1010,7 @@
 .retention-pillar-number{display:grid;width:38px;height:38px;place-items:center;margin:0;border:1px solid rgba(19,77,47,.15);border-radius:50%;background:rgba(255,255,255,.78);color:#52765b;font-family:"Roboto Mono",monospace;font-size:max(22px, .68rem);letter-spacing:.04em;box-shadow:0 2px 5px rgba(19,77,47,.04)}
 .retention-household-pillars h4{margin:0;color:#183d26;font-size:max(22px, clamp(.95rem,1.2vw,1.08rem));line-height:1.3;letter-spacing:-.02em}
 .retention-household-pillars p{margin:0;color:#526157;font-size:max(22px, clamp(.85rem,.98vw,.94rem));line-height:1.45}
-.retention-household-pillars p strong{color:#176b3a;font-size:1.6em;font-weight:750;letter-spacing:-.06em;font-variant-numeric:tabular-nums;white-space:nowrap}
+.retention-household-pillars p strong.retention-pillar-value{color:#176b3a;font-size:1.6em;font-weight:750;letter-spacing:-.06em;font-variant-numeric:tabular-nums;white-space:nowrap}
 @media (prefers-reduced-motion: no-preference) {
   .page-motion-ready > #retention-household .retention-household-pillars-heading > span,
   .page-motion-ready > #retention-household .retention-household-pillars > li {
