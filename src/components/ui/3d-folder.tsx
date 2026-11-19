@@ -120,7 +120,7 @@ export function AnimatedFolder({ title, projects, className }: AnimatedFolderPro
 
       {currentProject && createPortal(
         <div
-          className={cn('folder-lightbox', isVisible && 'is-visible')}
+          className={cn('folder-lightbox', isVisible && 'is-visible', className && `${className}__lightbox`)}
           role="presentation"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget || (event.target instanceof Element && event.target.classList.contains('folder-lightbox__backdrop'))) close()

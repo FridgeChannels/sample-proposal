@@ -1300,6 +1300,15 @@ async function handleRequest(req, res) {
   }
 
   if (
+    requestUrl.pathname === '/mosh'
+    || requestUrl.pathname === '/mosh/'
+    || requestUrl.pathname === '/mosh.html'
+  ) {
+    await serveDistHtml(res, 'mosh.html', 'Failed to load MOSH proposal (run `npm run build` to generate dist/)');
+    return;
+  }
+
+  if (
     requestUrl.pathname === '/LuckyEnergy'
     || requestUrl.pathname === '/LuckyEnergy/'
     || requestUrl.pathname === '/pilot-design-copy.html'
