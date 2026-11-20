@@ -16,3 +16,10 @@ mosh.sample.hommio.ai {
 	rewrite @root /mosh
 	reverse_proxy 127.0.0.1:4174
 }
+
+gardencup.sample.hommio.ai {
+	encode gzip
+	@root path /
+	rewrite @root /gardencup
+	reverse_proxy 127.0.0.1:4174
+}

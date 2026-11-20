@@ -234,6 +234,12 @@ export default defineConfig({
             return
           }
 
+          if (url.pathname === '/gardencup' || url.pathname === '/gardencup/') {
+            req.url = `/gardencup.html${url.search}`
+            next()
+            return
+          }
+
           const rewritten = await resolveSamplePhaseHtml(url.pathname)
           if (rewritten) {
             // Keep path semantics for the client (sn still comes from the browser URL);
@@ -263,6 +269,7 @@ export default defineConfig({
         fiveHourEnergy: resolve(projectRoot, '5hourenergy.html'),
         gourmendFoods: resolve(projectRoot, 'gourmendfoods.html'),
         mosh: resolve(projectRoot, 'mosh.html'),
+        gardenCup: resolve(projectRoot, 'gardencup.html'),
         hommioFrame: resolve(projectRoot, 'hommio-frame.html'),
         pilotPlanPrep: resolve(projectRoot, 'pilot-plan-prep.html'),
         playground: resolve(projectRoot, 'playground.html'),

@@ -1309,6 +1309,15 @@ async function handleRequest(req, res) {
   }
 
   if (
+    requestUrl.pathname === '/gardencup'
+    || requestUrl.pathname === '/gardencup/'
+    || requestUrl.pathname === '/gardencup.html'
+  ) {
+    await serveDistHtml(res, 'gardencup.html', 'Failed to load GardenCup proposal (run `npm run build` to generate dist/)');
+    return;
+  }
+
+  if (
     requestUrl.pathname === '/LuckyEnergy'
     || requestUrl.pathname === '/LuckyEnergy/'
     || requestUrl.pathname === '/pilot-design-copy.html'
