@@ -155,19 +155,8 @@ body {
   animation: grow var(--dur, 1s) linear forwards;
 }
 
-.is-hommio .bar { background: var(--hommio-bar); }
-
-.is-hommio .name,
-.is-hommio .value {
+.is-hommio .name {
   font-weight: 700;
-}
-
-.is-hommio .value {
-  color: var(--hommio);
-  font-size: 40px;
-  line-height: 1;
-  top: 50%;
-  transform: translateY(-50%);
 }
 
 .value {
@@ -378,19 +367,9 @@ body #cpm-comparison .value {
   line-height: 28px;
 }
 
-body #cpm-comparison .is-hommio .name,
-body #cpm-comparison .is-hommio .value {
+body #cpm-comparison .is-hommio .name {
   font-weight: 700 !important;
 }
-
-body #cpm-comparison .is-hommio .value {
-  font-size: 40px;
-  line-height: 1;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-body #cpm-comparison .is-hommio .value { color: var(--hommio); }
 
 body #cpm-comparison .model {
   min-height: 0;

@@ -103,11 +103,11 @@ function FunnelLayer({
 }
 
 const RATES = [
-  { from: 'MD', to: 'MSI', label: 'Activation Rate', value: '40%' },
-  { from: 'MSI', to: 'MGO', label: 'Order Conversion Rate', value: '30%' },
+  { from: 'MD', to: 'MSI', label: 'Activation Rate', value: '45%' },
+  { from: 'MSI', to: 'MGO', label: 'Order Conversion Rate', value: '22%' },
 ] as const
 
-/** 0 = MD · 1 = +40%+MSI · 2 = +30%+MGO · 3 = Cost per reorder */
+/** 0 = MD · 1 = +45%+MSI · 2 = +22%+MGO · 3 = Cost per household */
 const MAX_STEP = 3
 const ease = [0.22, 1, 0.36, 1] as const
 
@@ -253,22 +253,22 @@ export function ConversionFunnel() {
               animate={{ opacity: 1, y: 0 }}
               transition={t}
             >
-              <aside className="conversion-funnel__formula" aria-label="Cost per reorder: $0.60 per piece divided by 40% times 30% equals $5">
-                <p className="conversion-funnel__formula-title">Cost per reorder</p>
+              <aside className="conversion-funnel__formula" aria-label="Cost per household: 10,000 household times $0.60 per household divided by 1,200 equals $5">
+                <p className="conversion-funnel__formula-title">Cost per household</p>
                 <span className="conversion-funnel__formula-colon" aria-hidden="true">
                   :
                 </span>
 
-                <div className="conversion-funnel__board" aria-label="$0.60 per piece divided by 40% times 30% equals $5">
+                <div className="conversion-funnel__board" aria-label="10,000 household times $0.60 per household divided by 1,200 equals $5">
                   <div className="conversion-funnel__fraction">
                     <span className="conversion-funnel__fraction-num">
-                      $0.60<span className="conversion-funnel__fraction-unit"> / piece</span>
+                      10,000 household
+                      <span aria-hidden="true"> × </span>
+                      $0.60<span className="conversion-funnel__fraction-unit"> / household</span>
                     </span>
                     <span className="conversion-funnel__fraction-line" aria-hidden="true" />
                     <span className="conversion-funnel__fraction-den">
-                      <span>40%</span>
-                      <span aria-hidden="true">×</span>
-                      <span>30%</span>
+                      <span>1,200</span>
                     </span>
                   </div>
                   <span className="conversion-funnel__board-eq" aria-hidden="true">
