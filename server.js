@@ -1318,6 +1318,15 @@ async function handleRequest(req, res) {
   }
 
   if (
+    requestUrl.pathname === '/cpm-comparison'
+    || requestUrl.pathname === '/cpm-comparison/'
+    || requestUrl.pathname === '/cpm-comparison.html'
+  ) {
+    await serveDistHtml(res, 'cpm-comparison.html', 'Failed to load CPM comparison (run `npm run build` to generate dist/)');
+    return;
+  }
+
+  if (
     requestUrl.pathname === '/LuckyEnergy'
     || requestUrl.pathname === '/LuckyEnergy/'
     || requestUrl.pathname === '/pilot-design-copy.html'

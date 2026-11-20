@@ -3,6 +3,8 @@ import { createPortal } from 'react-dom'
 import { AnimatedFolder, type FolderProject } from '../components/ui/3d-folder'
 import { TiltedGridHero } from '../components/ui/tilted-grid-hero'
 import { ChannelEconomics } from '../gourmendfoods/ChannelEconomics'
+import { CpmComparison } from '../cpm/CpmComparison'
+import { ConversionFunnel } from './ConversionFunnel'
 import { extractPilotPlanConfig } from './pilot-plan-template'
 
 const heroImages = [
@@ -96,6 +98,8 @@ export function PilotPlan() {
   const meetConfig = useMemo(() => readMeetConfig(), [])
   const hostRef = useRef<HTMLDivElement>(null)
   const [folderHost, setFolderHost] = useState<HTMLElement | null>(null)
+  const [funnelHost, setFunnelHost] = useState<HTMLElement | null>(null)
+  const [cpmHost, setCpmHost] = useState<HTMLElement | null>(null)
   const [dtcEconomicsHost, setDtcEconomicsHost] = useState<HTMLElement | null>(null)
   const [economicsHost, setEconomicsHost] = useState<HTMLElement | null>(null)
   const [heroHost, setHeroHost] = useState<HTMLElement | null>(null)
@@ -178,6 +182,8 @@ export function PilotPlan() {
     setDtcEconomicsHost(hostRef.current?.querySelector<HTMLElement>('[data-dtc-economics-root]') ?? null)
     setEconomicsHost(hostRef.current?.querySelector<HTMLElement>('[data-amazon-economics-root]') ?? null)
     setFolderHost(hostRef.current?.querySelector<HTMLElement>('[data-parts-folder-root]') ?? null)
+    setFunnelHost(hostRef.current?.querySelector<HTMLElement>('[data-conversion-funnel-root]') ?? null)
+    setCpmHost(hostRef.current?.querySelector<HTMLElement>('[data-cpm-comparison-root]') ?? null)
     setHeroHost(hostRef.current?.querySelector<HTMLElement>('[data-tilted-grid-hero]') ?? null)
   }, [template])
 
@@ -254,6 +260,8 @@ export function PilotPlan() {
       <style data-pilot-plan-styles>{template.css}</style>
       <div ref={hostRef} dangerouslySetInnerHTML={bodyMarkup} />
       {folderHost && createPortal(<AnimatedFolder className="mosh-brand-folder" title="Explore the three parts" projects={solutionParts} />, folderHost)}
+      {funnelHost && createPortal(<ConversionFunnel />, funnelHost)}
+      {cpmHost && createPortal(<CpmComparison />, cpmHost)}
       {dtcEconomicsHost && createPortal(<ChannelEconomics channel="DTC" />, dtcEconomicsHost)}
       {economicsHost && createPortal(<ChannelEconomics channel="Amazon" />, economicsHost)}
       {heroHost && createPortal(<TiltedGridHero images={heroImages} aspectRatio={1} gap={0} />, heroHost)}

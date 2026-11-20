@@ -1038,11 +1038,56 @@
   .hommio-deck .cover-layout { grid-template-columns: 1fr; }
   .hommio-deck .cover-product-image { width: min(82vw, 380px); margin: 8px auto 0; }
 }
-@media (min-width: 621px) {
-  .hommio-deck #slide-01-title {
-    font-size: clamp(2.2rem, 4.4vw, 4rem) !important;
-    white-space: nowrap;
-  }
+.conversion-funnel-slide {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-top: clamp(72px, 6vh, 96px);
+  padding-bottom: clamp(28px, 4vh, 48px);
+  cursor: pointer;
+}
+
+.cpm-comparison-slide {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-top: clamp(72px, 6vh, 96px);
+  padding-bottom: clamp(28px, 4vh, 48px);
+}
+
+.cpm-comparison-slide .slide-topline {
+  margin-bottom: clamp(12px, 2vh, 22px);
+}
+
+.cpm-comparison-slide [data-cpm-comparison-root] {
+  width: 100%;
+}
+
+/* CPM chart owns its motion; skip generic page reveal on nested copy */
+.page-motion-ready > #cpm-comparison :is(.slide-topline, h1, h2, h3, p, ol, ul) {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
+.conversion-funnel-slide:focus-visible {
+  outline: 2px solid #681cab;
+  outline-offset: -8px;
+}
+
+.conversion-funnel-slide .slide-topline {
+  margin-bottom: clamp(12px, 2vh, 22px);
+}
+
+.conversion-funnel-slide [data-conversion-funnel-root] {
+  width: 100%;
+}
+
+/* Funnel owns its own staged motion; skip the generic page reveal. */
+.page-motion-ready > #slide-01 :is(.slide-topline, h1, h2, h3, p, ol, ul) {
+  opacity: 1;
+  transform: none;
+  transition: none;
 }
 .hommio-deck #retention-household .retention-household-pillars li,
 .hommio-deck #retention-household .retention-household-pillars h4,
