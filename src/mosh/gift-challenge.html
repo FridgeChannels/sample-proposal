@@ -24,13 +24,12 @@
     </a>
   </header>
   <main class="hommio-deck">
-    <section class="hero meeting-hero" id="home" aria-labelledby="home-title">
-      <div class="home-tilted-grid" data-tilted-grid-hero></div>
-      <div class="wrap hero-grid">
-        <div class="hero-copy">
-          <h1 id="home-title"><span class="presentation-cover-brands">Hommio × MOSH</span></h1>
-        </div>
-      </div>
+    <section id="home" aria-label="MOSH bars in the Bennetts’ home">
+      <a class="hommio-skip" href="#contents">Skip story and go to contents</a>
+      <hommio-living-home>
+      <iframe data-hommio-family title="The Bennetts’ home with MOSH"
+        src="/mosh-home/index.html?embed=1" loading="eager"></iframe>
+      </hommio-living-home>
     </section>
 
     <section class="presentation-contents" id="contents" aria-labelledby="contents-title">
@@ -250,16 +249,7 @@
 
     <section class="hommio-slide questions-slide" id="slide-04" aria-labelledby="slide-04-title">
       <div class="slide-topline"><span>Shape your solution</span></div>
-      <div class="questions-heading"><h2 id="slide-04-title">Two Questions to Shape Your Customized Retention Plan</h2><p>To develop a plan tailored to your brand, we’d like to understand:</p></div>
-      <div class="questions-list">
-        <article><span>01</span><div><h3>What are your primary growth goals for the selected channel or channels?</h3><fieldset class="growth-goal-options"><legend>Select your growth goals</legend>
-          <label><input type="checkbox" name="growth-goals" value="repeat-purchases"> <span>Increase repeat purchases</span></label>
-          <label><input type="checkbox" name="growth-goals" value="subscriptions"> <span>Grow subscriptions</span></label>
-          <label><input type="checkbox" name="growth-goals" value="customer-lifetime-value"> <span>Improve customer lifetime value</span></label>
-          <label><input type="checkbox" name="growth-goals" value="sales"> <span>Increase sales</span></label>
-        </fieldset></div></article>
-        <article><span>02</span><div><h3>What budget range are you considering for improving customer retention and repeat purchases?</h3></div></article>
-      </div>
+      <div data-retention-brief-root></div>
     </section>
 
     <section class="hommio-slide next-steps-slide" id="slide-05" aria-labelledby="slide-05-title">

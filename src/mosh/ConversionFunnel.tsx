@@ -253,13 +253,13 @@ export function ConversionFunnel() {
               animate={{ opacity: 1, y: 0 }}
               transition={t}
             >
-              <aside className="conversion-funnel__formula" aria-label="Cost per household: 10,000 household times $0.60 per household divided by 1,200 equals $5">
+              <aside className="conversion-funnel__formula" aria-label="Cost per household: 10,000 household times $0.60 per household divided by 1,000 equals $6">
                 <p className="conversion-funnel__formula-title">Cost per household</p>
                 <span className="conversion-funnel__formula-colon" aria-hidden="true">
                   :
                 </span>
 
-                <div className="conversion-funnel__board" aria-label="10,000 household times $0.60 per household divided by 1,200 equals $5">
+                <div className="conversion-funnel__board" aria-label="10,000 household times $0.60 per household divided by 1,000 equals $6">
                   <div className="conversion-funnel__fraction">
                     <span className="conversion-funnel__fraction-num">
                       10,000 household
@@ -268,13 +268,13 @@ export function ConversionFunnel() {
                     </span>
                     <span className="conversion-funnel__fraction-line" aria-hidden="true" />
                     <span className="conversion-funnel__fraction-den">
-                      <span>1,200</span>
+                      <span>1,000</span>
                     </span>
                   </div>
                   <span className="conversion-funnel__board-eq" aria-hidden="true">
                     =
                   </span>
-                  <strong className="conversion-funnel__board-result">$5</strong>
+                  <strong className="conversion-funnel__board-result">$6</strong>
                 </div>
               </aside>
             </motion.div>

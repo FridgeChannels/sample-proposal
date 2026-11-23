@@ -1097,9 +1097,16 @@
   color: #681cab !important;
 }
 #root{overflow-x:clip}
-#home{left:50%;width:100vw;max-width:none;transform:translateX(-50%)}
-.home-tilted-grid{position:absolute;inset:0;pointer-events:none}
-#home .hero-grid{position:absolute;z-index:1;top:clamp(96px,17%,230px);left:50%;margin:0;transform:translateX(-50%)}
+/* The attached story has its own header and fills the viewport above the deck. */
+.hommio-topbar:has(+ .hommio-deck > #home.page-in-view) { visibility: hidden; }
+@media (max-width: 959px) {
+  .hommio-topbar { position: fixed; inset: 0 0 auto; }
+  .hommio-deck > #home:has(> hommio-living-home) {
+    width: 100vw;
+    max-width: none;
+    margin-inline: calc(50% - 50vw);
+  }
+}
 .hommio-slide{scroll-snap-align:start;min-height:100vh;padding:8rem 0;border-bottom:1px solid rgba(104,28,171,.12);background:#fff;color:#000}
 .hommio-slide>section{min-height:0;padding:28px 0 0;border-bottom:0;scroll-snap-align:none}
 .slide-topline{display:flex;justify-content:space-between;gap:20px;margin-bottom:clamp(36px,6vw,72px);color:#000;font-family:"Roboto Mono",monospace;font-size:max(22px, .72rem);letter-spacing:.04em}
@@ -1335,12 +1342,7 @@ html { scroll-padding-top: var(--proposal-header-height, 76px); }
   .hommio-deck .three-parts .section-heading h2 { font-size: 60px; }
   .hommio-deck .discovery-content h2 { font-size: 42px; white-space: nowrap; }
   .hommio-deck .next-steps-layout { gap: 100px; }
-  .hommio-deck .questions-list { margin-top: 36px; }
-  .hommio-deck .questions-list article { padding: 20px 0; }
   .hommio-deck .desktop-slide-content > .wrap { width: 100%; }
-  #home .desktop-slide-content { height: 900px; padding: 0; }
-  #home .hero-grid { top: 206px; width: 1080px; }
-  #home .hero-copy h1 { font-size: 64px; }
   .hommio-deck .economics-summary-metrics dd { font-size: 56px; }
 }
 

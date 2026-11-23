@@ -37,8 +37,8 @@ export function extractPilotPlanConfig(source = pilotPlanDocument): TemplateConf
     heading.prepend(marker)
   })
 
-  // Keep scroll targets at viewport size; only their contents are scaled.
-  document.querySelectorAll('.hommio-deck > section').forEach((slide) => {
+  // Scale deck slides on desktop. The responsive story manages its own viewport.
+  document.querySelectorAll('.hommio-deck > section:not(#home)').forEach((slide) => {
     const content = document.createElement('div')
     content.className = 'desktop-slide-content'
     content.append(...slide.childNodes)

@@ -1,44 +1,11 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { AnimatedFolder, type FolderProject } from '../components/ui/3d-folder'
-import { TiltedGridHero } from '../components/ui/tilted-grid-hero'
 import { ChannelEconomics } from '../gourmendfoods/ChannelEconomics'
 import { CpmComparison } from '../cpm/CpmComparison'
 import { ConversionFunnel } from './ConversionFunnel'
+import { RetentionBrief } from './RetentionBrief'
 import { extractPilotPlanConfig } from './pilot-plan-template'
-
-const heroImages = [
-  { src: '/gourmendfoods/products/hero-fridge-kitchen-scene.png', alt: 'Hommio touchpoint in a kitchen', aspectRatio: 4 / 3 },
-  { src: '/mosh/products/mosh-product-lineup.webp', alt: 'MOSH High Protein bars in assorted flavors', aspectRatio: 1 },
-  { src: '/gourmendfoods/products/hero-fridge-portrait-scene.png', alt: 'Hommio Reorder Magnet on a refrigerator', aspectRatio: 1672 / 941 },
-  { src: '/mosh/products/mosh-plant-based-bars.webp', alt: 'MOSH plant-based nutrition bars', aspectRatio: 1 },
-  {
-    src: '/gourmendfoods/products/hero-fridge-magnet.mp4',
-    poster: '/gourmendfoods/products/hero-fridge-magnet-poster.jpg',
-    type: 'video' as const,
-    alt: 'Hommio Reorder Magnet demonstration',
-    aspectRatio: 9 / 16,
-  },
-  { src: '/mosh/products/mosh-customer-review.webp', alt: 'MOSH bars shown in a customer review', aspectRatio: 1 },
-  { src: '/gourmendfoods/products/hero-fridge-coffee-scene.png', alt: 'Hommio brand magnet on a refrigerator', aspectRatio: 1696 / 927 },
-  { src: '/mosh/products/mosh-usage-moments.webp', alt: 'MOSH bars for breakfast, afternoon energy, and focus', aspectRatio: 1 },
-  {
-    src: '/mosh/products/mosh-place-order.mp4',
-    poster: '/mosh/products/mosh-place-order-poster.jpg',
-    type: 'video' as const,
-    alt: 'MOSH place order experience',
-    aspectRatio: 540 / 824,
-  },
-  { src: '/mosh/products/mosh-hazelnut-chocolate-chip.webp', alt: 'MOSH Hazelnut Chocolate Chip bar', aspectRatio: 1 },
-  {
-    src: '/mosh/products/mosh-coupons.mp4',
-    poster: '/mosh/products/mosh-coupons-poster.jpg',
-    type: 'video' as const,
-    alt: 'MOSH coupons and rewards experience',
-    aspectRatio: 540 / 870,
-  },
-  { src: '/mosh/products/mosh-lemon-white-chocolate.webp', alt: 'MOSH Lemon White Chocolate Crunch bar', aspectRatio: 1 },
-]
 
 const solutionParts: FolderProject[] = [
   {
@@ -99,10 +66,10 @@ export function PilotPlan() {
   const hostRef = useRef<HTMLDivElement>(null)
   const [folderHost, setFolderHost] = useState<HTMLElement | null>(null)
   const [funnelHost, setFunnelHost] = useState<HTMLElement | null>(null)
+  const [briefHost, setBriefHost] = useState<HTMLElement | null>(null)
   const [cpmHost, setCpmHost] = useState<HTMLElement | null>(null)
   const [dtcEconomicsHost, setDtcEconomicsHost] = useState<HTMLElement | null>(null)
   const [economicsHost, setEconomicsHost] = useState<HTMLElement | null>(null)
-  const [heroHost, setHeroHost] = useState<HTMLElement | null>(null)
   const template = useMemo(() => extractPilotPlanConfig(), [])
   const bodyMarkup = useMemo(() => ({ __html: template.bodyMarkup }), [template])
 
@@ -183,8 +150,8 @@ export function PilotPlan() {
     setEconomicsHost(hostRef.current?.querySelector<HTMLElement>('[data-amazon-economics-root]') ?? null)
     setFolderHost(hostRef.current?.querySelector<HTMLElement>('[data-parts-folder-root]') ?? null)
     setFunnelHost(hostRef.current?.querySelector<HTMLElement>('[data-conversion-funnel-root]') ?? null)
+    setBriefHost(hostRef.current?.querySelector<HTMLElement>('[data-retention-brief-root]') ?? null)
     setCpmHost(hostRef.current?.querySelector<HTMLElement>('[data-cpm-comparison-root]') ?? null)
-    setHeroHost(hostRef.current?.querySelector<HTMLElement>('[data-tilted-grid-hero]') ?? null)
   }, [template])
 
   useEffect(() => {
@@ -261,10 +228,10 @@ export function PilotPlan() {
       <div ref={hostRef} dangerouslySetInnerHTML={bodyMarkup} />
       {folderHost && createPortal(<AnimatedFolder className="mosh-brand-folder" title="Explore the three parts" projects={solutionParts} />, folderHost)}
       {funnelHost && createPortal(<ConversionFunnel />, funnelHost)}
+      {briefHost && createPortal(<RetentionBrief />, briefHost)}
       {cpmHost && createPortal(<CpmComparison />, cpmHost)}
       {dtcEconomicsHost && createPortal(<ChannelEconomics channel="DTC" />, dtcEconomicsHost)}
       {economicsHost && createPortal(<ChannelEconomics channel="Amazon" />, economicsHost)}
-      {heroHost && createPortal(<TiltedGridHero images={heroImages} aspectRatio={1} gap={0} />, heroHost)}
     </>
   )
 }

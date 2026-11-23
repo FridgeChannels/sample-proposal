@@ -1,0 +1,16 @@
+#home:has(> hommio-living-home) {position:relative; width:100%; height:auto; padding:0; margin:0; display:block; overflow:visible}
+  [data-hommio-family] {display:block; width:100%; height:100vh; height:max(530px, 100svh); border:0; background:#283d27}
+  @media(max-width:720px) {[data-hommio-family] {height:calc(clamp(100px,24vw,156px) + clamp(280px,77vw,495px) + clamp(365px,97vw,515px) + 10px)}}
+  .hommio-skip {
+    position:absolute; z-index:4; left:18px; bottom:16px;
+    display:inline-flex; align-items:center; justify-content:center;
+    padding:10px 15px; border:1px solid rgba(255,255,255,.82); border-radius:999px;
+    background:rgba(30,47,29,.9); color:white; font:600 13px/1.2 system-ui,sans-serif;
+    text-decoration:none; text-underline-offset:3px; backdrop-filter:blur(8px);
+  }
+  .hommio-skip:hover {background:#283d27}
+  .hommio-skip:focus-visible {outline:3px solid #fbeaff; outline-offset:3px}
+  @media(max-width:720px) {
+    .hommio-skip {top:10px; right:10px; bottom:auto; left:auto; padding:7px 10px; font-size:11px}
+  }
+hommio-living-home {display:block}

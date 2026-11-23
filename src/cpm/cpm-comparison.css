@@ -1,4 +1,6 @@
-:root {
+:root,
+#cpm-comparison,
+.sheet {
   --paper: #ffffff;
   --ink: #160428;
   --quiet: rgba(22, 4, 40, 0.62);

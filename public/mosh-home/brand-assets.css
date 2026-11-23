@@ -1,0 +1,13 @@
+/* Scalable product cutouts; no rectangular label backgrounds. */
+.sb-prop{display:block;position:relative;width:100%;aspect-ratio:3142/1034;line-height:0;pointer-events:none;isolation:isolate}
+.sb-prop>img{display:block;width:100%;height:100%;object-fit:contain;object-position:center;filter:drop-shadow(1px 2px 1px #39291824);user-select:none;-webkit-user-drag:none}
+.sb-prop--carton,.sb-prop--openParcel{aspect-ratio:1}
+.sb-prop--box{aspect-ratio:1}.sb-prop--magnet,.sb-prop--magnetBack{aspect-ratio:7/13}
+.sb-prop--magnet>img{filter:drop-shadow(0 1px 1px #211a1244)}
+.sb-product-card{display:flex;align-items:center;gap:14px;text-align:left;width:100%;color:#281633}
+.sb-product-card>.sb-prop{width:39%;flex:0 0 39%;transform:rotate(-4deg)}
+.sb-product-info{flex:1;min-width:0}.sb-wordmark{display:block;font:800 9px/1.1 Arial,sans-serif;letter-spacing:.7px;color:#681cab}
+.sb-product-info h3{font:19px/1.15 Georgia,serif;letter-spacing:-.3px;color:#281633;margin:8px 0}
+.sb-product-info p{font:10px/1.5 Arial,sans-serif;margin:0;color:#78647e}
+.sb-product-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:12px;font:9px Arial,sans-serif;color:#78647e}.sb-product-meta b{font-size:13px;font-weight:500;color:#681cab}
+.sb-product-card.is-compact{gap:9px}.sb-product-card.is-compact .sb-product-info h3{font-size:14px}.sb-product-card.is-compact .sb-product-info p{font-size:8px}.sb-product-card.is-compact .sb-product-meta{font-size:8px;margin-top:8px}

@@ -1,0 +1,44 @@
+/* One stage and one reading surface, at a scale that remains legible. */
+:root{--ink:#2f4339;--paper:#f6f4ed;--olive:#52674b}
+html,body{background:#eeeae1}
+main{padding:24px 28px;min-height:100svh;align-items:center}
+#experience,#experience.has-brand{display:grid;grid-template-columns:minmax(0,1fr) minmax(370px,38%);gap:18px;width:min(1320px,100%);height:clamp(420px,calc(100svh - 48px),830px);margin:auto;--panel-width:370px;--panel-gap:18px;transition:none}
+#home-stage{position:relative;min-width:0;height:100%;overflow:hidden;isolation:isolate;border-radius:22px;background:#c6c9b9;box-shadow:0 12px 40px #34452f0c}
+.stage-camera{position:absolute;inset:0 auto auto 0;width:100%;transform-origin:0 0;transition:transform 1.35s cubic-bezier(.22,.75,.2,1);will-change:transform}
+#experience.has-brand #home-map{width:100%;border-radius:0;box-shadow:none;background:#7c8a69}
+#experience #home-map #scene{width:100%;border-radius:0;transition:none}
+#experience #whiteboard{position:relative;inset:auto;width:100%;height:100%;min-height:0;margin:0;border:1px solid #fff9;padding:0;overflow:hidden;border-radius:22px;background:#fbfaf5;box-shadow:0 12px 40px #34452f08}
+.stage-chrome{position:absolute;inset:0;pointer-events:none;z-index:20;background:none}
+.stage-heading{position:absolute;top:24px;left:26px;right:26px;color:white;text-shadow:0 1px 12px #10241844}
+.stage-heading>span{font:9px/1.4 Arial,sans-serif;letter-spacing:2.2px;opacity:.88}.stage-heading>b{display:block;font:25px/1.2 Georgia,serif;margin-top:5px;letter-spacing:-.5px;max-width:80%}
+
+.stage-scene-caption{position:absolute;bottom:28px;left:26px;right:160px;font:11px/1.5 Arial;color:white;text-shadow:0 1px 8px #1d3a1b88}
+.stage-encounters{position:absolute;right:20px;top:20px;background:#fffdf0df;backdrop-filter:blur(8px);border:1px solid #ffffffb0;border-radius:20px;padding:7px 11px;display:flex;align-items:center;gap:6px;color:#4e6144}.stage-encounters[hidden]{display:none}.stage-encounters strong{font:18px/1 Georgia;font-variant-numeric:tabular-nums}.stage-encounters span{font:8px/1.4 Arial;letter-spacing:.1px}
+.activity-toast,.traffic-counter{display:none!important}
+#experience[data-story-mode=story] .spot,#experience[data-story-mode=outcome] .spot{opacity:0;pointer-events:none;transition:opacity .5s}
+#experience[data-story-mode=story][data-focus=fridge] .spot:first-child,#experience[data-story-mode=outcome] .spot:first-child{opacity:.95}
+#experience[data-story-mode=brand] .spot{opacity:.15}#experience[data-story-mode=brand] .spot.brand-active{opacity:1}
+#experience[data-story-mode=story] #exposure,#experience[data-story-mode=outcome] #exposure{display:none!important}
+#experience #home-stage>#economics{left:18px!important;right:18px;top:auto!important;bottom:16px;width:auto;max-width:none;height:auto;max-height:60%;border-radius:16px;padding:14px 18px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:0 14px;overflow:auto;z-index:30;background:#fffcf4f5;box-shadow:0 15px 45px #18271f28}
+#experience #home-stage>#economics[hidden]{display:none}
+#home-stage #economics .eco-top,#home-stage #economics .eco-heading,#home-stage #economics .eco-tabs,#home-stage #economics .eco-bottom,#home-stage #economics details{grid-column:1/-1}
+#home-stage #economics .eco-kicker{font-size:8px}#home-stage #economics .eco-heading{margin:4px 0 9px}#home-stage #economics .eco-heading h2{font-size:22px}#home-stage #economics .eco-tabs button{padding:5px 3px}
+#home-stage #economics .eco-hero{min-height:0;padding:12px 0;display:block;text-align:left}#home-stage #economics .eco-hero>strong{font-size:36px;margin:3px 0}#home-stage #economics .eco-hero>span{font-size:9px}#home-stage #economics .eco-hero>small{font-size:8px;display:block;line-height:1.4}
+#home-stage #economics .eco-metrics{align-self:center;border:0;padding:12px 0}#home-stage #economics .eco-metrics strong{font-size:21px}#home-stage #economics .eco-metrics span{font-size:8px}#home-stage #economics .eco-bottom{padding-top:8px}#home-stage #economics details{margin-top:7px}#home-stage #economics details .eco-ledger{padding:4px 0}
+@media(max-width:1100px){main{padding:16px}#experience,#experience.has-brand{grid-template-columns:minmax(0,1fr) 330px;gap:14px;height:clamp(420px,calc(100svh - 32px),800px)}.stage-heading{top:20px;left:20px}.stage-heading>b{font-size:21px}.stage-scene-caption{left:20px;font-size:10px}}
+@media(max-width:720px){main{padding:12px;align-items:flex-start}#experience,#experience.has-brand{display:flex;flex-direction:column;width:100%;height:auto;max-width:620px;gap:12px}#home-stage{height:54svh;min-height:320px;max-height:520px;flex:none}#experience #whiteboard{height:560px;flex:none}.stage-heading>b{font-size:22px}.stage-scene-caption{font-size:10px;right:140px}#experience #home-stage>#economics{max-height:67%;left:12px!important;right:12px;bottom:12px;padding:12px}.stage-heading{top:18px;left:20px}}
+@media(prefers-reduced-motion:reduce){.stage-camera{transition:none}}
+
+/* Composite the changing actors separately from the fixed floor plan. */
+#world,#software-world,.map-delivery-actors{transform:translateZ(0)}
+#home-stage .stage-encounters,#experience #whiteboard,#home-stage .character-bubble{backdrop-filter:none;-webkit-backdrop-filter:none}
+
+/* The house and its interactive coordinates occupy the west side of one landscape. */
+main{padding:0;display:block}
+#experience,#experience.has-brand{position:relative;isolation:isolate;display:block;width:100%;max-width:none;height:100svh;min-height:430px;overflow:hidden;background:#677b48}
+#experience:before{content:"";position:absolute;inset:0 0 0 54%;background:#71804d url("assets/front-yard-continuous-v2.webp") 78% 50%/auto 118% no-repeat}
+#home-stage{position:absolute;inset:0 auto 0 0;width:68%;height:100%;border-radius:0;box-shadow:none;mask-image:linear-gradient(to right,#000 0 94%,transparent)}
+#experience #whiteboard{position:absolute;inset:clamp(16px,4vh,40px) clamp(14px,2vw,40px) auto auto;width:clamp(300px,31vw,520px);height:calc(100% - clamp(32px,8vh,80px));border-radius:22px;background:rgba(250,249,241,.89);box-shadow:0 9px 40px #23341e29;backdrop-filter:blur(8px)}
+#experience #whiteboard .story-guide,#experience #whiteboard .mosh-intro{background:transparent}
+
+@media(max-width:720px){#experience,#experience.has-brand{height:auto;min-height:100svh;padding:50svh 12px 15px}#experience:before{inset:0;background-size:auto 105%}#home-stage{width:100%;height:56svh;min-height:0;mask-image:linear-gradient(#000 88%,transparent)}#experience #whiteboard{position:relative;inset:auto;width:100%;height:clamp(440px,69svh,620px);margin:0 auto}}
