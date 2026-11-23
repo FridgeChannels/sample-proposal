@@ -87,7 +87,7 @@
 }
 .brief-field input::placeholder { color: #b0b0b0; opacity: 1; }
 .brief-footer { border-top: 1px solid var(--brief-line); padding-block: 14px; background: #fcf9fd; }
-.brief-progress { display: flex; align-items: center; gap: 12px; color: var(--brief-muted); font-size: 15px; }
+.brief-progress { display: flex; flex: none; align-items: center; gap: 12px; color: var(--brief-muted); font-size: 15px; }
 .brief-progress progress { appearance: none; width: 100px; height: 5px; border: 0; border-radius: 5px; overflow: hidden; background: var(--brief-line); }
 .brief-progress progress::-webkit-progress-bar { background: var(--brief-line); }
 .brief-progress progress::-webkit-progress-value { background: var(--brand-dark); }
@@ -109,8 +109,8 @@
 .brief-footer button:disabled { background: #e6ddec; color: #65596b; cursor: default; }
 .brief-footer button:enabled:hover { background: #511685; }
 .brief-footer button:focus-visible { outline: 2px solid var(--brand-dark); outline-offset: 3px; }
-.brief-submit { display: grid; justify-items: end; gap: 8px; }
-.brief-status { margin: 0; max-width: 320px; color: #4b3659; font-size: 14px; line-height: 1.4; text-align: right; }
+.brief-submit { display: flex; flex: 1; min-width: 0; align-items: center; justify-content: flex-end; gap: 12px; }
+.brief-status { flex: 0 1 500px; width: 100%; max-width: 500px; margin: 0; color: #4b3659; font-size: 14px; line-height: 1.4; text-align: left; white-space: normal; overflow-wrap: anywhere; }
 .brief-status.is-error { color: #9b1c1c; }
 @media (max-width: 959px) {
   #slide-04 .slide-topline { margin-bottom: 20px; }
@@ -125,4 +125,7 @@
   #slide-04 .brief-heading p, #slide-04 .brief-question h3 { font-size: 16px; }
   .brief-fields { grid-column: 1 / -1; grid-auto-flow: row; }
   .brief-footer { flex-direction: column; align-items: stretch; gap: 14px; }
+  .brief-submit { width: 100%; flex: none; flex-direction: column; align-items: stretch; }
+  .brief-status { width: 100%; max-width: none; }
+  .brief-footer button { align-self: flex-end; }
 }

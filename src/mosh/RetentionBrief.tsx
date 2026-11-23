@@ -155,13 +155,13 @@ export function RetentionBrief({ brand = 'MOSH' }: RetentionBriefProps) {
           <span role="status">{completed} of {questions.length} answered</span>
         </div>
         <div className="brief-submit">
+          {message && (
+            <p className={`brief-status${status === 'error' ? ' is-error' : ''}`} role="status">{message}</p>
+          )}
           <button type="submit" disabled={!started || status === 'submitting' || status === 'success'}>
             <Send size={18} aria-hidden="true" />
             {status === 'submitting' ? 'Saving…' : status === 'success' ? 'Saved' : 'Submit'}
           </button>
-          {message && (
-            <p className={`brief-status${status === 'error' ? ' is-error' : ''}`} role="status">{message}</p>
-          )}
         </div>
       </footer>
     </form>
