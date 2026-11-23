@@ -230,8 +230,8 @@ export function PilotPlan() {
       {funnelHost && createPortal(<ConversionFunnel />, funnelHost)}
       {briefHost && createPortal(<RetentionBrief brand="MOSH" />, briefHost)}
       {cpmHost && createPortal(<CpmComparison />, cpmHost)}
-      {dtcEconomicsHost && createPortal(<ChannelEconomics channel="DTC" />, dtcEconomicsHost)}
-      {economicsHost && createPortal(<ChannelEconomics channel="Amazon" />, economicsHost)}
+      {dtcEconomicsHost && createPortal(<ChannelEconomics channel="DTC" hardwareAllocation={6} />, dtcEconomicsHost)}
+      {economicsHost && createPortal(<ChannelEconomics channel="Amazon" hardwareAllocation={6} />, economicsHost)}
     </>
   )
 }

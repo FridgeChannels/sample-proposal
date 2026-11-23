@@ -17,7 +17,7 @@ const chapters={
  reorder:{number:'03',title:'The next order',next:null,cta:'Watch again'}
 };
 
-const householdEconomics=`<details class="sg-household-model"><summary>What could one repeat household be worth?</summary><p>HOMMIO’s year-one example assumes two attributed orders at $50 each. That’s $100 in sales against $15 in program costs ($5 allocated hardware and $10 commission), before product and fulfillment costs. These are model assumptions.</p><a href="https://hommio.ai/dtcbrands" target="_blank" rel="noopener noreferrer">See the HOMMIO model ↗</a></details>`;
+const householdEconomics=`<details class="sg-household-model"><summary>What could one repeat household be worth?</summary><p>HOMMIO’s year-one example assumes two attributed orders at $50 each. That’s $100 in sales against $16 in program costs ($6 allocated hardware and $10 commission), before product and fulfillment costs. These are model assumptions.</p><a href="https://hommio.ai/dtcbrands" target="_blank" rel="noopener noreferrer">See the HOMMIO model ↗</a></details>`;
 
 function placementReason(point){
  const p=String(point||'').toLowerCase();
