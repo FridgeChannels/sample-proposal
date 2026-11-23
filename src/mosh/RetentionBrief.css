@@ -109,6 +109,9 @@
 .brief-footer button:disabled { background: #e6ddec; color: #65596b; cursor: default; }
 .brief-footer button:enabled:hover { background: #511685; }
 .brief-footer button:focus-visible { outline: 2px solid var(--brand-dark); outline-offset: 3px; }
+.brief-submit { display: grid; justify-items: end; gap: 8px; }
+.brief-status { margin: 0; max-width: 320px; color: #4b3659; font-size: 14px; line-height: 1.4; text-align: right; }
+.brief-status.is-error { color: #9b1c1c; }
 @media (max-width: 959px) {
   #slide-04 .slide-topline { margin-bottom: 20px; }
   #slide-04 .brief-heading h2 { font-size: clamp(28px, 5vw, 40px); }

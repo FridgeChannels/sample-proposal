@@ -228,7 +228,7 @@ export function PilotPlan() {
       <div ref={hostRef} dangerouslySetInnerHTML={bodyMarkup} />
       {folderHost && createPortal(<AnimatedFolder className="mosh-brand-folder" title="Explore the three parts" projects={solutionParts} />, folderHost)}
       {funnelHost && createPortal(<ConversionFunnel />, funnelHost)}
-      {briefHost && createPortal(<RetentionBrief />, briefHost)}
+      {briefHost && createPortal(<RetentionBrief brand="MOSH" />, briefHost)}
       {cpmHost && createPortal(<CpmComparison />, cpmHost)}
       {dtcEconomicsHost && createPortal(<ChannelEconomics channel="DTC" />, dtcEconomicsHost)}
       {economicsHost && createPortal(<ChannelEconomics channel="Amazon" />, economicsHost)}

@@ -1,14 +1,16 @@
 import { useState, type FormEvent } from 'react'
 import { PencilLine, Send } from 'lucide-react'
+import { fetchAboutPilotFormToken } from '../../meeting-intake/client/submitApplication'
 import './RetentionBrief.css'
 
 type AnswerField = {
   name: string
   label: string
   placeholder: string
-  mode: 'numeric' | 'decimal' | 'text'
+  mode: 'numeric' | 'decimal' | 'text' | 'email'
   prefix?: string
   suffix?: string
+  type?: 'text' | 'email'
 }
 
 const questions: { text: string; fields: AnswerField[] }[] = [
@@ -48,34 +50,61 @@ const questions: { text: string; fields: AnswerField[] }[] = [
   },
 ]
 
-export function RetentionBrief() {
+const contactFields: AnswerField[] = [
+  { name: 'contactName', label: 'Your name', placeholder: 'Optional', mode: 'text' },
+  { name: 'contactEmail', label: 'Work email', placeholder: 'Optional', mode: 'email', type: 'email' },
+]
+
+type RetentionBriefProps = {
+  brand?: string
+}
+
+export function RetentionBrief({ brand = 'MOSH' }: RetentionBriefProps) {
   const [answers, setAnswers] = useState<Record<string, string>>({})
+  const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle')
+  const [message, setMessage] = useState('')
   const completed = questions.filter(({ fields }) => fields.every(({ name }) => answers[name]?.trim())).length
   const started = Object.values(answers).some(value => value.trim())
 
-  function downloadAnswers(event: FormEvent<HTMLFormElement>) {
+  async function submitAnswers(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (!started) return
-    const sections = questions.map(({ text, fields }, index) => {
-      const lines = fields.map(({ name, label, prefix, suffix }) => {
-        const value = answers[name]?.trim()
-        if (!value) return label + ': —'
-        const formatted = (prefix === '$' ? '$' : '') + value + (suffix === '%' ? '%' : '')
-        return label + ': ' + formatted
+    if (!started || status === 'submitting') return
+
+    setStatus('submitting')
+    setMessage('Saving your answers…')
+
+    try {
+      const formToken = await fetchAboutPilotFormToken('/api/retention-brief/form-token')
+      const response = await fetch('/api/retention-brief/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          brand,
+          sourcePage: brand,
+          formToken,
+          answers,
+          contactName: answers.contactName || '',
+          contactEmail: answers.contactEmail || '',
+        }),
       })
-      return [String(index + 1) + '. ' + text, ...lines].join('\n')
-    })
-    const file = new Blob([['MOSH × Hommio | Retention brief', ...sections].join('\n\n')], { type: 'text/plain;charset=utf-8' })
-    const url = URL.createObjectURL(file)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = 'MOSH-retention-brief.txt'
-    link.click()
-    window.setTimeout(() => URL.revokeObjectURL(url), 1000)
+      const result = await response.json().catch(() => ({})) as {
+        ok?: boolean
+        error?: string
+        pageId?: string
+      }
+      if (!response.ok || !result.ok || !result.pageId) {
+        throw new Error(result.error || "We couldn't save your answers. Please try again.")
+      }
+      setStatus('success')
+      setMessage('Saved. Hommio will use these answers to shape your retention plan.')
+    } catch (error) {
+      setStatus('error')
+      setMessage(error instanceof Error ? error.message : "We couldn't save your answers. Please try again.")
+    }
   }
 
   return (
-    <form className="retention-brief" aria-labelledby="slide-04-title" onSubmit={downloadAnswers}>
+    <form className="retention-brief" aria-labelledby="slide-04-title" onSubmit={submitAnswers}>
       <header className="brief-heading">
         <div>
           <h2 id="slide-04-title">Questions to Shape Your Customized Retention Plan</h2>
@@ -94,8 +123,10 @@ export function RetentionBrief() {
                 {fields.map(({ name, label, prefix, suffix, placeholder, mode }) => (
                   <label className="brief-field" key={name}>
                     {prefix && <span aria-hidden="true">{prefix}</span>}
-                    <input type="text" name={name} aria-label={label} inputMode={mode} placeholder={placeholder}
-                      value={answers[name] ?? ''} onChange={event => setAnswers({ ...answers, [name]: event.target.value })} />
+                    <input type="text" name={name} aria-label={label} inputMode={mode === 'email' ? 'email' : mode}
+                      placeholder={placeholder} value={answers[name] ?? ''}
+                      onChange={event => setAnswers({ ...answers, [name]: event.target.value })}
+                      disabled={status === 'submitting' || status === 'success'} />
                     {suffix && <span aria-hidden="true">{suffix}</span>}
                   </label>
                 ))}
@@ -103,13 +134,35 @@ export function RetentionBrief() {
             </div>
           )
         })}
+        <div className="brief-question" role="group" aria-labelledby="brief-contact-title">
+          <span className="brief-number" aria-hidden="true">+</span>
+          <h3 id="brief-contact-title">Who should we follow up with? (optional)</h3>
+          <div className="brief-fields">
+            {contactFields.map(({ name, label, placeholder, mode, type }) => (
+              <label className="brief-field" key={name}>
+                <input type={type || 'text'} name={name} aria-label={label} inputMode={mode}
+                  placeholder={placeholder} value={answers[name] ?? ''}
+                  onChange={event => setAnswers({ ...answers, [name]: event.target.value })}
+                  disabled={status === 'submitting' || status === 'success'} />
+              </label>
+            ))}
+          </div>
+        </div>
       </div>
       <footer className="brief-footer">
         <div className="brief-progress">
           <progress aria-label="Questions answered" value={completed} max={questions.length} />
           <span role="status">{completed} of {questions.length} answered</span>
         </div>
-        <button type="submit" disabled={!started}><Send size={18} aria-hidden="true" />Submit</button>
+        <div className="brief-submit">
+          <button type="submit" disabled={!started || status === 'submitting' || status === 'success'}>
+            <Send size={18} aria-hidden="true" />
+            {status === 'submitting' ? 'Saving…' : status === 'success' ? 'Saved' : 'Submit'}
+          </button>
+          {message && (
+            <p className={`brief-status${status === 'error' ? ' is-error' : ''}`} role="status">{message}</p>
+          )}
+        </div>
       </footer>
     </form>
   )

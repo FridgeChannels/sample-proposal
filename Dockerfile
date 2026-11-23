@@ -1,9 +1,13 @@
+# syntax=docker/dockerfile:1
+# Build with BuildKit (deploy.sh enables it). Legacy builder ignores cache mounts.
+
 FROM node:22-alpine AS build
 
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
-RUN npm ci
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci
 
 COPY vite.config.ts tsconfig.json tsconfig.app.json tsconfig.node.json ./
 COPY pilot-ops-auth.js ./
@@ -30,12 +34,14 @@ FROM node:22-alpine
 
 WORKDIR /app
 
+# Runtime only needs pdf-lib (and its deps). Frontend toolchain is devDependencies.
 COPY package.json package-lock.json* ./
-RUN npm ci --omit=dev
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --omit=dev --omit=optional
 
 COPY server.js pilot-commerce.js pilot-session.js pilot-ops-auth.js \
      christmas-campaign-notion.js christmas-campaign-security.js \
-     about-pilot-notion.js ./
+     about-pilot-notion.js retention-brief-notion.js ./
 COPY meeting-intake ./meeting-intake
 COPY public/pilot-plan-login.html ./public/pilot-plan-login.html
 COPY sql ./sql

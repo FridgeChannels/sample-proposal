@@ -38,6 +38,7 @@ const {
   handleAuthLogout,
 } = require('./pilot-ops-auth');
 const { createChristmasCampaignApplication } = require('./christmas-campaign-notion');
+const { createRetentionBriefApplication } = require('./retention-brief-notion');
 const { handleMeetingIntakeRequest } = require('./meeting-intake/server/routes');
 const {
   clientIp,
@@ -1032,6 +1033,69 @@ async function handleRequest(req, res) {
   }
 
   if (await handleMeetingIntakeRequest(req, res, requestUrl)) {
+    return;
+  }
+
+  if (requestUrl.pathname === '/api/retention-brief/form-token' && req.method === 'GET') {
+    try {
+      assertAllowedOrigin(req);
+      assertTokenRateLimit(clientIp(req));
+      await sendJson(res, 200, issueFormToken());
+    } catch (error) {
+      if (error.retryAfter) res.setHeader('Retry-After', String(error.retryAfter));
+      await sendJson(res, error.status || 500, {
+        error: error.message || 'Unable to issue form token.',
+        code: error.code || 'form_token_failed',
+      });
+    }
+    return;
+  }
+
+  if (requestUrl.pathname === '/api/retention-brief/submit' && req.method === 'POST') {
+    try {
+      const contentType = String(req.headers['content-type'] || '');
+      if (!contentType.toLowerCase().includes('application/json')) {
+        await sendJson(res, 415, { error: 'Content-Type must be application/json.', code: 'unsupported_media_type' });
+        return;
+      }
+
+      assertAllowedOrigin(req);
+      const body = await readJsonBody(req);
+      assertFormToken(body.formToken);
+      const emailHint = normalizeEmail(body.contactEmail || body.answers?.contactEmail);
+      assertRateLimits({ ip: clientIp(req), email: emailHint });
+
+      const result = await createRetentionBriefApplication(body);
+      if (!result?.pageId) {
+        await sendJson(res, 502, {
+          ok: false,
+          code: 'notion_save_failed',
+          error: "We couldn't save your answers. Please try again.",
+        });
+        return;
+      }
+
+      await sendJson(res, 201, {
+        ok: true,
+        pageId: result.pageId,
+        url: result.url,
+        brand: result.brand,
+      });
+    } catch (error) {
+      console.error('[api/retention-brief/submit]', error && error.message, error && error.code);
+      if (error.retryAfter) res.setHeader('Retry-After', String(error.retryAfter));
+      const notionFailed =
+        error.code === 'notion_api_error'
+        || error.code === 'notion_token_missing'
+        || error.status === 502;
+      await sendJson(res, error.status || 500, {
+        ok: false,
+        error: notionFailed
+          ? "We couldn't save your answers right now. Please try again in a moment."
+          : (error.message || "We couldn't save your answers. Please try again."),
+        code: error.code || 'retention_brief_submit_failed',
+      });
+    }
     return;
   }
 
