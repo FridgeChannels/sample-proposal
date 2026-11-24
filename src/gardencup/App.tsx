@@ -1,25 +1,10 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { AnimatedFolder, type FolderProject } from '../components/ui/3d-folder'
-import { TiltedGridHero } from '../components/ui/tilted-grid-hero'
 import { ChannelEconomics } from '../gourmendfoods/ChannelEconomics'
+import { CpmComparison } from '../cpm/CpmComparison'
+import { ConversionFunnel } from './ConversionFunnel'
 import { extractPilotPlanConfig } from './pilot-plan-template'
-
-const heroImages = [
-  { src: '/gourmendfoods/products/hero-fridge-kitchen-scene.png', alt: 'Hommio touchpoint in a kitchen', aspectRatio: 4 / 3 },
-  { src: '/gardencup/products/gardencup-chicken-salad.webp', alt: 'GardenCup chicken salad', aspectRatio: 1 },
-  { src: '/gourmendfoods/products/hero-fridge-portrait-scene.png', alt: 'Hommio Reorder Magnet on a refrigerator', aspectRatio: 1672 / 941 },
-  { src: '/gardencup/products/gardencup-salad-jar.webp', alt: 'GardenCup salad jar', aspectRatio: 1 },
-  { src: '/gourmendfoods/products/hero-fridge-coffee-scene.png', alt: 'Hommio branded magnet in a home', aspectRatio: 1696 / 927 },
-  { src: '/gardencup/products/gardencup-strawberry-chia.webp', alt: 'GardenCup strawberry chia jar', aspectRatio: 1 },
-  { src: '/gourmendfoods/products/hero-fridge-magnet-poster.jpg', alt: 'Hommio Reorder Magnet product visual', aspectRatio: 9 / 16 },
-  { src: '/gardencup/products/gardencup-breakfast-bowl.webp', alt: 'GardenCup breakfast bowl', aspectRatio: 1 },
-  { src: '/gourmendfoods/products/hero-amazon-order-poster.jpg', alt: 'Hommio Amazon reorder experience', aspectRatio: 540 / 958 },
-  { src: '/gardencup/products/gardencup-product-range.webp', alt: 'GardenCup product range', aspectRatio: 1 },
-  { src: '/gourmendfoods/products/hero-dtc-demo-poster.jpg', alt: 'Hommio DTC experience', aspectRatio: 540 / 870 },
-  { src: '/gardencup/products/gardencup-fridge-moment.webp', alt: 'Customer choosing a GardenCup meal from the fridge', aspectRatio: 1 },
-  { src: '/gardencup/products/gardencup-shared-meal.webp', alt: 'Sharing a GardenCup meal', aspectRatio: 1 },
-]
 
 const solutionParts: FolderProject[] = [
   {
@@ -79,9 +64,10 @@ export function PilotPlan() {
   const meetConfig = useMemo(() => readMeetConfig(), [])
   const hostRef = useRef<HTMLDivElement>(null)
   const [folderHost, setFolderHost] = useState<HTMLElement | null>(null)
+  const [funnelHost, setFunnelHost] = useState<HTMLElement | null>(null)
+  const [cpmHost, setCpmHost] = useState<HTMLElement | null>(null)
   const [dtcEconomicsHost, setDtcEconomicsHost] = useState<HTMLElement | null>(null)
   const [economicsHost, setEconomicsHost] = useState<HTMLElement | null>(null)
-  const [heroHost, setHeroHost] = useState<HTMLElement | null>(null)
   const template = useMemo(() => extractPilotPlanConfig(), [])
   const bodyMarkup = useMemo(() => ({ __html: template.bodyMarkup }), [template])
 
@@ -161,7 +147,8 @@ export function PilotPlan() {
     setDtcEconomicsHost(hostRef.current?.querySelector<HTMLElement>('[data-dtc-economics-root]') ?? null)
     setEconomicsHost(hostRef.current?.querySelector<HTMLElement>('[data-amazon-economics-root]') ?? null)
     setFolderHost(hostRef.current?.querySelector<HTMLElement>('[data-parts-folder-root]') ?? null)
-    setHeroHost(hostRef.current?.querySelector<HTMLElement>('[data-tilted-grid-hero]') ?? null)
+    setFunnelHost(hostRef.current?.querySelector<HTMLElement>('[data-conversion-funnel-root]') ?? null)
+    setCpmHost(hostRef.current?.querySelector<HTMLElement>('[data-cpm-comparison-root]') ?? null)
   }, [template])
 
   useEffect(() => {
@@ -237,9 +224,10 @@ export function PilotPlan() {
       <style data-pilot-plan-styles>{template.css}</style>
       <div ref={hostRef} dangerouslySetInnerHTML={bodyMarkup} />
       {folderHost && createPortal(<AnimatedFolder className="gardencup-brand-folder" title="Explore the three parts" projects={solutionParts} />, folderHost)}
-      {dtcEconomicsHost && createPortal(<ChannelEconomics channel="DTC" />, dtcEconomicsHost)}
-      {economicsHost && createPortal(<ChannelEconomics channel="Amazon" />, economicsHost)}
-      {heroHost && createPortal(<TiltedGridHero images={heroImages} aspectRatio={1} gap={0} />, heroHost)}
+      {funnelHost && createPortal(<ConversionFunnel />, funnelHost)}
+      {cpmHost && createPortal(<CpmComparison />, cpmHost)}
+      {dtcEconomicsHost && createPortal(<ChannelEconomics channel="DTC" hardwareAllocation={6} />, dtcEconomicsHost)}
+      {economicsHost && createPortal(<ChannelEconomics channel="Amazon" hardwareAllocation={6} />, economicsHost)}
     </>
   )
 }

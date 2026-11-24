@@ -7,9 +7,9 @@
   <title>Hommio × GardenCup</title>
     <link rel="icon" type="image/png" href="/gourmendfoods/logos/hommio-favicon.png">
   <style>
-    #contents .presentation-outline-number { color: var(--brand-dark, #681cab); }
+    #contents .presentation-outline-number { color: var(--brand-dark, #2f6b45); }
     #contents .presentation-outline a:hover,
-    #contents .presentation-outline a:focus-visible { color: var(--brand-dark, #681cab); }
+    #contents .presentation-outline a:focus-visible { color: var(--brand-dark, #2f6b45); }
   </style>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,19 +18,18 @@
 <body>
   <header class="hommio-topbar">
     <a class="hommio-wordmark" href="#home" aria-label="GardenCup and Hommio, home">
-      <img class="gardencup-logo" src="/gardencup/logos/gardencup-logo-dark-green.avif" alt="GardenCup" width="360" height="58">
+      <img class="gardencup-logo" src="/gardencup/logos/gardencup-logo-dark-green.avif" alt="GardenCup" width="360" height="206">
       <span class="brand-separator" aria-hidden="true">×</span>
       <img class="hommio-logo" src="/gourmendfoods/logos/hommio-transparent.png" alt="" width="2172" height="724">
     </a>
   </header>
   <main class="hommio-deck">
-    <section class="hero meeting-hero" id="home" aria-labelledby="home-title">
-      <div class="home-tilted-grid" data-tilted-grid-hero></div>
-      <div class="wrap hero-grid">
-        <div class="hero-copy">
-          <h1 id="home-title"><span class="presentation-cover-brands">Hommio × GardenCup</span></h1>
-        </div>
-      </div>
+    <section id="home" aria-label="GardenCup household story">
+      <a class="hommio-skip" href="/gardencup/Gardencup-Customers-at-Home.pdf" target="_blank" rel="noopener noreferrer">Gardencup Customers at Home.pdf</a>
+      <hommio-living-home>
+      <iframe data-hommio-family title="Household story with Hommio"
+        src="/mosh-home/index.html?embed=1&as=Gardencup" loading="eager"></iframe>
+      </hommio-living-home>
     </section>
 
     <section class="presentation-contents" id="contents" aria-labelledby="contents-title">
@@ -40,28 +39,26 @@
         </header>
         <nav aria-label="Presentation contents">
           <ol class="presentation-outline">
-            <li><a href="#slide-01"><span class="presentation-outline-number">01</span><span>Retention is at home.</span></a></li>
-            <li><a href="#slide-01a"><span class="presentation-outline-number">02</span><span>Hommio retention solution</span></a></li>
-            <li><a href="#retention-household"><span class="presentation-outline-number">03</span><span>Hommio Retention Household</span></a></li>
-            <li><a href="#dtc"><span class="presentation-outline-number">04</span><span>Solution for DTC</span></a></li>
-            <li><a href="#amazon"><span class="presentation-outline-number">05</span><span>Solution for Amazon</span></a></li>
-            <li><a href="#slide-04"><span class="presentation-outline-number">06</span><span>Shape your solution</span></a></li>
-            <li><a href="#slide-05"><span class="presentation-outline-number">07</span><span>Next Step</span></a></li>
+            <li><a href="#slide-01"><span class="presentation-outline-number">01</span><span>Magnet-to-ReOrder Funnel</span></a></li>
+            <li><a href="#cpm-comparison"><span class="presentation-outline-number">02</span><span>CPM COMPARISON</span></a></li>
+            <li><a href="#slide-01a"><span class="presentation-outline-number">03</span><span>Hommio retention solution</span></a></li>
+            <li><a href="#retention-household"><span class="presentation-outline-number">04</span><span>Hommio Retention Household</span></a></li>
+            <li><a href="#dtc"><span class="presentation-outline-number">05</span><span>Solution for DTC</span></a></li>
+            <li><a href="#amazon"><span class="presentation-outline-number">06</span><span>Solution for Amazon</span></a></li>
+            <li><a href="#slide-04"><span class="presentation-outline-number">07</span><span>Shape your solution</span></a></li>
+            <li><a href="#slide-05"><span class="presentation-outline-number">08</span><span>Next Step</span></a></li>
           </ol>
         </nav>
       </div>
     </section>
 
-    <section class="hommio-slide hommio-cover" id="slide-01" aria-labelledby="slide-01-title">
-      <div class="slide-topline"><span>Introducing Hommio</span></div>
-      <div class="cover-layout">
-        <div class="cover-copy">
-          <h1 id="slide-01-title">Retention is <em>at home.</em></h1>
-          <h2 class="cover-subtitle">In-home retention solution for CPG brands.</h2>
-          <p class="cover-description">Hommio helps customers remember your brand and buy from you again. We plan how to reach the right households, create a Reorder Magnet they can keep at home, and personalize what happens when they tap.</p>
-        </div>
-        <img class="cover-product-image" src="/gourmendfoods/products/hero-fridge-portrait-scene.png" alt="Hommio Reorder Magnet in a home setting" width="1672" height="941">
-      </div>
+    <section class="hommio-slide conversion-funnel-slide" id="slide-01" aria-label="Magnet-to-ReOrder Funnel">
+      <div class="slide-topline"><span>Magnet-to-ReOrder Funnel</span></div>
+      <div data-conversion-funnel-root></div>
+    </section>
+
+    <section class="hommio-slide cpm-comparison-slide" id="cpm-comparison" aria-label="CPM COMPARISON">
+      <div data-cpm-comparison-root></div>
     </section>
 
     <section class="hommio-slide three-parts-slide" id="slide-01a" aria-labelledby="slide-01a-title">

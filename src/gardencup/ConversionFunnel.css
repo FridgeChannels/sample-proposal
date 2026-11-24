@@ -1,0 +1,400 @@
+.conversion-funnel {
+  --paper: #ffffff;
+  --ink: #0f2a18;
+  --brand: #2f6b45;
+  --wash: #d8eadc;
+  --mid: #5b946d;
+  --field: #f5f0e8;
+  display: grid;
+  gap: clamp(12px, 1.8vh, 20px);
+  width: 100%;
+  cursor: pointer;
+  user-select: none;
+}
+
+.conversion-funnel.is-complete {
+  cursor: default;
+}
+
+.conversion-funnel__body {
+  display: grid;
+  gap: clamp(56px, 8vh, 96px);
+  align-items: start;
+}
+
+.conversion-funnel__funnel {
+  display: grid;
+  grid-template-columns: minmax(280px, 560px) minmax(360px, 1fr);
+  column-gap: 16px;
+  row-gap: 0;
+  min-width: 0;
+  align-items: center;
+  transform-origin: top center;
+}
+
+.conversion-funnel__step,
+.conversion-funnel__row,
+.conversion-funnel__node-slot,
+.conversion-funnel__example-head {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
+  align-items: center;
+}
+
+.conversion-funnel__example-head {
+  margin-bottom: 4px;
+}
+
+.conversion-funnel__example-label {
+  grid-column: 3;
+  justify-self: end;
+  color: var(--brand);
+  font-size: max(20px, 1.2rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.conversion-funnel__band {
+  display: grid;
+  justify-items: center;
+  min-width: 0;
+}
+
+.conversion-funnel__layer {
+  --trap-top: 100%;
+  --trap-bottom: 86%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45em;
+  width: 100%;
+  min-height: 64px;
+  padding: 14px clamp(28px, 4vw, 48px);
+  clip-path: polygon(
+    calc((100% - var(--trap-top)) / 2) 0%,
+    calc((100% + var(--trap-top)) / 2) 0%,
+    calc((100% + var(--trap-bottom)) / 2) 100%,
+    calc((100% - var(--trap-bottom)) / 2) 100%
+  );
+}
+
+/* 01 light wash */
+.conversion-funnel__layer--md {
+  color: #3b1760;
+  background: linear-gradient(180deg, #f6ecff 0%, var(--wash) 100%);
+}
+
+/* 02 brand mid */
+.conversion-funnel__layer--msi {
+  color: #fff;
+  background: linear-gradient(180deg, var(--mid) 0%, var(--brand) 100%);
+}
+
+/* 03 deepest ink */
+.conversion-funnel__layer--mgo {
+  color: #f3e8ff;
+  background: linear-gradient(180deg, #3a0f63 0%, var(--ink) 100%);
+}
+
+.hommio-slide .conversion-funnel__label {
+  margin: 0;
+  color: inherit;
+  line-height: 1;
+}
+
+.conversion-funnel__abbr {
+  font-family: "Roboto Mono", monospace;
+  font-size: max(18px, clamp(1.05rem, 1.6vw, 1.35rem));
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  opacity: 0.95;
+}
+
+/* Counts sit at the end of the row — definition first, number as the example */
+.hommio-slide .conversion-funnel__count {
+  margin: 0;
+  min-width: 4.5rem;
+  font-size: max(26px, clamp(1.6rem, 2.6vw, 2.25rem));
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  line-height: 1;
+  white-space: nowrap;
+  text-align: right;
+  color: var(--ink);
+}
+
+.conversion-funnel__unit {
+  font-size: 0.55em;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.conversion-funnel__count--spacer,
+.conversion-funnel__blurb--spacer {
+  visibility: hidden;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Side definitions — full text within two lines by giving the column more width */
+.hommio-deck .desktop-slide-content .conversion-funnel__blurb {
+  margin: 0;
+  max-width: none;
+  color: rgba(22, 4, 40, 0.58);
+  font-size: 16px;
+  line-height: 1.35;
+  text-align: left;
+  overflow: visible;
+}
+
+.hommio-slide .conversion-funnel__blurb strong {
+  display: inline;
+  color: var(--brand);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* Waist conversion node — same 3-col grid + spacers as rows, centered on funnel band */
+.conversion-funnel__node-slot {
+  margin: 2px 0;
+}
+
+.conversion-funnel__node {
+  grid-column: 1;
+  display: grid;
+  justify-items: center;
+  justify-self: stretch;
+  width: 100%;
+  gap: 2px;
+  color: var(--brand);
+}
+
+.conversion-funnel__node-stem {
+  width: 1.5px;
+  height: 10px;
+  background: rgba(47,107,69, 0.35);
+}
+
+.conversion-funnel__node-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--brand);
+  box-shadow: 0 0 0 3px rgba(47,107,69, 0.12);
+}
+
+.conversion-funnel__node-value {
+  margin-top: 2px;
+  font-size: max(20px, 1.2rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.conversion-funnel__node-meta {
+  display: grid;
+  justify-items: center;
+  gap: 1px;
+  font-size: max(12px, 0.68rem);
+  line-height: 1.2;
+  color: rgba(22, 4, 40, 0.62);
+}
+
+.conversion-funnel__node-meta span {
+  font-family: "Roboto Mono", monospace;
+  font-size: 0.64rem;
+  letter-spacing: 0.02em;
+  color: var(--brand);
+}
+
+.conversion-funnel__formula-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.conversion-funnel__formula {
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  gap: 14px 16px;
+  padding: clamp(16px, 2vw, 22px);
+  border: 1px solid rgba(22, 4, 40, 0.08);
+  border-radius: 4px;
+  background: var(--field);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+  white-space: nowrap;
+}
+
+.hommio-slide .conversion-funnel__formula-title {
+  margin: 0;
+  color: var(--ink);
+  font-size: max(16px, 0.95rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.conversion-funnel__formula-colon {
+  color: var(--ink);
+  font-size: max(22px, 1.35rem);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.conversion-funnel__board {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 14px 18px;
+}
+
+.conversion-funnel__fraction {
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+  min-width: 8.5rem;
+}
+
+.conversion-funnel__fraction-num {
+  color: var(--ink);
+  font-size: max(18px, clamp(1.05rem, 1.5vw, 1.25rem));
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.conversion-funnel__fraction-unit {
+  font-size: 0.72em;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.conversion-funnel__fraction-line {
+  display: block;
+  width: 100%;
+  height: 2px;
+  background: var(--ink);
+}
+
+.conversion-funnel__fraction-den {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink);
+  font-size: max(16px, clamp(0.95rem, 1.3vw, 1.1rem));
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.conversion-funnel__fraction-den span[aria-hidden="true"] {
+  color: rgba(22, 4, 40, 0.4);
+  font-weight: 500;
+}
+
+.conversion-funnel__board-eq {
+  color: rgba(22, 4, 40, 0.4);
+  font-size: max(22px, 1.4rem);
+  font-weight: 500;
+}
+
+.conversion-funnel__board-result {
+  color: var(--brand);
+  font-size: max(48px, clamp(2.8rem, 5vw, 4rem));
+  font-weight: 700;
+  letter-spacing: -0.06em;
+  line-height: 0.9;
+}
+
+.hommio-deck .desktop-slide-content .conversion-funnel__formula-path {
+  grid-column: 3;
+  justify-self: end;
+  margin: 0;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: max(20px, clamp(1.05rem, 1.5vw, 1.35rem));
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.conversion-funnel__formula-path-label {
+  margin-right: 0.45em;
+  font-weight: 700;
+}
+
+
+@media (max-width: 720px) {
+  .conversion-funnel__funnel,
+  .conversion-funnel__step,
+  .conversion-funnel__row,
+  .conversion-funnel__node-slot,
+  .conversion-funnel__example-head,
+  .conversion-funnel__formula-row {
+    grid-template-columns: 1fr;
+    grid-column: auto;
+    gap: 8px;
+  }
+
+  .conversion-funnel__example-label {
+    grid-column: 1;
+    justify-self: start;
+  }
+
+  .conversion-funnel__formula,
+  .hommio-deck .desktop-slide-content .conversion-funnel__formula-path {
+    width: 100%;
+    max-width: none;
+    margin-inline: 0;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .conversion-funnel__layer,
+  .conversion-funnel__node {
+    width: 100%;
+  }
+
+  .conversion-funnel__layer {
+    padding-inline: 22px;
+  }
+
+  .hommio-slide .conversion-funnel__count {
+    min-width: 0;
+    text-align: center;
+  }
+
+  .conversion-funnel__count--spacer,
+  .conversion-funnel__blurb--spacer {
+    display: none;
+  }
+
+  .hommio-slide .conversion-funnel__label {
+    font-size: max(12px, 0.72rem);
+  }
+
+  .hommio-slide .conversion-funnel__blurb {
+    text-align: left;
+  }
+
+  .conversion-funnel__board-result {
+    font-size: max(40px, 2.6rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .conversion-funnel__funnel {
+    transform: none !important;
+  }
+}
