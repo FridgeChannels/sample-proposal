@@ -25,7 +25,13 @@ const solutionParts: FolderProject[] = [
     ],
   },
   {
-    id: 'insights', number: '03', shortTitle: 'Retention intelligence', icon: 'insights', logo: '/gourmendfoods/products/icon-retention-growth.png',
+    id: 'loyalty', number: '03', shortTitle: 'Loyalty between purchases', icon: 'loyalty', logo: '/gourmendfoods/products/icon-retention-growth.png',
+    title: 'One Loyalty Program. More Ways to Engage.',
+    paragraphs: [],
+    diagram: '/gardencup/loyalty-program-diagram.jpg',
+  },
+  {
+    id: 'insights', number: '04', shortTitle: 'Retention intelligence', icon: 'insights', logo: '/gourmendfoods/products/icon-retention-growth.png',
     title: 'In-home retention intelligence that grows with each tap.',
     paragraphs: [
       'Each tap helps your brand better understand what customers need at home. With customer permission and available data, Hommio builds on their preferences, responses, and reorder habits to strengthen your brand’s in-home retention intelligence.',
@@ -223,7 +229,7 @@ export function PilotPlan() {
     <>
       <style data-pilot-plan-styles>{template.css}</style>
       <div ref={hostRef} dangerouslySetInnerHTML={bodyMarkup} />
-      {folderHost && createPortal(<AnimatedFolder className="gardencup-brand-folder" title="Explore the three parts" projects={solutionParts} />, folderHost)}
+      {folderHost && createPortal(<AnimatedFolder className="gardencup-brand-folder" title="Explore the four parts" projects={solutionParts} />, folderHost)}
       {funnelHost && createPortal(<ConversionFunnel />, funnelHost)}
       {cpmHost && createPortal(<CpmComparison />, cpmHost)}
       {dtcEconomicsHost && createPortal(<ChannelEconomics channel="DTC" hardwareAllocation={6} />, dtcEconomicsHost)}

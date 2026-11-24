@@ -11,8 +11,10 @@ export interface FolderProject {
   title: string
   paragraphs: string[]
   emphasisLast?: boolean
-  icon: 'strategy' | 'magnet' | 'insights'
+  icon: 'strategy' | 'magnet' | 'insights' | 'loyalty'
   logo: string
+  /** When set, the lightbox shows this diagram instead of the text layout. */
+  diagram?: string
 }
 
 interface AnimatedFolderProps {
@@ -82,7 +84,7 @@ export function AnimatedFolder({ title, projects, className }: AnimatedFolderPro
           <div className="animated-folder__back" aria-hidden="true" />
           <div className="animated-folder__tab" aria-hidden="true" />
           <div className="animated-folder__previews">
-            {projects.slice(0, 3).map((project, index) => {
+            {projects.map((project, index) => {
               return (
                 <button
                   key={project.id}
@@ -129,19 +131,28 @@ export function AnimatedFolder({ title, projects, className }: AnimatedFolderPro
           <div className="folder-lightbox__backdrop" aria-hidden="true" />
           <div className="folder-lightbox__dialog" role="dialog" aria-modal="true" aria-labelledby="folder-lightbox-title">
             <div className="folder-lightbox__toolbar">
-              <span>One retention solution · {currentProject.number} / 03</span>
+              <span>One retention solution · {currentProject.number} / {String(projects.length).padStart(2, '0')}</span>
               <button type="button" className="folder-lightbox__close" onClick={close} aria-label="Close details"><X size={20} /></button>
             </div>
-            <div className="folder-lightbox__body">
-              <div className="folder-lightbox__visual" aria-hidden="true"><img src={currentProject.logo} alt="" /><span>{currentProject.number}</span></div>
-              <div className="folder-lightbox__copy">
-                <p className="folder-lightbox__eyebrow">Part {currentProject.number}</p>
-                <h3 id="folder-lightbox-title">{currentProject.title}</h3>
-                {currentProject.paragraphs.map((paragraph, index) => (
-                  <p key={paragraph} className={currentProject.emphasisLast && index === currentProject.paragraphs.length - 1 ? 'folder-lightbox__emphasis' : undefined}>{paragraph}</p>
-                ))}
+            {currentProject.diagram ? (
+              <div className="folder-lightbox__body folder-lightbox__body--diagram">
+                <figure className="folder-lightbox__diagram">
+                  <img src={currentProject.diagram} alt={currentProject.title} />
+                </figure>
+                <h3 id="folder-lightbox-title" className="sr-only">{currentProject.title}</h3>
               </div>
-            </div>
+            ) : (
+              <div className="folder-lightbox__body">
+                <div className="folder-lightbox__visual" aria-hidden="true"><img src={currentProject.logo} alt="" /><span>{currentProject.number}</span></div>
+                <div className="folder-lightbox__copy">
+                  <p className="folder-lightbox__eyebrow">Part {currentProject.number}</p>
+                  <h3 id="folder-lightbox-title">{currentProject.title}</h3>
+                  {currentProject.paragraphs.map((paragraph, index) => (
+                    <p key={paragraph} className={currentProject.emphasisLast && index === currentProject.paragraphs.length - 1 ? 'folder-lightbox__emphasis' : undefined}>{paragraph}</p>
+                  ))}
+                </div>
+              </div>
+            )}
             <div className="folder-lightbox__footer">
               <div className="folder-lightbox__steps" aria-label="Choose a part">
                 {projects.map((project, index) => (

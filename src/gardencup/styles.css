@@ -980,6 +980,36 @@
 .gardencup-brand-folder .animated-folder__preview-logo {
   filter: none;
 }
+.gardencup-brand-folder.is-expanded .animated-folder__preview:nth-child(1) {
+  transform: translate(calc(-50% - 255px), -92px) rotate(-10deg);
+}
+.gardencup-brand-folder.is-expanded .animated-folder__preview:nth-child(2) {
+  transform: translate(calc(-50% - 85px), -118px) rotate(-3deg);
+}
+.gardencup-brand-folder.is-expanded .animated-folder__preview:nth-child(3) {
+  transform: translate(calc(-50% + 85px), -118px) rotate(3deg);
+}
+.gardencup-brand-folder.is-expanded .animated-folder__preview:nth-child(4) {
+  transform: translate(calc(-50% + 255px), -92px) rotate(10deg);
+}
+.gardencup-brand-folder.is-expanded .animated-folder__preview:nth-child(1):is(:hover, :focus-visible) {
+  transform: translate(calc(-50% - 255px), -108px) rotate(-6deg);
+}
+.gardencup-brand-folder.is-expanded .animated-folder__preview:nth-child(2):is(:hover, :focus-visible) {
+  transform: translate(calc(-50% - 85px), -134px) rotate(-1deg);
+}
+.gardencup-brand-folder.is-expanded .animated-folder__preview:nth-child(3):is(:hover, :focus-visible) {
+  transform: translate(calc(-50% + 85px), -134px) rotate(1deg);
+}
+.gardencup-brand-folder.is-expanded .animated-folder__preview:nth-child(4):is(:hover, :focus-visible) {
+  transform: translate(calc(-50% + 255px), -108px) rotate(6deg);
+}
+.gardencup-brand-folder__lightbox .folder-lightbox__body--diagram {
+  background: #edf5e8;
+}
+.gardencup-brand-folder__lightbox .folder-lightbox__dialog:has(.folder-lightbox__body--diagram) {
+  width: min(100%, 1040px);
+}
 .gardencup-brand-folder :is(.animated-folder__front, .animated-folder__front:hover) {
   border-color: #edf5e8 !important;
   background: linear-gradient(145deg, #5b946d, #2f6b45) !important;
@@ -992,7 +1022,7 @@
 }
 .gardencup-brand-folder .animated-folder__front-title { color: #fff !important; }
 .gardencup-brand-folder__lightbox .folder-lightbox__backdrop {
-  background: rgba(251, 234, 255, .78) !important;
+  background: rgba(47, 107, 69, .78) !important;
 }
 .gardencup-brand-folder__lightbox .folder-lightbox__dialog {
   border-color: #2f6b45 !important;
@@ -1178,6 +1208,32 @@
 .play-card-top .play-index{margin:0}
 .play-card-top .channel-icons{flex:none}
 .play-summary article p{color:#000;font-size:max(22px, .92rem)}.hommio-slide .channels-conclusion{max-width:940px;margin:clamp(28px,3vw,40px) 0 0;color:#000;font-size:max(22px, 1.05rem)}.channels-conclusion strong{color:#000}
+.loyalty-between-slide {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-top: clamp(72px, 7vh, 104px);
+  padding-bottom: clamp(28px, 4vh, 48px);
+}
+.loyalty-between-slide .slide-topline { margin-bottom: 18px; }
+.loyalty-between-figure {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  margin: 0;
+  min-height: 0;
+}
+.loyalty-between-figure img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 18px 46px rgba(47, 107, 69, 0.1);
+}
+
 .retention-household-slide{display:flex;flex-direction:column;justify-content:center;gap:clamp(28px,4vh,42px)}
 .retention-household-heading{width:100%;max-width:none}
 .retention-household-heading h2{max-width:970px;margin-bottom:18px}
@@ -1432,12 +1488,14 @@ html { scroll-padding-top: var(--proposal-header-height, 76px); }
   .three-parts-slide .animated-folder__front-title { font-size: 36px; }
   .three-parts-slide .animated-folder__preview { width: 164px; height: 176px; padding: 14px; }
   .three-parts-slide .animated-folder__preview-logo { width: 48px; height: 48px; }
-  .three-parts-slide .is-expanded .animated-folder__preview:nth-child(1) { transform: translate(calc(-50% - 180px), -92px) rotate(-9deg); }
-  .three-parts-slide .is-expanded .animated-folder__preview:nth-child(2) { transform: translate(-50%, -108px); }
-  .three-parts-slide .is-expanded .animated-folder__preview:nth-child(3) { transform: translate(calc(-50% + 180px), -92px) rotate(9deg); }
-  .three-parts-slide .is-expanded .animated-folder__preview:nth-child(1):is(:hover,:focus-visible) { transform: translate(calc(-50% - 180px), -109px) rotate(-5deg); }
-  .three-parts-slide .is-expanded .animated-folder__preview:nth-child(2):is(:hover,:focus-visible) { transform: translate(-50%, -125px); }
-  .three-parts-slide .is-expanded .animated-folder__preview:nth-child(3):is(:hover,:focus-visible) { transform: translate(calc(-50% + 180px), -109px) rotate(5deg); }
+  .three-parts-slide .gardencup-brand-folder.is-expanded .animated-folder__preview:nth-child(1) { transform: translate(calc(-50% - 220px), -84px) rotate(-10deg); }
+  .three-parts-slide .gardencup-brand-folder.is-expanded .animated-folder__preview:nth-child(2) { transform: translate(calc(-50% - 72px), -106px) rotate(-3deg); }
+  .three-parts-slide .gardencup-brand-folder.is-expanded .animated-folder__preview:nth-child(3) { transform: translate(calc(-50% + 72px), -106px) rotate(3deg); }
+  .three-parts-slide .gardencup-brand-folder.is-expanded .animated-folder__preview:nth-child(4) { transform: translate(calc(-50% + 220px), -84px) rotate(10deg); }
+  .three-parts-slide .gardencup-brand-folder.is-expanded .animated-folder__preview:nth-child(1):is(:hover,:focus-visible) { transform: translate(calc(-50% - 220px), -100px) rotate(-6deg); }
+  .three-parts-slide .gardencup-brand-folder.is-expanded .animated-folder__preview:nth-child(2):is(:hover,:focus-visible) { transform: translate(calc(-50% - 72px), -122px) rotate(-1deg); }
+  .three-parts-slide .gardencup-brand-folder.is-expanded .animated-folder__preview:nth-child(3):is(:hover,:focus-visible) { transform: translate(calc(-50% + 72px), -122px) rotate(1deg); }
+  .three-parts-slide .gardencup-brand-folder.is-expanded .animated-folder__preview:nth-child(4):is(:hover,:focus-visible) { transform: translate(calc(-50% + 220px), -100px) rotate(6deg); }
   .three-parts-slide .animated-folder__caption { margin-top: 12px; line-height: 26px; }
   .three-parts-slide .animated-folder__caption span { font-size: 20px; line-height: 26px; }
   .three-parts-slide .animated-folder__hint { margin-top: 10px; font-size: 20px; line-height: 26px; }

@@ -102,6 +102,38 @@
 .folder-lightbox__close:hover, .folder-lightbox__navigation button:not(:disabled):hover { background: #134d2f; }
 .folder-lightbox__close:focus-visible, .folder-lightbox__navigation button:focus-visible, .folder-lightbox__steps button:focus-visible { outline: 2px solid #134d2f; outline-offset: 2px; }
 .folder-lightbox__body { display: grid; grid-template-columns: 33% minmax(0,1fr); min-height: 360px; overflow-y: auto; }
+.folder-lightbox__body--diagram {
+  display: grid;
+  grid-template-columns: 1fr;
+  place-items: center;
+  padding: 18px;
+  background: #f7faf6;
+}
+.folder-lightbox__diagram {
+  display: grid;
+  width: 100%;
+  margin: 0;
+  place-items: center;
+}
+.folder-lightbox__diagram img {
+  display: block;
+  width: 100%;
+  max-height: min(68vh, 620px);
+  object-fit: contain;
+  border-radius: 12px;
+  background: #fff;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 .folder-lightbox__visual { position: relative; display: grid; min-height: 100%; place-items: center; background: radial-gradient(circle at 56% 45%, #134d2f, #134d2f); color:#fff; }
 .folder-lightbox__visual img { display: block; width: min(70%, 240px); max-height: 280px; object-fit: contain; }
 .folder-lightbox__visual span { position: absolute; bottom: 24px; left: 24px; color:#fff; font-family: "Roboto Mono", monospace; font-size: 22px; }
