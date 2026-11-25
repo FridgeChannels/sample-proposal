@@ -1,0 +1,65 @@
+{
+  "upstream": "https://github.com/makehumancommunity/makehuman",
+  "commit": "a8bc2d54ff0ac92e78ff71431b1023eda42bf482",
+  "license": "CC0-1.0",
+  "licenseSource": "https://www.makehumancommunity.org/about/license.html",
+  "sourceFiles": [
+    {
+      "file": "scripts/build-characters-source/LICENSE.ASSETS.md",
+      "sha256": "f6089cba01cb570a24712b41ab8a586ccd3cc5ef53dc266ca50b95c288956d2c"
+    },
+    {
+      "file": "scripts/build-characters-source/base.obj",
+      "sha256": "8e761e6624b8f54536409135d1636da63b32486a90d4897f84e121d144f6fb4c"
+    },
+    {
+      "file": "scripts/build-characters-source/caucasian-female-child.target",
+      "sha256": "17fc408839c0a407bf4efd96d9af7eebcdf20d74698659f3597b0647ed6b147e"
+    },
+    {
+      "file": "scripts/build-characters-source/caucasian-female-young.target",
+      "sha256": "118379f6e8ba9266247fdb8788a20e1df40a239f97ced0b9905bcbcc74f6e820"
+    },
+    {
+      "file": "scripts/build-characters-source/caucasian-male-child.target",
+      "sha256": "401b9b0349c88dc7aacb81e71f67daf747fecde0f7fd7f3f6e10fb2ce5586d1e"
+    },
+    {
+      "file": "scripts/build-characters-source/caucasian-male-young.target",
+      "sha256": "70e228ba7164737dae664454394536fc5935fa48d333c1a97d77e2dc6eacc5f5"
+    },
+    {
+      "file": "scripts/build-characters-source/default.mhskel",
+      "sha256": "99f179bce0aa850b45d4191a1d0d234c5851f881c057439470ded3bddf729a24"
+    },
+    {
+      "file": "scripts/build-characters-source/default_weights.mhw",
+      "sha256": "0f3641d651ae3d00ad6b4ccee43142edb109d3bd909d27d9e4139ef1beed8625"
+    },
+    {
+      "file": "scripts/build-characters-source/universal-female-child-averagemuscle-averageweight.target",
+      "sha256": "4ba5396ddabda448ece15650a566fbebfbb10239256ccb201e8f883429e12249"
+    },
+    {
+      "file": "scripts/build-characters-source/universal-female-young-averagemuscle-averageweight.target",
+      "sha256": "4ba5396ddabda448ece15650a566fbebfbb10239256ccb201e8f883429e12249"
+    },
+    {
+      "file": "scripts/build-characters-source/universal-male-child-averagemuscle-averageweight.target",
+      "sha256": "4ba5396ddabda448ece15650a566fbebfbb10239256ccb201e8f883429e12249"
+    },
+    {
+      "file": "scripts/build-characters-source/universal-male-young-averagemuscle-averageweight.target",
+      "sha256": "4ba5396ddabda448ece15650a566fbebfbb10239256ccb201e8f883429e12249"
+    }
+  ],
+  "derivative": "Four sculpted and clothed anatomical meshes with skin albedo baked from the project’s individual portraits. The women’s hair uses a fitted pigmented root layer, a longitudinal part and swept crown sections. The small meshes reserve separate simplification budgets for body, face and crown.",
+  "rigVersion": "2026-11-18 expressive14",
+  "rigBones": 14,
+  "portraitReferences": [
+    "dist/assets/portrait-emma.webp",
+    "dist/assets/portrait-daniel.webp",
+    "dist/assets/portrait-olivia.webp",
+    "dist/assets/portrait-noah.webp"
+  ]
+}

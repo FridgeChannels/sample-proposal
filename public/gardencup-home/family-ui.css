@@ -1,0 +1,97 @@
+/* Minimal family conversation with photographic portrait crops. */
+#whiteboard{padding:0;overflow:hidden;background:#fafbf8ed;border-color:#ffffffc9;box-shadow:0 12px 35px #33492a0b;color:#344237}
+#whiteboard [hidden]{display:none!important}
+.conversation{height:100%;display:flex;flex-direction:column;min-height:0;position:relative}
+.conversation-header{display:flex;align-items:center;justify-content:space-between;flex-shrink:0;padding:22px 22px 19px;border-bottom:1px solid #e8ebe3;background:#fafbf8c9}
+.family-identity{display:block;border:0;background:none;text-align:left;padding:0;color:inherit;cursor:pointer}
+.family-identity b{font-size:14px;font-weight:600;letter-spacing:-.2px}
+.family-identity small{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:9px;color:#98a08f;max-width:235px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.family-identity small i{display:inline-block;flex-shrink:0;width:4px;height:4px;background:#91a486;border-radius:50%}
+.family-avatar{display:block;width:38px;height:38px;overflow:hidden;border-radius:50%;flex-shrink:0;background-image:url('assets/bennett-portraits-v1.webp');background-size:300% 200%;background-repeat:no-repeat;background-color:#d6d1c5;box-shadow:0 0 0 1px #ffffffc9}
+.portrait-0{background-position:0% 0%}.portrait-1{background-position:50% 0%}.portrait-2{background-position:100% 0%}.portrait-3{background-position:0% 100%}.portrait-4{background-position:50% 100%}.portrait-5{background-position:100% 100%}
+.quiet-icon{border:0;background:transparent;color:#9ba690;padding:3px 0 3px 8px;cursor:pointer}.quiet-icon svg{width:18px;height:18px;display:block}
+.chat-stream{flex:1;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#d8dfd1 transparent;padding:23px 22px 8px;min-height:0;scroll-behavior:auto}
+.chat-message{display:flex;gap:11px;margin:0 0 24px;animation:message-in .45s ease-out;align-items:flex-start}
+.avatar-button{padding:0;background:none;border:0;border-radius:50%;cursor:pointer;margin-top:1px;flex-shrink:0}
+.message-content{flex:1;min-width:0}.message-meta{display:flex;align-items:baseline;gap:7px;padding:0 0 5px;font-size:9px;color:#9ba590}
+.message-meta b{font-size:10px;color:#65765a;font-weight:600}.message-meta span{font-size:8px;font-weight:400;color:#a0a896}
+.message-content p{font:12px/1.65 Arial,sans-serif;background:none;border:0;border-radius:0;margin:0;padding:0;color:#505b48;overflow-wrap:anywhere;box-shadow:none}
+.chat-message.thought .message-content p{background:none;border:0;color:#8d9782;font-style:italic;border-radius:0}
+.conversation-footer{flex-shrink:0;padding:14px 20px 13px;background:#fafbf8f5;border-top:1px solid #e8ebe3}
+.conversation-actions{display:flex;align-items:center;gap:8px}
+.story-cta{flex:1;min-width:0;border:1px solid #dce4d4;background:#eaf0e5;color:#52674a;border-radius:8px;font:10px Arial,sans-serif;padding:12px 10px;display:flex;align-items:center;justify-content:space-between;gap:5px;cursor:pointer;white-space:nowrap;transition:background .2s}.story-cta:hover{background:#dfe9d7}
+.tap-preview{display:flex;align-items:center;justify-content:center;gap:6px;flex:0 0 102px;border:1px solid #dce2d5;border-radius:8px;padding:10px 8px;background:#f9fbf5;color:#718366;font:10px Arial,sans-serif;white-space:nowrap;cursor:pointer;transition:background .2s}.tap-preview:hover{background:#eef3e8}.tap-preview svg{width:14px;height:16px}
+.footer-note{display:flex;align-items:center;justify-content:space-between;margin-top:11px;font-size:8px;color:#adb4a4;gap:6px}.footer-note button{background:none;border:0;font-size:8px;color:#94a088;cursor:pointer;padding:0}
+.playback-controls{display:flex;flex:1;min-width:0;align-items:center;justify-content:space-between;gap:5px;height:38px;background:#eef2e9;border:1px solid #dce4d4;border-radius:8px;padding:0 5px}.playback-controls button{border:0;background:none;color:#748469;border-radius:5px;width:30px;height:30px;cursor:pointer;flex-shrink:0}.playback-controls span{font-size:10px;color:#89967e;white-space:nowrap;font-variant-numeric:tabular-nums}
+.new-messages{position:absolute;bottom:109px;left:50%;transform:translateX(-50%);border:1px solid #dde4d5;border-radius:20px;padding:7px 13px;background:#fcfdf9;color:#6e8261;box-shadow:0 3px 15px #41523013;cursor:pointer;font-size:10px;z-index:3}
+.family-dialog{width:min(620px,calc(100vw - 32px));max-height:min(82svh,780px);padding:26px 32px;border-radius:24px;background:#fafbf6;color:#465441;border:1px solid #fff;box-shadow:0 30px 100px #26362130;scrollbar-width:thin}.family-dialog::backdrop{background:#24322255;backdrop-filter:blur(5px)}
+.family-dialog header{display:flex;justify-content:space-between;align-items:center;color:#939f88;font-size:9px;letter-spacing:2px;margin-bottom:24px}.family-dialog header button{border:0;background:none;font-size:25px;color:#8a987f;cursor:pointer;line-height:1}
+.family-dialog nav{display:flex;gap:13px;border-bottom:1px solid #e4e9dd;padding-bottom:20px}.family-dialog nav button{flex:1;display:flex;align-items:center;flex-direction:column;gap:7px;border:0;background:none;color:#8a957f;font-size:10px;padding:0;cursor:pointer}.family-dialog nav .family-avatar{width:48px;height:48px;border:2px solid transparent;outline:2px solid transparent;outline-offset:3px}.family-dialog nav button[aria-pressed=true] .family-avatar{outline-color:#b2c2a4}.family-dialog nav button[aria-pressed=true]{color:#445c39}
+.profile-bio{padding:24px 0 12px}.profile-role{font-size:10px;color:#97a18d}.profile-bio h2{font:32px Georgia,serif;margin:8px 0}.profile-bio h3{font:12px Arial;color:#839275;margin:0 0 20px}.profile-bio p{font:13px/1.8 Arial;color:#7a8671;margin:0 0 15px}.profile-bio .profile-intro{font:19px/1.5 Georgia;color:#4c6041}.interests{display:flex;gap:7px;flex-wrap:wrap;margin-top:18px}.interests span{font-size:10px;background:#ebf0e4;color:#849476;border-radius:14px;padding:7px 10px}.profile-fiction{font-size:9px;color:#a5ae9c;display:block;margin-top:20px}
+#activity-props{position:absolute;inset:0;pointer-events:none;z-index:2}.meal-plate{position:absolute;width:2.1%;aspect-ratio:1.7;background:#f8f4e9;border:1px solid #d4c6a9;border-radius:50%;box-shadow:0 2px 2px #4b453620}.meal-plate:after{content:'';position:absolute;inset:22%;background:#d5a55c;border:3px dotted #6f9a55;border-radius:50%}.game-board-prop{position:absolute;left:49%;top:63.8%;width:5.2%;height:3.8%;background:repeating-conic-gradient(#e0cba3 0% 25%,#8e9a77 0% 50%) 50%/25% 25%;transform:rotate(7deg) skewX(-8deg);box-shadow:0 2px 3px #0003;border:2px solid #dabf93}.game-board-prop:after{content:'●  ●';color:#e2a05b;position:absolute;font-size:clamp(6px,1vw,14px);left:10%;top:20%}.tv-light{position:absolute;left:80.1%;top:60%;width:2%;height:10%;transform:skewY(-25deg);background:linear-gradient(#91bed7,#486c8b,#8bba82);box-shadow:0 0 15px #a4c8ed88;opacity:.75;animation:tv-screen 9s linear infinite}.activity-toast{position:absolute;left:18px;bottom:15px;display:flex;align-items:center;gap:7px;font:10px Arial;color:#53674c;background:#f8faf0dd;backdrop-filter:blur(10px);padding:8px 12px;border:1px solid #fff7;border-radius:14px}.activity-toast i{width:5px;height:5px;border-radius:50%;background:#8ca57c}
+@keyframes tv-screen{50%{filter:hue-rotate(40deg);opacity:.5}}@keyframes message-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:850px){#whiteboard{height:540px;min-height:0;padding:0}.conversation-header{padding:18px}.chat-stream{padding:16px 20px}.family-identity small{max-width:none}.family-dialog{padding:22px}.family-dialog nav{gap:8px}.family-dialog nav .family-avatar{width:38px;height:38px}}
+@media(prefers-reduced-motion:reduce){.chat-message,.tv-light{animation:none}}
+.homework-paper{position:absolute;width:2%;height:2.5%;background:repeating-linear-gradient(#f9f6e9 0 3px,#c6d6cc 3px 4px);transform:rotate(8deg);box-shadow:0 1px 2px #0002}
+#pov-host{position:absolute;inset:0;border-radius:inherit;overflow:hidden}
+#pov-host{overflow:clip}
+
+#delivery-host{position:absolute;inset:0;overflow:clip;border-radius:inherit}
+#parcel{width:3.4%;aspect-ratio:1.4;padding:0;display:grid;place-items:center;font-size:clamp(3px,.45vw,6px);color:#65503a;background:linear-gradient(90deg,#b99567 46%,#dec8a5 46%,#dec8a5 55%,#c6a273 55%);border-color:#94754e;box-shadow:2px 3px 5px #36271426;transform:translate(-50%,-90%) rotate(-3deg)}
+#house-product{left:70%;top:49%;background:#ffd670}#house-product>span{background:#d68b45}#brand-magnet{z-index:6}
+
+/* One shared map: fixed house plus its front pavement and residential road. */
+#home-map{position:relative;width:100%;overflow:hidden;isolation:isolate;border-radius:18px;box-shadow:0 12px 35px #33492a0b;background:#7c8a69}
+#experience{width:min(100%,calc((100svh - 124px)*1.07527))}
+#experience.has-brand{width:min(100%,calc((100svh - 124px)*1.07527 + var(--panel-width) + var(--panel-gap)))}
+#experience.has-brand #home-map{width:calc(100% - var(--panel-width) - var(--panel-gap))}
+#experience #home-map #scene{width:100%;border-radius:0;box-shadow:none;overflow:hidden}
+#street{position:relative;width:100%;aspect-ratio:100/18;background:linear-gradient(180deg,#a7aa92 0%,#a7aa92 4%,#c1c0ad 4%,#c1c0ad 24%,#e3e0cb 24%,#d2cfbd 26%,#606563 28%,#626765 100%);box-shadow:inset 0 12px 18px #203b2214}
+#street:before{content:'';position:absolute;left:0;right:0;top:5%;height:20%;background:repeating-linear-gradient(90deg,transparent 0,transparent 12%,#6b705c3b 12%,transparent 12.2%);border-bottom:1px solid #efecda;opacity:.7}
+#street:after{content:'';position:absolute;inset:28% 0 0;opacity:.18;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' opacity='.5' filter='url(%23n)'/%3E%3C/svg%3E");pointer-events:none}
+.front-walk{position:absolute;left:45.8%;width:6.1%;top:0;height:25%;background:#c2baa8;border-left:1px solid #c9c1af;border-right:1px solid #c9c1af}
+#parcel{background:none;border:0;box-shadow:none;transform:translate(-50%,-100%);width:4.4%;height:auto;aspect-ratio:auto;padding:0;overflow:visible}
+#parcel img,#brand-magnet img,#house-product img{display:block;width:100%;height:100%;object-fit:contain}
+#brand-magnet{left:40%;top:26%;width:3.5%;max-width:none;aspect-ratio:1.5;padding:0;background:none;border:0;box-shadow:none;transform:rotate(-2deg)}
+#house-product{left:69.2%;top:48%;width:4.4%;height:auto;aspect-ratio:1.2;border:0;border-radius:0;background:none;box-shadow:none;overflow:visible;display:flex;align-items:flex-end}
+#house-product img{width:57%;height:auto;filter:drop-shadow(1px 2px 2px #42301e33)}
+#house-product img+img{margin-left:-15%;transform:rotate(8deg) translateY(1px)}
+#activity-props{z-index:2}
+@media(max-width:850px){#experience,#experience.has-brand{width:100%;max-width:700px}#experience.has-brand #home-map{width:100%}#home-map{border-radius:16px}}
+
+/* Three family plays share one scene and one quiet command composer. */
+main{padding:20px 24px;align-items:center}
+#experience,#experience.has-brand{width:min(100%,calc((100svh - 40px)*.8888889 + var(--panel-width) + var(--panel-gap)))}
+#street{aspect-ratio:100/37.5;background:#798767;box-shadow:none}
+#street:before,#street:after,.front-walk{display:none}
+#pov-host{bottom:var(--composer-height,64px)}
+#brand-magnet{left:40.3%;top:25%;width:1.8%;aspect-ratio:.5125;border-radius:0;transform:rotate(-1deg);filter:drop-shadow(.5px 1px 1px #231c173d)}
+#experience #economics{left:18px!important;right:auto;top:auto!important;bottom:18px;width:min(310px,calc(100% - 36px));height:auto;max-height:calc(100% - 36px);padding:20px 22px;border-radius:18px;background:linear-gradient(145deg,#fffffff0,#faf7eee3);box-shadow:0 16px 50px #1e2c2736;z-index:15}
+#economics .eco-hero{flex:none;min-height:80px;padding:14px 0}#economics .eco-hero>strong{font-size:46px;margin:4px 0}#economics .eco-heading{margin:8px 0 12px}#economics .eco-metrics{padding:12px 0}#economics .eco-ledger{padding:10px 0}#economics .eco-ledger>div{padding:4px 0}#economics .eco-bottom{padding-top:10px}
+.traffic-counter{position:absolute;right:16px;top:16px;z-index:5;display:flex;gap:12px;align-items:center;padding:8px 12px;color:#536047;background:#ffffffe0;border:1px solid #fff9;border-radius:18px;backdrop-filter:blur(8px);box-shadow:0 3px 16px #1c29121a;font-size:9px}.traffic-counter strong{font:17px Georgia,serif;font-variant-numeric:tabular-nums}.traffic-counter[hidden]{display:none}
+.exposure-plus{left:41%;top:27%;padding:2px 6px;font-size:17px;background:#ffffffe8;border-radius:9px;box-shadow:0 2px 8px #4a271122;animation:plus 2s ease-out forwards}
+.coffee-steam{position:absolute;left:47%;top:34%;width:2%;height:5%;transform:translateY(-40%)}.coffee-steam i{position:absolute;bottom:0;left:0;width:30%;height:75%;border-radius:50%;background:linear-gradient(transparent,#ffffffe6,transparent);filter:blur(1px);animation:steam-rise 3s ease-in-out infinite}.coffee-steam i:nth-child(2){left:40%;animation-delay:1s}.coffee-steam i:nth-child(3){left:70%;animation-delay:2s}@keyframes steam-rise{0%{opacity:0;transform:translateY(10px) scaleX(.7)}40%{opacity:.65}100%{opacity:0;transform:translateY(-14px) scaleX(1.3)}}
+.microwave-prop{position:absolute;left:63.5%;top:22%;width:4.5%;height:3.1%;border:2px solid #a6a69a;border-radius:2px;background:linear-gradient(#b7b7ad,#ededdf);box-shadow:1px 2px 3px #0003;display:flex;padding:1px;gap:2px}.microwave-prop span{width:75%;background:radial-gradient(ellipse,#d6b86777,#242d26 70%);border-radius:1px}.microwave-prop i{color:#9ee6b1;background:#303b30;align-self:flex-start;font:3px monospace;font-style:normal}
+.empty-pouch{position:absolute;left:48%;top:35.5%;width:3%;height:4%;object-fit:contain;transform:rotate(76deg) scaleY(.5);filter:saturate(.8) drop-shadow(1px 2px 2px #0003)}
+@media(max-width:850px){main{padding:16px 12px;align-items:flex-start}#experience,#experience.has-brand{width:100%;max-width:700px}#whiteboard{height:610px;min-height:0}#experience #economics{position:absolute;margin:0;bottom:14px;left:14px!important;width:min(290px,calc(100% - 28px))}.traffic-counter{right:10px;top:10px}.command-composer{font-size:11px}}
+@media(prefers-reduced-motion:reduce){.coffee-steam i{animation:none;opacity:.35}.exposure-plus{animation-duration:.1s}}
+#street{background:#65704f url('assets/front-yard-photoreal.webp') center/100% 100% no-repeat}
+
+.coffee-maker-prop{position:absolute;left:46.2%;top:33%;width:2%;height:3%;border-radius:3px 3px 1px 1px;background:linear-gradient(90deg,#474a44,#91968b 30%,#3e433c 90%);box-shadow:1px 2px 2px #382b2444}.coffee-maker-prop:before{content:"";position:absolute;top:-8%;left:5%;right:5%;height:13%;border-radius:50%;background:#8d9288}.coffee-maker-prop i{position:absolute;left:13%;right:13%;top:35%;bottom:12%;border:1px solid #aaa99a;border-radius:0 0 4px 4px;background:linear-gradient(#9caca178 20%,#452b19d9 40%)}.coffee-maker-prop span{position:absolute;right:-15%;top:46%;width:24%;height:30%;border:2px solid #292f29;border-radius:40%;}
+
+/* The lawn continues through the house/yard boundary rather than meeting at a
+   hard image edge. The new extension matches the door path and widens the
+   driveway naturally; its clear top lawn overlaps only the existing grass.
+   Keep the map's height and all calibrated actor coordinates unchanged. */
+#street{background:none;overflow:visible}
+#street:before{display:block;content:'';position:absolute;left:0;right:0;top:-8%;bottom:0;height:auto;border:0;opacity:1;background:url('assets/front-yard-continuous-v2.webp') center/100% 100% no-repeat;mask-image:linear-gradient(to bottom,transparent 0%,#000 7.4075%,#000 100%);-webkit-mask-image:linear-gradient(to bottom,transparent 0%,#000 7.4075%,#000 100%);pointer-events:none}
+#street:after{display:none}
+
+/* The same photographic cast appears in profiles and storyboard scenes. */
+.family-avatar{background-size:cover;background-position:center 30%}
+.portrait-0{background-image:url('assets/portrait-emma.webp')}
+.portrait-1{background-image:url('assets/portrait-daniel.webp')}
+.portrait-2{background-image:url('assets/portrait-olivia.webp')}
+.portrait-3{background-image:url('assets/portrait-noah.webp')}
+.portrait-4{background-image:url('assets/portrait-cooper.webp')}
+.portrait-5{background-image:url('assets/portrait-maple.webp')}

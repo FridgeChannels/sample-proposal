@@ -1,0 +1,9 @@
+#whiteboard .gardencup-intro{height:100%;display:flex;flex-direction:column;color:#191a17;overflow:auto}
+.mi-copy,.loading-card-copy{padding:clamp(19px,2.1vw,34px);flex:0 0 auto}
+#whiteboard .mi-copy h2,.loading-card-copy h2{display:flex;align-items:center;gap:.22em;flex-wrap:wrap;margin:0;color:#1d1e1a;font:580 clamp(24px,2.1vw,38px)/1.1 -apple-system,BlinkMacSystemFont,Arial,sans-serif;letter-spacing:-.052em}
+.mi-copy h2 img{display:inline-block;width:2.35em;height:.87em;object-fit:contain;object-position:left center}
+.mi-copy p,.loading-card-copy p{margin:12px 0 20px;font:400 clamp(14px,1.05vw,17px)/1.5 -apple-system,BlinkMacSystemFont,Arial,sans-serif;letter-spacing:-.014em;color:#53564e;max-width:35ch}
+.mi-start{display:inline-flex;align-items:center;justify-content:center;gap:9px;cursor:pointer;min-height:42px;transition:background .2s ease}
+.mi-start i{display:block;width:0;height:0;border-block:4px solid transparent;border-left:7px solid currentColor}
+.mi-start:focus-visible{outline:3px solid #6e744f;outline-offset:4px}
+.intro-premise .mi-live-sample{color:inherit;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}.mi-live-sample:hover,.mi-live-sample:focus-visible{color:#62258b}

@@ -1,0 +1,71 @@
+.first-person{
+  position:absolute;inset:0;isolation:isolate;overflow:clip;container:pov-frame / size;
+  border-radius:inherit;background:#eee9e1;color:#272427;font-family:Arial,sans-serif;
+}
+.first-person[hidden],.first-person [hidden]{display:none!important}
+.pov-room{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center}
+.first-person:not(.pov-unboxing) .pov-room{object-fit:cover;object-position:28% 36%}
+.pov-header,.pov-modes{position:absolute;z-index:6;top:10px;left:10px}
+.pov-back,.pov-modes button{border:0;cursor:pointer;font-family:inherit}
+.pov-back{width:28px;height:28px;padding:0 0 3px;border:1px solid #fff9;border-radius:50%;background:#302e2bc4;color:#fff;font-size:22px;line-height:1}
+.pov-modes{left:46px;display:flex;gap:2px;padding:3px;border:1px solid #fff8;border-radius:18px;background:#373232bd}
+.pov-modes button{padding:6px 12px;border-radius:14px;background:transparent;color:white;font-size:10px}
+.pov-modes [aria-pressed=true]{background:#fff9f4;color:#332438}
+.first-person button:focus-visible,.first-person a:focus-visible{outline:2px solid #ab4a9f;outline-offset:2px}
+
+/* The photographed fridge already contains both the magnet and the approaching phone. */
+.pov-magnet{position:absolute;inset:0;z-index:1;border:0;background:transparent;cursor:pointer}
+.pov-magnet:focus-visible{outline-offset:-5px!important}
+.pov-caption{position:absolute;z-index:5;inset:auto 12px 12px;margin:0;text-align:center;color:#fff;font:11px/1.4 Arial,sans-serif;text-shadow:0 1px 5px #332b27;pointer-events:none}
+.first-person.is-scanned .pov-caption{display:none}
+
+/* The parcel is the only shot that needs a handheld card and phone approach. */
+.pov-card-hand,.pov-approach-hand,.pov-mission-photo{pointer-events:none}
+.pov-card-hand{display:none;position:absolute;width:min(86cqw,94cqh);aspect-ratio:2/3;top:50%;left:50%;transform:translate(-70%,-36%) rotate(-5deg) scale(.78)}
+.pov-card-hand>img{position:relative;z-index:2;display:block;width:100%;height:100%;object-fit:contain;clip-path:polygon(0 0,31.7% 0,31.7% 51%,36% 50.7%,39.7% 52.5%,40.7% 55.8%,39% 59%,100% 59%,100% 100%,0 100%)}
+.pov-card-copy{position:absolute;left:31%;top:4%;width:44%;height:55%;padding:0;border:0;background:none;cursor:pointer;pointer-events:auto}
+.pov-card-copy img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none}
+.pov-card-front,.is-card-front .pov-card-back{visibility:hidden}
+.is-card-front .pov-card-front{visibility:visible}
+.pov-unboxing.is-raised:not(.is-scanned) .pov-card-hand,.pov-unboxing.is-presenting-front:not(.is-family-choice) .pov-card-hand{display:block}
+.pov-unboxing.is-presenting-front .pov-card-hand{transform:translate(-50%,-34%) rotate(-3deg)}
+.pov-approach-hand{visibility:hidden;position:absolute;z-index:3;left:49%;bottom:-8%;height:83%;aspect-ratio:1196/1315;transform:translate(-32%,36px) rotate(3deg);opacity:0;transition:transform .43s ease-out,opacity .22s ease-out}
+.pov-unboxing.is-raised:not(.is-scanned) .pov-approach-hand{visibility:visible;transform:translate(-32%,0) rotate(3deg);opacity:1}
+.pov-approach-hand img{height:100%;width:100%}
+.pov-approach-hand span{position:absolute;left:27.1%;top:6.95%;width:37.7%;height:71.55%;display:grid;place-items:center;border-radius:11% / 5.5%;background:#fbf8f4;color:#5e515e;text-align:center;font:500 clamp(9px,2.5cqw,12px)/1.25 Arial,sans-serif}
+.pov-mission-photo{display:none;position:absolute;inset:0;place-items:center}
+.pov-unboxing[data-unbox-shot="magnet-read"]:not(.is-scanned) .pov-mission-photo{display:grid}
+.pov-mission-photo>div{position:relative;width:min(100cqw,80cqh);height:min(100cqh,125cqw)}
+.pov-mission-photo button{position:absolute;left:42%;top:29%;width:26%;height:31%;border:0;border-radius:4px;background:transparent;pointer-events:auto;cursor:pointer}
+
+/* One pre-sized portrait screen serves the NFC notification and every subsequent page. */
+.pov-device{
+  position:absolute;inset:0;z-index:4;display:grid;place-items:center;
+  background:radial-gradient(ellipse at 48% 37%,#faf7f3,#e7dfe1 85%);
+  animation:device-appear .20s ease-out;
+}
+.pov-device .pov-phone-screen{
+  position:relative;width:min(77cqw,calc(46cqh - 6px),244px);aspect-ratio:0.49;
+  display:flex;align-items:center;flex-direction:column;min-height:0;overflow:hidden;
+  padding:clamp(14px,2.8cqh,22px) clamp(5px,1.2cqw,9px) clamp(9px,2.2cqh,15px);
+  border:4px solid #343138;border-radius:14% / 7%;background:#fffaf7;
+  box-shadow:inset 0 0 0 1px #cfc9ca,0 4px 2px #2115201c,0 11px 22px #38253422;
+  container-type:inline-size;text-align:center;font-family:Arial,sans-serif;color:#3d3040;
+}
+.pov-phone-screen:before,.pov-phone-screen:after{content:'';position:absolute;left:50%;transform:translateX(-50%);z-index:4;border-radius:9px;background:#332e34;pointer-events:none}
+.pov-phone-screen:before{top:1.8%;width:20%;height:1.4%}
+.pov-phone-screen:after{bottom:1.5%;width:24%;height:.8%;opacity:.72}
+.pov-phone-screen button{font-family:inherit;cursor:pointer}
+.pov-phone-screen .px-app{min-height:0;overflow:hidden}
+.pov-phone-screen .px-scroll{min-height:0;overflow-y:auto;overscroll-behavior:contain}
+.pov-lockscreen{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;padding-top:7%;color:#524052}
+.pov-lock-date{font-size:clamp(8px,4.4cqi,11px)}
+.pov-lockscreen>strong{margin:3% 0 12%;font:440 clamp(20px,14cqi,30px)/1.05 Arial,sans-serif;letter-spacing:-.04em}
+.pov-nfc-notification{display:flex;align-items:center;gap:5%;width:100%;padding:7% 5%;border:1px solid #e4dce4;border-radius:10px;background:#fff;text-align:left;color:#413546}
+.pov-nfc-icon{display:grid;place-items:center;flex:none;width:16%;aspect-ratio:1;border-radius:25%;color:white;background:#776477;font-size:clamp(12px,8cqi,18px)}
+.pov-nfc-notification>span:last-child{display:grid;gap:3px}
+.pov-nfc-notification b{font-size:clamp(8px,5.3cqi,12px)}
+.pov-nfc-notification small,.pov-nfc-notification i,.pov-nfc-demo{font-size:clamp(7px,4.1cqi,10px);line-height:1.3;font-style:normal;color:#675969}
+.pov-nfc-demo{margin-top:auto}
+@keyframes device-appear{from{opacity:0}to{opacity:1}}
+@media(prefers-reduced-motion:reduce){.pov-device{animation:none}.pov-approach-hand{transition:none}}
